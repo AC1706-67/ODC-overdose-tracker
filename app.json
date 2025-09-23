@@ -4,6 +4,9 @@
     "slug": "bolt-expo-nativewind",
     "version": "1.0.0",
     "sdkVersion": "54.0.0",
+    "updates": {
+      "enabled": false
+    },
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
