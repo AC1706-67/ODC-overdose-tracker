@@ -10,11 +10,14 @@ import {
   Alert,
 } from 'react-native';
 import { Settings, User, Shield, Database, LogOut, Info } from 'lucide-react-native';
+import DiagnosticsScreen from '@/components/DiagnosticsScreen';
 
 export default function SettingsScreen() {
   const [notifications, setNotifications] = useState(true);
   const [offlineMode, setOfflineMode] = useState(true);
   const [autoSync, setAutoSync] = useState(true);
+  const [showDiagnostics, setShowDiagnostics] = useState(false);
+  const [tapCount, setTapCount] = useState(0);
 
   const handleClearData = () => {
     Alert.alert(
@@ -47,6 +50,18 @@ export default function SettingsScreen() {
     );
   };
 
+  const handleVersionTap = () => {
+    const newCount = tapCount + 1;
+    setTapCount(newCount);
+    
+    if (newCount >= 7) {
+      setShowDiagnostics(true);
+      setTapCount(0);
+    }
+    
+    // Reset counter after 3 seconds
+    setTimeout(() => setTapCount(0), 3000);
+  };
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
@@ -136,10 +151,10 @@ export default function SettingsScreen() {
             <Text style={styles.sectionTitle}>About</Text>
           </View>
           
-          <View style={styles.settingItem}>
+          <TouchableOpacity style={styles.settingItem} onPress={handleVersionTap}>
             <Text style={styles.settingLabel}>Version</Text>
             <Text style={styles.settingValue}>1.0.0</Text>
-          </View>
+          </TouchableOpacity>
 
           <TouchableOpacity style={styles.settingItem}>
             <Text style={styles.settingLabel}>Privacy Policy</Text>
@@ -169,6 +184,11 @@ export default function SettingsScreen() {
           </Text>
         </View>
       </ScrollView>
+      
+      <DiagnosticsScreen 
+        visible={showDiagnostics} 
+        onClose={() => setShowDiagnostics(false)} 
+      />
     </SafeAreaView>
   );
 }
