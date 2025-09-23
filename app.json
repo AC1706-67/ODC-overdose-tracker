@@ -22,7 +22,7 @@
     },
     "android": {
       "newArchEnabled": false,
-      "package": "com.anonymous.boltexponativewind"
+      "package": "org.odc.overdose"
     },
     "web": {
       "bundler": "metro",
