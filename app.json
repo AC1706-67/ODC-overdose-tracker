@@ -8,6 +8,10 @@
       "enabled": false,
       "checkAutomatically": "NEVER"
     },
+    "updates": {
+      "enabled": false,
+      "checkAutomatically": "NEVER"
+    },
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
