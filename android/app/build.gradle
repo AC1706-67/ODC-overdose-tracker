@@ -92,7 +92,7 @@ android {
 
     namespace 'com.anonymous.boltexponativewind'
     defaultConfig {
-        applicationId 'com.anonymous.boltexponativewind'
+        applicationId 'org.odc.overdose'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

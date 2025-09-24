@@ -1,4 +1,4 @@
-package com.anonymous.boltexponativewind
+package org.odc.overdose
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build
