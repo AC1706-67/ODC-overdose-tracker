@@ -90,7 +90,7 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.anonymous.boltexponativewind'
+    namespace 'org.odc.overdose'
     defaultConfig {
         applicationId 'org.odc.overdose'
         minSdkVersion rootProject.ext.minSdkVersion
