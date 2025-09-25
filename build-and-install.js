@@ -29,7 +29,7 @@ console.log('Building and installing APK...');
 // Check if android directory exists, if not create it
 if (!fs.existsSync('android')) {
   console.log('Android directory not found. Running expo prebuild...');
-  runCommand('npx expo prebuild --platform android');
+  runCommand('npm exec expo prebuild --platform android');
 }
 
 // Check if AndroidManifest.xml exists
