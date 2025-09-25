@@ -1,4 +1,4 @@
-package org.odc.overdose
+package org.odc.overdose.odc.overdose
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

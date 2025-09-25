@@ -1,4 +1,4 @@
-package org.odc.overdose
+package org.odc.overdose.odc.overdose
 
 import android.app.Application
 import android.content.res.Configuration
