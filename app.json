@@ -1,28 +1,23 @@
 {
   "expo": {
-    "name": "bolt-expo-nativewind",
-    "slug": "bolt-expo-nativewind",
-    "version": "1.0.0",
-    "sdkVersion": "54.0.0",
-    "updates": {
-      "enabled": false,
-      "checkAutomatically": "NEVER"
-    },
-    "updates": {
-      "enabled": false,
-      "checkAutomatically": "NEVER"
+    "name": "ODC Overdose Tracker",
+    "slug": "odc-overdose-tracker",
+    "owner": "dr.ecovery",
+    "scheme": "odc",
+    "version": "1.0.1",
+    "runtimeVersion": {
+      "policy": "sdkVersion"
     },
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": false,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "org.odc.overdose"
     },
     "android": {
-      "newArchEnabled": false,
-      "package": "org.odc.overdose"
+      "package": "org.odc.overdose",
+      "versionCode": 2
     },
     "web": {
       "bundler": "metro",
@@ -31,12 +26,15 @@
     },
     "plugins": [
       "expo-router",
-      "expo-font",
-      "expo-web-browser"
+      "expo-build-properties"
     ],
-    "experiments": {
-      "typedRoutes": true,
-      "reactNativeNewArchitecture": false
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "9add2f5e-6eee-4906-b050-441c9e963140"
+      }
     }
   }
 }

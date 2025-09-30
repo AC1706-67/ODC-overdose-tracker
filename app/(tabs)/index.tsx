@@ -13,7 +13,7 @@ import { CircleAlert as AlertCircle, CircleCheck as CheckCircle, Wifi, WifiOff }
 import { useIncidentStorage } from '@/hooks/useIncidentStorage';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 
-const GENDER_OPTIONS = ['Male', 'Female', 'Non-binary', 'Prefer not to say', 'Unknown'];
+const GENDER_OPTIONS = ['Male', 'Female', 'Prefer not to say', 'Unknown'];
 const AGE_OPTIONS = ['<18', '18-25', '26-35', '36-45', '46-55', '56-65', '65+', 'Unknown'];
 const SURVIVAL_OPTIONS = ['Survived', 'Deceased', 'Unknown'];
 

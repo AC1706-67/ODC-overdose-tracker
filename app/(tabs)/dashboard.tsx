@@ -8,7 +8,7 @@ import {
   SafeAreaView,
   Dimensions,
 } from 'react-native';
-import { ChartBar as BarChart3, TrendingUp, Users, Package, Heart, Download } from 'lucide-react-native';
+import { BarChart3, TrendingUp, Users, Package, Heart, Download } from 'lucide-react-native';
 import { useDashboardData } from '@/hooks/useDashboardData';
 
 const { width } = Dimensions.get('window');

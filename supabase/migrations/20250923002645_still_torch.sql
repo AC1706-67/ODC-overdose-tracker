@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS incidents (
   incident_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   timestamp timestamptz DEFAULT now(),
   zip_code text NOT NULL CHECK (zip_code ~ '^[0-9]{5}$'),
-  gender text NOT NULL CHECK (gender IN ('Male', 'Female', 'Non-binary', 'Prefer not to say', 'Unknown')),
+  gender text NOT NULL CHECK (gender IN ('Male', 'Female', 'Prefer not to say', 'Unknown')),
   approx_age text NOT NULL CHECK (approx_age IN ('<18', '18-25', '26-35', '36-45', '46-55', '56-65', '65+', 'Unknown')),
   narcan_used boolean NOT NULL,
   survival text NOT NULL CHECK (survival IN ('Survived', 'Deceased', 'Unknown')),
