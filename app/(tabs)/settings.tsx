@@ -10,7 +10,10 @@ import {
   Alert,
 } from 'react-native';
 import { Settings, User, Shield, Database, LogOut, Info } from 'lucide-react-native';
+import { supabase } from '@/lib/supabase';
+import { useRouter } from 'expo-router';
 import DiagnosticsScreen from '@/components/DiagnosticsScreen';
+import { AuthTest } from '@/components/AuthTest';
 
 export default function SettingsScreen() {
   const [notifications, setNotifications] = useState(true);
@@ -37,15 +40,22 @@ export default function SettingsScreen() {
     Alert.alert('Export Data', 'Data export functionality will be implemented.');
   };
 
+  const router = useRouter();
+
   const handleLogout = () => {
     Alert.alert(
       'Logout',
       'Are you sure you want to logout?',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Logout', style: 'destructive', onPress: () => {
-          // Logout logic would go here
-        }},
+        { 
+          text: 'Logout', 
+          style: 'destructive', 
+          onPress: async () => {
+            await supabase.auth.signOut();
+            router.replace('/login');
+          }
+        },
       ]
     );
   };
@@ -166,6 +176,9 @@ export default function SettingsScreen() {
             <Text style={styles.settingAction}>View</Text>
           </TouchableOpacity>
         </View>
+
+        {/* Auth Test */}
+        <AuthTest />
 
         {/* Logout */}
         <View style={styles.section}>
