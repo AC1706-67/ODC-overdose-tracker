@@ -1,7 +1,10 @@
 import { Tabs } from 'expo-router';
 import { Activity, BarChart3, Package, Settings } from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TabLayout() {
+  const insets = useSafeAreaInsets();
+  
   return (
     <Tabs
       screenOptions={{
@@ -12,9 +15,9 @@ export default function TabLayout() {
           backgroundColor: '#ffffff',
           borderTopWidth: 1,
           borderTopColor: '#e5e7eb',
-          paddingBottom: 8,
+          paddingBottom: Math.max(insets.bottom, 8), // Use safe area or minimum 8px
           paddingTop: 8,
-          height: 80,
+          height: 80 + Math.max(insets.bottom, 8), // Adjust height for safe area
         },
         tabBarLabelStyle: {
           fontSize: 12,
