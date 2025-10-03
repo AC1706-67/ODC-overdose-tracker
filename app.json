@@ -13,7 +13,13 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "org.odc.overdose"
+      "bundleIdentifier": "org.odc.overdose",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSHealthShareUsageDescription": "This app helps track overdose incidents for public health purposes.",
+        "NSLocationWhenInUseUsageDescription": "Location is used to improve incident reporting accuracy.",
+        "CFBundleDisplayName": "ODC Overdose Tracker"
+      }
     },
     "android": {
       "package": "org.odc.overdose",
