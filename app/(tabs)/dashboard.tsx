@@ -68,7 +68,7 @@ export default function DashboardScreen() {
           <View style={styles.metricCard}>
             <View style={styles.metricHeader}>
               <Heart size={20} color="#dc2626" />
-              <Text style={styles.metricTitle}>Total Incidents</Text>
+              <Text style={styles.metricTitle}>Overdose Incidents</Text>
             </View>
             <Text style={styles.metricValue}>{data?.incidents?.total || 0}</Text>
             <Text style={styles.metricSubtext}>
