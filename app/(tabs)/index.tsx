@@ -7,7 +7,6 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
-  SafeAreaView,
 } from 'react-native';
 import { CircleAlert as AlertCircle, CircleCheck as CheckCircle, Wifi, WifiOff } from 'lucide-react-native';
 import { useIncidentStorage } from '@/hooks/useIncidentStorage';
@@ -75,7 +74,7 @@ export default function IncidentScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <View style={styles.titleRow}>
@@ -240,7 +239,7 @@ export default function IncidentScreen() {
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 

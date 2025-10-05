@@ -6,7 +6,6 @@ import {
   ScrollView,
   TouchableOpacity,
   Switch,
-  SafeAreaView,
   Alert,
 } from 'react-native';
 import { Settings, User, Shield, Database, LogOut, Info } from 'lucide-react-native';
@@ -73,7 +72,7 @@ export default function SettingsScreen() {
     setTimeout(() => setTapCount(0), 3000);
   };
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <View style={styles.titleRow}>
@@ -202,7 +201,7 @@ export default function SettingsScreen() {
         visible={showDiagnostics} 
         onClose={() => setShowDiagnostics(false)} 
       />
-    </SafeAreaView>
+    </View>
   );
 }
 

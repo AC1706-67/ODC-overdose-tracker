@@ -7,7 +7,6 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
-  SafeAreaView,
 } from 'react-native';
 import { Package, CircleCheck as CheckCircle, Wifi, WifiOff } from 'lucide-react-native';
 import { useDistributionStorage } from '@/hooks/useDistributionStorage';
@@ -83,7 +82,7 @@ export default function DistributionScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <View style={styles.titleRow}>
@@ -202,7 +201,7 @@ export default function DistributionScreen() {
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
