@@ -1,39 +1,39 @@
-# 🚨 ODC Overdose Tracker
+# ODC Overdose Tracker
 
 A React Native mobile application for tracking overdose incidents and kit distributions, designed for healthcare professionals and community responders.
 
-## 📱 Features
+## Features
 
-### 🔐 **Authentication System**
+### Authentication System
 - Secure email/password login with Supabase
 - Persistent session management
 - Role-based access control
 - Automatic session restoration
 
-### 📊 **Incident Reporting**
+### Incident Reporting
 - Quick overdose incident logging
 - Anonymous data collection (ZIP code, demographics, outcomes)
 - Offline-first with automatic sync
 - Real-time validation and error handling
 
-### 📦 **Kit Distribution Tracking**
+### Kit Distribution Tracking
 - Log Narcan and harm reduction kit distributions
 - Track distribution by type and location
 - Monitor inventory and usage patterns
 
-### 📈 **Community Dashboard**
+### Community Dashboard
 - Real-time statistics and trends
 - Survival rates and intervention effectiveness
 - Geographic coverage analysis
 - Demographic insights for public health planning
 
-### 🔄 **Offline Capabilities**
+### Offline Capabilities
 - Works without internet connection
 - Local data storage with automatic sync
 - Pending submission indicators
 - Network status monitoring
 
-## 🛠️ **Tech Stack**
+## Tech Stack
 
 - **Framework**: React Native with Expo (Managed Workflow)
 - **Navigation**: Expo Router (file-based routing)
@@ -43,7 +43,7 @@ A React Native mobile application for tracking overdose incidents and kit distri
 - **UI**: React Native with Lucide React Native icons
 - **Build**: EAS Build for Android/iOS deployment
 
-## 🚀 **Getting Started**
+## Getting Started
 
 ### Prerequisites
 - Node.js 18+ 
@@ -84,7 +84,7 @@ EXPO_PUBLIC_SUPABASE_URL=your_supabase_project_url
 EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
-## 📱 **Building & Deployment**
+## Building & Deployment
 
 ### Android APK
 ```bash
@@ -110,7 +110,7 @@ npx eas submit --platform ios --profile preview
 
 See [TESTFLIGHT_SETUP.md](./TESTFLIGHT_SETUP.md) for detailed iOS deployment instructions.
 
-## 🏗️ **Project Structure**
+## Project Structure
 
 ```
 ODC-overdose-tracker/
@@ -130,7 +130,7 @@ ODC-overdose-tracker/
 └── assets/               # Images and static files
 ```
 
-## 🗄️ **Database Schema**
+## Database Schema
 
 ### Tables
 - **incidents**: Overdose incident records
@@ -143,7 +143,7 @@ ODC-overdose-tracker/
 - Real-time subscriptions
 - Automatic timestamps
 
-## 🔒 **Security & Privacy**
+## Security & Privacy
 
 - **No PII Collection**: Only anonymous demographic data
 - **HIPAA Compliant**: No personally identifiable health information
@@ -151,7 +151,7 @@ ODC-overdose-tracker/
 - **Data Encryption**: All data encrypted in transit and at rest
 - **Role-Based Access**: Users can only access their own data
 
-## 🧪 **Testing**
+## Testing
 
 ### Manual Testing
 - Authentication flow testing
@@ -168,13 +168,13 @@ adb install -r path/to/your.apk
 adb shell am start -n org.odc.overdose/.MainActivity
 ```
 
-## 📋 **Version History**
+## Version History
 
 - **v1.1.0**: Authentication system, safe area fixes, universal builds
 - **v1.0.1**: Production setup, environment variables, navigation fixes
 - **v1.0.0**: Initial release with basic incident reporting
 
-## 🤝 **Contributing**
+## Contributing
 
 This is a healthcare application for public health purposes. Contributions should focus on:
 - Data accuracy and validation
@@ -182,18 +182,18 @@ This is a healthcare application for public health purposes. Contributions shoul
 - Security enhancements
 - Accessibility compliance
 
-## 📄 **License**
+## License
 
 This project is developed for public health purposes. Please ensure compliance with local healthcare data regulations.
 
-## 🆘 **Support**
+## Support
 
 For technical issues or feature requests, please create an issue in this repository.
 
-## 🏥 **About ODC**
+## About ODC
 
 The ODC Overdose Tracker supports community health initiatives by providing healthcare professionals and first responders with tools to track and respond to overdose incidents effectively.
 
 ---
 
-**Built with ❤️ for public health and community safety**
+**Built with care for public health and community safety**
