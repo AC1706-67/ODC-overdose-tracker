@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "ODC Overdose Tracker",
-    "slug": "odc-overdose-tracker",
+    "name": "ODC Log",
+    "slug": "odc-log",
     "owner": "dr.ecovery",
     "scheme": "odc",
     "version": "1.1.0",
@@ -13,16 +13,16 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "org.odc.overdose",
+      "bundleIdentifier": "org.odc.log",
       "buildNumber": "1",
       "infoPlist": {
-        "NSHealthShareUsageDescription": "This app helps track overdose incidents for public health purposes.",
+        "NSHealthShareUsageDescription": "ODC Log helps track community health incidents with compassion and care.",
         "NSLocationWhenInUseUsageDescription": "Location is used to improve incident reporting accuracy.",
-        "CFBundleDisplayName": "ODC Overdose Tracker"
+        "CFBundleDisplayName": "ODC Log"
       }
     },
     "android": {
-      "package": "org.odc.overdose",
+      "package": "org.odc.log",
       "versionCode": 3
     },
     "web": {

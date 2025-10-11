@@ -1,6 +1,6 @@
-# ODC Overdose Tracker
+# ODC Log - Our Daily Compassion
 
-A React Native mobile application for tracking overdose incidents and kit distributions, designed for healthcare professionals and community responders.
+A React Native mobile application for compassionate community health tracking, designed for healthcare professionals, peer support specialists, and community responders.
 
 ## Features
 
@@ -11,7 +11,7 @@ A React Native mobile application for tracking overdose incidents and kit distri
 - Automatic session restoration
 
 ### Incident Reporting
-- Quick overdose incident logging
+- Compassionate health incident logging
 - Anonymous data collection (ZIP code, demographics, outcomes)
 - Offline-first with automatic sync
 - Real-time validation and error handling
@@ -56,8 +56,8 @@ A React Native mobile application for tracking overdose incidents and kit distri
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/AC1706-67/ODC-overdose-tracker.git
-   cd ODC-overdose-tracker
+   git clone https://github.com/AC1706-67/ODC-log.git
+   cd ODC-log
    ```
 
 2. **Install dependencies**
@@ -113,7 +113,7 @@ See [TESTFLIGHT_SETUP.md](./TESTFLIGHT_SETUP.md) for detailed iOS deployment ins
 ## Project Structure
 
 ```
-ODC-overdose-tracker/
+ODC-log/
 ├── app/                    # Expo Router screens
 │   ├── (tabs)/            # Tab navigation screens
 │   │   ├── index.tsx      # Incident reporting
@@ -133,7 +133,7 @@ ODC-overdose-tracker/
 ## Database Schema
 
 ### Tables
-- **incidents**: Overdose incident records
+- **incidents**: Health incident records
 - **distributions**: Kit distribution logs
 - **users**: Authentication and user management
 
@@ -192,7 +192,7 @@ For technical issues or feature requests, please create an issue in this reposit
 
 ## About ODC
 
-The ODC Overdose Tracker supports community health initiatives by providing healthcare professionals and first responders with tools to track and respond to overdose incidents effectively.
+ODC Log - Our Daily Compassion supports community health initiatives by providing healthcare professionals, peer support specialists, and first responders with compassionate tools to track and respond to community health incidents with care and humanity.
 
 ---
 

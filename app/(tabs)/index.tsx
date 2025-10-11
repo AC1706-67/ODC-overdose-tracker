@@ -79,7 +79,7 @@ export default function IncidentScreen() {
         <View style={styles.header}>
           <View style={styles.titleRow}>
             <AlertCircle size={24} color="#dc2626" />
-            <Text style={styles.title}>Report Overdose Incident</Text>
+            <Text style={styles.title}>Report Health Incident</Text>
           </View>
           <View style={styles.statusRow}>
             {isOnline ? (

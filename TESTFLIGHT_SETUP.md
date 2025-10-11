@@ -1,4 +1,4 @@
-# 🍎 ODC Overdose Tracker - Apple TestFlight Setup Guide
+# 🍎 ODC Log - Apple TestFlight Setup Guide
 
 ## Prerequisites
 
@@ -19,8 +19,8 @@
    ```
    - Login to Apple Developer Portal
    - Certificates, Identifiers & Profiles → Identifiers
-   - Register new App ID: org.odc.overdose
-   - Description: ODC Overdose Tracker
+   - Register new App ID: org.odc.log
+   - Description: ODC Log - Our Daily Compassion
    - Capabilities: None required for basic functionality
    ```
 
@@ -29,9 +29,9 @@
    - Login to App Store Connect
    - My Apps → + (New App)
    - Platform: iOS
-   - Name: ODC Overdose Tracker
-   - Bundle ID: org.odc.overdose
-   - SKU: odc-overdose-tracker-2024
+   - Name: ODC Log
+   - Bundle ID: org.odc.log
+   - SKU: odc-log-2024
    - User Access: Full Access
    ```
 
@@ -117,15 +117,15 @@ npx eas submit --platform ios --profile store
 ### Required Information
 ```
 App Information:
-- Name: ODC Overdose Tracker
-- Subtitle: Public Health Incident Tracking
+- Name: ODC Log
+- Subtitle: Our Daily Compassion - Community Health Tracking
 - Category: Medical
 - Content Rights: Your organization owns rights
 
 App Review Information:
 - Contact Information: Your details
 - Demo Account: Test credentials for reviewers
-- Notes: "Healthcare app for overdose incident tracking"
+- Notes: "Compassionate community health tracking app"
 
 App Privacy:
 - Data Collection: Health data, location (if used)
@@ -181,4 +181,4 @@ App Privacy:
 5. 🔄 Submit to TestFlight
 6. 🔄 Add testers and distribute
 
-The ODC Overdose Tracker is now ready for iOS TestFlight distribution! 🚀
+ODC Log - Our Daily Compassion is now ready for iOS TestFlight distribution! 🚀
