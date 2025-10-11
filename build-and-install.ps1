@@ -5,7 +5,17 @@ Write-Host "== 0) In project root? =="
 if (!(Test-Path package.json)) { Fail "Open the folder that contains package.json and run again." }
 
 Write-Host "== 1) Install deps if needed =="
-if (!(Test-Path node_modules)) { npm install || Fail "npm install failed." }
+# Check if node_modules exists, if not, install dependencies
+if (!(Test-Path node_modules)) {
+    Write-Host "node_modules not found. Running npm install..."
+    npm install
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "npm install failed. Please check for dependency issues."
+        exit 1
+    } else {
+        Write-Host "npm install completed successfully."
+    }
+}
 
 Write-Host "== 2) Ensure native /android exists (prebuild) =="
 if (!(Test-Path android)) {
