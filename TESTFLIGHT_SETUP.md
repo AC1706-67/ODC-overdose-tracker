@@ -1,4 +1,4 @@
-# 🍎 ODC Log - Apple TestFlight Setup Guide
+# 🍎 Compassionate LOG - Apple TestFlight Setup Guide
 
 ## Prerequisites
 
@@ -20,7 +20,7 @@
    - Login to Apple Developer Portal
    - Certificates, Identifiers & Profiles → Identifiers
    - Register new App ID: org.odc.log
-   - Description: ODC Log - Our Daily Compassion
+   - Description: Compassionate LOG - Recording acts of care and compassion
    - Capabilities: None required for basic functionality
    ```
 
@@ -29,7 +29,7 @@
    - Login to App Store Connect
    - My Apps → + (New App)
    - Platform: iOS
-   - Name: ODC Log
+   - Name: Compassionate LOG
    - Bundle ID: org.odc.log
    - SKU: odc-log-2024
    - User Access: Full Access
@@ -117,15 +117,15 @@ npx eas submit --platform ios --profile store
 ### Required Information
 ```
 App Information:
-- Name: ODC Log
-- Subtitle: Our Daily Compassion - Community Health Tracking
+- Name: Compassionate LOG
+- Subtitle: Recording acts of care and compassion that save lives
 - Category: Medical
 - Content Rights: Your organization owns rights
 
 App Review Information:
 - Contact Information: Your details
 - Demo Account: Test credentials for reviewers
-- Notes: "Compassionate community health tracking app"
+- Notes: "Compassionate LOG helps communities record acts of care and compassion that save lives"
 
 App Privacy:
 - Data Collection: Health data, location (if used)
@@ -181,4 +181,4 @@ App Privacy:
 5. 🔄 Submit to TestFlight
 6. 🔄 Add testers and distribute
 
-ODC Log - Our Daily Compassion is now ready for iOS TestFlight distribution! 🚀
+Compassionate LOG is now ready for iOS TestFlight distribution! 🚀

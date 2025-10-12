@@ -29,8 +29,8 @@ export default function Login() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>ODC Log</Text>
-      <Text style={styles.subtitle}>Our Daily Compassion - Sign in to continue</Text>
+      <Text style={styles.title}>Compassionate LOG</Text>
+      <Text style={styles.subtitle}>Recording acts of care and compassion - Sign in to continue</Text>
       
       <TextInput
         placeholder="Email"

@@ -1,6 +1,6 @@
-# ODC Log - Our Daily Compassion
+# Compassionate LOG
 
-A React Native mobile application for compassionate community health tracking, designed for healthcare professionals, peer support specialists, and community responders.
+A React Native mobile application that helps communities record acts of care and compassion that save lives, designed for healthcare professionals, peer support specialists, and community responders.
 
 ## Features
 
@@ -56,8 +56,8 @@ A React Native mobile application for compassionate community health tracking, d
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/AC1706-67/ODC-log.git
-   cd ODC-log
+   git clone https://github.com/AC1706-67/Compassionate-LOG.git
+   cd Compassionate-LOG
    ```
 
 2. **Install dependencies**
@@ -113,7 +113,7 @@ See [TESTFLIGHT_SETUP.md](./TESTFLIGHT_SETUP.md) for detailed iOS deployment ins
 ## Project Structure
 
 ```
-ODC-log/
+Compassionate-LOG/
 ├── app/                    # Expo Router screens
 │   ├── (tabs)/            # Tab navigation screens
 │   │   ├── index.tsx      # Incident reporting
@@ -165,7 +165,7 @@ ODC-log/
 adb install -r path/to/your.apk
 
 # Launch app
-adb shell am start -n org.odc.overdose/.MainActivity
+adb shell am start -n org.odc.log/.MainActivity
 ```
 
 ## Version History
@@ -190,9 +190,9 @@ This project is developed for public health purposes. Please ensure compliance w
 
 For technical issues or feature requests, please create an issue in this repository.
 
-## About ODC
+## About Compassionate LOG
 
-ODC Log - Our Daily Compassion supports community health initiatives by providing healthcare professionals, peer support specialists, and first responders with compassionate tools to track and respond to community health incidents with care and humanity.
+Compassionate LOG supports community health initiatives by providing healthcare professionals, peer support specialists, and first responders with tools to record acts of care and compassion that save lives.
 
 ---
 

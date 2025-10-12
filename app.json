@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "ODC Log",
+    "name": "Compassionate LOG",
     "slug": "odc-log",
     "owner": "dr.ecovery",
     "scheme": "odc",
@@ -16,9 +16,9 @@
       "bundleIdentifier": "org.odc.log",
       "buildNumber": "1",
       "infoPlist": {
-        "NSHealthShareUsageDescription": "ODC Log helps track community health incidents with compassion and care.",
+        "NSHealthShareUsageDescription": "Compassionate LOG helps communities record acts of care and compassion that save lives.",
         "NSLocationWhenInUseUsageDescription": "Location is used to improve incident reporting accuracy.",
-        "CFBundleDisplayName": "ODC Log"
+        "CFBundleDisplayName": "Compassionate LOG"
       }
     },
     "android": {
