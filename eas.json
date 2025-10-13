@@ -1,7 +1,9 @@
 {
-  "cli": { "version": ">= 10.0.0" },
+  "cli": { "version": ">= 13.0.0" },
   "build": {
     "development": {
+      "developmentClient": true,
+      "distribution": "internal",
       "android": {
         "buildType": "apk",
         "image": "ubuntu-22.04-jdk-17-ndk-r26b"
@@ -39,18 +41,20 @@
         "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZpdHd5cGljcG9ycXBlZWZ3c2pzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1ODc0NTUsImV4cCI6MjA3NDE2MzQ1NX0.LZvBs3c5XIQPTdEDwkEEqZO0irjmR7WZnsSsyuZ7wcI"
       }
     },
-    "store": { 
+    "production": {
+      "developmentClient": false,
+      "distribution": "internal",
       "android": { 
-        "buildType": "app-bundle",
+        "buildType": "apk",
         "image": "ubuntu-22.04-jdk-17-ndk-r26b"
-      },
-      "ios": {
-        "distribution": "store"
       },
       "env": {
         "EXPO_PUBLIC_SUPABASE_URL": "https://vitwypicporqpeefwsjs.supabase.co",
         "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZpdHd5cGljcG9ycXBlZWZ3c2pzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1ODc0NTUsImV4cCI6MjA3NDE2MzQ1NX0.LZvBs3c5XIQPTdEDwkEEqZO0irjmR7WZnsSsyuZ7wcI"
       }
     }
+  },
+  "submit": { 
+    "production": {} 
   }
 }

@@ -1,0 +1,10 @@
+node_modules
+.git
+android/.gradle
+android/app/build
+android/build
+.expo
+*.log
+.DS_Store
+build-and-install.ps1
+build-and-install.js
