@@ -4,7 +4,7 @@
     "slug": "odc-overdose-tracker",
     "owner": "dr.ecovery",
     "scheme": "compassionatelog",
-    "version": "1.4.0",
+    "version": "1.5.0",
     "runtimeVersion": {
       "policy": "sdkVersion"
     },
@@ -23,7 +23,7 @@
     },
     "android": {
       "package": "org.odc.log",
-      "versionCode": 6
+      "versionCode": 7
     },
     "web": {
       "bundler": "metro",

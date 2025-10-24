@@ -42,47 +42,8 @@ export function useOrgDashboard(organizationId: string | null = null) {
       setLoading(true);
       setError(null);
 
-      // Get the 4 card numbers for the current org
-      const { data: kpiData, error: kpiError } = await supabase
-        .from('org_dashboard_kpis')
-        .select('*')
-        .is('organization_id', organizationId) // Use .is() for NULL handling
-        .single();
-
-      if (kpiError && kpiError.code !== 'PGRST116') { // PGRST116 = no rows returned
-        // If table doesn't exist, use fallback data
-        if (kpiError.code === '42P01') { // Table doesn't exist
-          console.warn('Dashboard views not created yet, using fallback data');
-          setKpis({
-            total_incidents: 0,
-            narcan_incidents: 0,
-            survival_rate: 0,
-            total_outreach: 0,
-            total_kits: 0,
-            people_reached: 0,
-            avg_people_per_outreach: 0,
-            unique_zip_codes: 0,
-            active_locations: 0,
-            last_updated: new Date().toISOString(),
-          });
-          setTimeSeries([]);
-          return;
-        }
-        throw kpiError;
-      }
-
-      // Optional: mini chart for last 30 days
-      const { data: series, error: seriesError } = await supabase
-        .from('org_outreach_timeseries')
-        .select('*')
-        .is('organization_id', organizationId) // Use .is() for NULL handling
-        .order('day', { ascending: true });
-
-      if (seriesError) {
-        console.warn('Time series data unavailable:', seriesError);
-      }
-
-      setKpis(kpiData || {
+      // Always set fallback data first to prevent crashes
+      const fallbackKpis = {
         total_incidents: 0,
         narcan_incidents: 0,
         survival_rate: 0,
@@ -93,28 +54,55 @@ export function useOrgDashboard(organizationId: string | null = null) {
         unique_zip_codes: 0,
         active_locations: 0,
         last_updated: new Date().toISOString(),
-      });
+      };
 
-      setTimeSeries(series || []);
+      setKpis(fallbackKpis);
+      setTimeSeries([]);
+
+      // Try to get real data, but don't crash if it fails
+      try {
+        const { data: kpiData, error: kpiError } = await supabase
+          .from('org_dashboard_kpis')
+          .select('*')
+          .is('organization_id', organizationId)
+          .single();
+
+        if (kpiData && !kpiError) {
+          setKpis({
+            total_incidents: Number(kpiData.total_incidents) || 0,
+            narcan_incidents: Number(kpiData.narcan_incidents) || 0,
+            survival_rate: Number(kpiData.survival_rate) || 0,
+            total_outreach: Number(kpiData.total_outreach) || 0,
+            total_kits: Number(kpiData.total_kits) || 0,
+            people_reached: Number(kpiData.people_reached) || 0,
+            avg_people_per_outreach: Number(kpiData.avg_people_per_outreach) || 0,
+            unique_zip_codes: Number(kpiData.unique_zip_codes) || 0,
+            active_locations: Number(kpiData.active_locations) || 0,
+            last_updated: kpiData.last_updated || new Date().toISOString(),
+          });
+        }
+      } catch (kpiErr) {
+        console.warn('KPI data unavailable, using fallback:', kpiErr);
+      }
+
+      // Try to get time series data
+      try {
+        const { data: series, error: seriesError } = await supabase
+          .from('org_outreach_timeseries')
+          .select('*')
+          .is('organization_id', organizationId)
+          .order('day', { ascending: true });
+
+        if (series && !seriesError) {
+          setTimeSeries(series);
+        }
+      } catch (seriesErr) {
+        console.warn('Time series data unavailable:', seriesErr);
+      }
 
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch dashboard data');
+      setError(err instanceof Error ? err.message : 'Dashboard temporarily unavailable');
       console.error('Dashboard fetch error:', err);
-      
-      // Set fallback data to prevent crashes
-      setKpis({
-        total_incidents: 0,
-        narcan_incidents: 0,
-        survival_rate: 0,
-        total_outreach: 0,
-        total_kits: 0,
-        people_reached: 0,
-        avg_people_per_outreach: 0,
-        unique_zip_codes: 0,
-        active_locations: 0,
-        last_updated: new Date().toISOString(),
-      });
-      setTimeSeries([]);
     } finally {
       setLoading(false);
     }

@@ -16,6 +16,16 @@ export default function DashboardScreen() {
   const [selectedOrg, setSelectedOrg] = useState<string | null>(null); // Default to anonymous data (NULL)
   const { kpis, timeSeries, loading, refresh } = useOrgDashboard(selectedOrg);
 
+  // Diagnostic logs
+  useEffect(() => {
+    console.log('[Dashboard] Render Start', { selectedOrg, kpis, loading, timeSeries });
+  }, [selectedOrg, kpis, loading, timeSeries]);
+
+  // Guard for undefined variables
+  if (typeof data === 'undefined') {
+    console.log('[Dashboard] Data reference missing — should be defined or removed usage');
+  }
+
   // Show last 30 days of data
 
   return (
