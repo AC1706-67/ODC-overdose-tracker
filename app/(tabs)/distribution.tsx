@@ -9,41 +9,47 @@ import {
   Alert,
 } from 'react-native';
 import { Package, CircleCheck as CheckCircle, Wifi, WifiOff } from 'lucide-react-native';
-import { useDistributionStorage } from '@/hooks/useDistributionStorage';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
+import { supabase } from '@/lib/supabase';
 
 const KIT_TYPES = ['Narcan', 'Feminine Hygiene', 'Hygiene', 'Safe Sex'];
-const LAST_KIT_OUTCOMES = [
-  'Used in overdose',
-  'Expired',
-  'Lost',
-  'Still have it',
-  'Given to someone else',
-  'Unknown'
-];
 
 export default function DistributionScreen() {
   const [zipCode, setZipCode] = useState('');
-  const [kitType, setKitType] = useState('');
-  const [kitsGiven, setKitsGiven] = useState('1');
-  const [lastKitOutcome, setLastKitOutcome] = useState('');
+  const [location, setLocation] = useState('');
+  const [selectedKitTypes, setSelectedKitTypes] = useState<string[]>([]);
+  const [numKits, setNumKits] = useState('0');
+  const [peopleReached, setPeopleReached] = useState('0');
+  const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const { submitDistribution, pendingCount, syncPending } = useDistributionStorage();
   const { isOnline } = useNetworkStatus();
+
+  const toggleKitType = (kitType: string) => {
+    setSelectedKitTypes(prev => 
+      prev.includes(kitType) 
+        ? prev.filter(type => type !== kitType)
+        : [...prev, kitType]
+    );
+  };
 
   const validateForm = () => {
     if (!zipCode || zipCode.length !== 5 || !/^\d{5}$/.test(zipCode)) {
       Alert.alert('Invalid ZIP Code', 'Please enter a valid 5-digit ZIP code.');
       return false;
     }
-    if (!kitType) {
-      Alert.alert('Missing Information', 'Please select a kit type.');
+    if (selectedKitTypes.length === 0) {
+      Alert.alert('Missing Information', 'Select at least one kit type.');
       return false;
     }
-    const kitsNum = parseInt(kitsGiven);
-    if (!kitsNum || kitsNum < 1 || kitsNum > 50) {
-      Alert.alert('Invalid Quantity', 'Please enter a valid number of kits (1-50).');
+    const kitsNum = parseInt(numKits);
+    if (isNaN(kitsNum) || kitsNum < 0) {
+      Alert.alert('Invalid Number', 'Number of kits must be 0 or greater.');
+      return false;
+    }
+    const peopleNum = parseInt(peopleReached);
+    if (isNaN(peopleNum) || peopleNum < 0) {
+      Alert.alert('Invalid Number', 'People reached must be 0 or greater.');
       return false;
     }
     return true;
@@ -54,30 +60,31 @@ export default function DistributionScreen() {
 
     setIsSubmitting(true);
     try {
-      await submitDistribution({
+      const { error } = await supabase.from('outreach_logs').insert({
         zip_code: zipCode,
-        kit_type: kitType,
-        kits_given: parseInt(kitsGiven),
-        last_kit_outcome: kitType === 'Narcan' ? lastKitOutcome : undefined,
+        location: location || null,
+        kit_types: selectedKitTypes,
+        num_kits: Number(numKits || 0),
+        people_reached: Number(peopleReached || 0),
+        notes: notes || null,
       });
+
+      if (error) throw error;
 
       // Reset form
       setZipCode('');
-      setKitType('');
-      setKitsGiven('1');
-      setLastKitOutcome('');
+      setLocation('');
+      setSelectedKitTypes([]);
+      setNumKits('0');
+      setPeopleReached('0');
+      setNotes('');
 
-      Alert.alert('Success', 'Distribution recorded successfully.');
+      Alert.alert('Success', 'Outreach recorded.');
     } catch (error) {
-      Alert.alert('Error', 'Failed to record distribution. It will be saved locally and synced when online.');
+      Alert.alert('Error', 'Failed to record outreach. Please try again.');
+      console.error('Outreach submission error:', error);
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const handleSync = async () => {
-    if (isOnline && pendingCount > 0) {
-      await syncPending();
     }
   };
 
@@ -87,7 +94,7 @@ export default function DistributionScreen() {
         <View style={styles.header}>
           <View style={styles.titleRow}>
             <Package size={24} color="#059669" />
-            <Text style={styles.title}>Log Kit Distribution</Text>
+            <Text style={styles.title}>Outreach Log (L.O.G.)</Text>
           </View>
           <View style={styles.statusRow}>
             {isOnline ? (
@@ -100,11 +107,6 @@ export default function DistributionScreen() {
                 <WifiOff size={16} color="#dc2626" />
                 <Text style={styles.offlineText}>Offline</Text>
               </View>
-            )}
-            {pendingCount > 0 && (
-              <TouchableOpacity style={styles.syncButton} onPress={handleSync}>
-                <Text style={styles.syncText}>{pendingCount} pending</Text>
-              </TouchableOpacity>
             )}
           </View>
         </View>
@@ -123,21 +125,32 @@ export default function DistributionScreen() {
           </View>
 
           <View style={styles.field}>
-            <Text style={styles.label}>Kit Type *</Text>
+            <Text style={styles.label}>Location</Text>
+            <TextInput
+              style={styles.input}
+              value={location}
+              onChangeText={setLocation}
+              placeholder="e.g., Montana & Sioux, GWW/Lomaland, 1499 Lee Treviño"
+              multiline
+            />
+          </View>
+
+          <View style={styles.field}>
+            <Text style={styles.label}>Kit Type(s) *</Text>
             <View style={styles.optionsGrid}>
               {KIT_TYPES.map((option) => (
                 <TouchableOpacity
                   key={option}
                   style={[
                     styles.optionButton,
-                    kitType === option && styles.optionButtonSelected,
+                    selectedKitTypes.includes(option) && styles.optionButtonSelected,
                   ]}
-                  onPress={() => setKitType(option)}
+                  onPress={() => toggleKitType(option)}
                 >
                   <Text
                     style={[
                       styles.optionText,
-                      kitType === option && styles.optionTextSelected,
+                      selectedKitTypes.includes(option) && styles.optionTextSelected,
                     ]}
                   >
                     {option}
@@ -148,46 +161,38 @@ export default function DistributionScreen() {
           </View>
 
           <View style={styles.field}>
-            <Text style={styles.label}>Number of Kits *</Text>
+            <Text style={styles.label}>Number of Kits</Text>
             <TextInput
               style={styles.input}
-              value={kitsGiven}
-              onChangeText={setKitsGiven}
-              placeholder="1"
+              value={numKits}
+              onChangeText={setNumKits}
+              placeholder="0"
               keyboardType="numeric"
-              maxLength={2}
             />
           </View>
 
-          {kitType === 'Narcan' && (
-            <View style={styles.field}>
-              <Text style={styles.label}>What happened to your last kit?</Text>
-              <Text style={styles.subtitle}>
-                Ask the recipient about their previous Narcan kit
-              </Text>
-              <View style={styles.optionsGrid}>
-                {LAST_KIT_OUTCOMES.map((option) => (
-                  <TouchableOpacity
-                    key={option}
-                    style={[
-                      styles.optionButton,
-                      lastKitOutcome === option && styles.optionButtonSelected,
-                    ]}
-                    onPress={() => setLastKitOutcome(option)}
-                  >
-                    <Text
-                      style={[
-                        styles.optionText,
-                        lastKitOutcome === option && styles.optionTextSelected,
-                      ]}
-                    >
-                      {option}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-          )}
+          <View style={styles.field}>
+            <Text style={styles.label}>People Reached</Text>
+            <TextInput
+              style={styles.input}
+              value={peopleReached}
+              onChangeText={setPeopleReached}
+              placeholder="0"
+              keyboardType="numeric"
+            />
+          </View>
+
+          <View style={styles.field}>
+            <Text style={styles.label}>Notes/Observations</Text>
+            <TextInput
+              style={[styles.input, styles.textArea]}
+              value={notes}
+              onChangeText={setNotes}
+              placeholder="Additional notes about the outreach activity..."
+              multiline
+              numberOfLines={3}
+            />
+          </View>
 
           <TouchableOpacity
             style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]}
@@ -196,7 +201,7 @@ export default function DistributionScreen() {
           >
             <CheckCircle size={20} color="#ffffff" />
             <Text style={styles.submitText}>
-              {isSubmitting ? 'Recording...' : 'Record Distribution'}
+              {isSubmitting ? 'Recording...' : 'Record Outreach'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -278,11 +283,9 @@ const styles = StyleSheet.create({
     color: '#374151',
     marginBottom: 12,
   },
-  subtitle: {
-    fontSize: 14,
-    color: '#6b7280',
-    marginBottom: 12,
-    fontStyle: 'italic',
+  textArea: {
+    minHeight: 80,
+    textAlignVertical: 'top',
   },
   input: {
     backgroundColor: '#ffffff',

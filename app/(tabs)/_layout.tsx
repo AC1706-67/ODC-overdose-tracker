@@ -36,7 +36,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="distribution"
         options={{
-          title: 'Distribution',
+          title: 'Outreach',
           tabBarIcon: ({ size, color }) => (
             <Package size={size} color={color} />
           ),
