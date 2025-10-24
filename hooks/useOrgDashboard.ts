@@ -50,6 +50,24 @@ export function useOrgDashboard(organizationId: string = 'anonymous') {
         .single();
 
       if (kpiError && kpiError.code !== 'PGRST116') { // PGRST116 = no rows returned
+        // If table doesn't exist, use fallback data
+        if (kpiError.code === '42P01') { // Table doesn't exist
+          console.warn('Dashboard views not created yet, using fallback data');
+          setKpis({
+            total_incidents: 0,
+            narcan_incidents: 0,
+            survival_rate: 0,
+            total_outreach: 0,
+            total_kits: 0,
+            people_reached: 0,
+            avg_people_per_outreach: 0,
+            unique_zip_codes: 0,
+            active_locations: 0,
+            last_updated: new Date().toISOString(),
+          });
+          setTimeSeries([]);
+          return;
+        }
         throw kpiError;
       }
 
@@ -82,6 +100,21 @@ export function useOrgDashboard(organizationId: string = 'anonymous') {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch dashboard data');
       console.error('Dashboard fetch error:', err);
+      
+      // Set fallback data to prevent crashes
+      setKpis({
+        total_incidents: 0,
+        narcan_incidents: 0,
+        survival_rate: 0,
+        total_outreach: 0,
+        total_kits: 0,
+        people_reached: 0,
+        avg_people_per_outreach: 0,
+        unique_zip_codes: 0,
+        active_locations: 0,
+        last_updated: new Date().toISOString(),
+      });
+      setTimeSeries([]);
     } finally {
       setLoading(false);
     }
