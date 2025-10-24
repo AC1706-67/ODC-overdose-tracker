@@ -13,7 +13,7 @@ import { useOrgDashboard } from '@/hooks/useOrgDashboard';
 const { width } = Dimensions.get('window');
 
 export default function DashboardScreen() {
-  const [selectedOrg, setSelectedOrg] = useState('anonymous'); // Default to anonymous data
+  const [selectedOrg, setSelectedOrg] = useState<string | null>(null); // Default to anonymous data (NULL)
   const { kpis, timeSeries, loading, refresh } = useOrgDashboard(selectedOrg);
 
   // Show last 30 days of data

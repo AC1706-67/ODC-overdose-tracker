@@ -31,7 +31,7 @@ export interface OutreachTimeSeriesPoint {
   incident_count: number;
 }
 
-export function useOrgDashboard(organizationId: string = 'anonymous') {
+export function useOrgDashboard(organizationId: string | null = null) {
   const [kpis, setKpis] = useState<OrgDashboardKPIs | null>(null);
   const [timeSeries, setTimeSeries] = useState<OutreachTimeSeriesPoint[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,7 +46,7 @@ export function useOrgDashboard(organizationId: string = 'anonymous') {
       const { data: kpiData, error: kpiError } = await supabase
         .from('org_dashboard_kpis')
         .select('*')
-        .eq('organization_id', organizationId)
+        .is('organization_id', organizationId) // Use .is() for NULL handling
         .single();
 
       if (kpiError && kpiError.code !== 'PGRST116') { // PGRST116 = no rows returned
@@ -75,7 +75,7 @@ export function useOrgDashboard(organizationId: string = 'anonymous') {
       const { data: series, error: seriesError } = await supabase
         .from('org_outreach_timeseries')
         .select('*')
-        .eq('organization_id', organizationId)
+        .is('organization_id', organizationId) // Use .is() for NULL handling
         .order('day', { ascending: true });
 
       if (seriesError) {
@@ -134,7 +134,7 @@ export function useOrgDashboard(organizationId: string = 'anonymous') {
 }
 
 // Alternative hook using the helper function (more efficient)
-export function useOrgDashboardOptimized(organizationId: string = 'anonymous') {
+export function useOrgDashboardOptimized(organizationId: string | null = null) {
   const [data, setData] = useState<{
     kpis: OrgDashboardKPIs;
     timeSeries: OutreachTimeSeriesPoint[];
