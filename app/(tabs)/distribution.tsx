@@ -94,7 +94,7 @@ export default function DistributionScreen() {
         <View style={styles.header}>
           <View style={styles.titleRow}>
             <Package size={24} color="#059669" />
-            <Text style={styles.title}>Outreach Log (L.O.G.)</Text>
+            <Text style={styles.title}>Outreach Log</Text>
           </View>
           <View style={styles.statusRow}>
             {isOnline ? (
