@@ -7,22 +7,16 @@ import {
   TouchableOpacity,
   Dimensions,
 } from 'react-native';
-import { BarChart3, TrendingUp, Users, Package, Heart, Download } from 'lucide-react-native';
-import { useDashboardData } from '@/hooks/useDashboardData';
+import { BarChart3, TrendingUp, Users, Package, Heart, Download, MapPin } from 'lucide-react-native';
+import { useOrgDashboard } from '@/hooks/useOrgDashboard';
 
 const { width } = Dimensions.get('window');
 
 export default function DashboardScreen() {
-  const [selectedPeriod, setSelectedPeriod] = useState('week');
-  const [selectedZip, setSelectedZip] = useState('');
-  const { data, loading, refresh } = useDashboardData(selectedPeriod, selectedZip);
+  const [selectedOrg, setSelectedOrg] = useState('anonymous'); // Default to anonymous data
+  const { kpis, timeSeries, loading, refresh } = useOrgDashboard(selectedOrg);
 
-  const periods = [
-    { key: 'day', label: 'Today' },
-    { key: 'week', label: 'This Week' },
-    { key: 'month', label: 'This Month' },
-    { key: 'quarter', label: 'This Quarter' },
-  ];
+  // Show last 30 days of data
 
   return (
     <View style={styles.container}>
@@ -37,29 +31,14 @@ export default function DashboardScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Period Selector */}
-        <View style={styles.periodSelector}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {periods.map((period) => (
-              <TouchableOpacity
-                key={period.key}
-                style={[
-                  styles.periodButton,
-                  selectedPeriod === period.key && styles.periodButtonSelected,
-                ]}
-                onPress={() => setSelectedPeriod(period.key)}
-              >
-                <Text
-                  style={[
-                    styles.periodText,
-                    selectedPeriod === period.key && styles.periodTextSelected,
-                  ]}
-                >
-                  {period.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+        {/* Time Period Info */}
+        <View style={styles.periodInfo}>
+          <Text style={styles.periodText}>Last 30 Days</Text>
+          {kpis?.last_updated && (
+            <Text style={styles.lastUpdated}>
+              Updated {new Date(kpis.last_updated).toLocaleDateString()}
+            </Text>
+          )}
         </View>
 
         {/* Key Metrics */}
@@ -69,43 +48,43 @@ export default function DashboardScreen() {
               <Heart size={20} color="#dc2626" />
               <Text style={styles.metricTitle}>Health Incidents</Text>
             </View>
-            <Text style={styles.metricValue}>{data?.incidents?.total || 0}</Text>
+            <Text style={styles.metricValue}>{kpis?.total_incidents || 0}</Text>
             <Text style={styles.metricSubtext}>
-              {data?.incidents?.narcanUsed || 0} with Narcan
+              {kpis?.narcan_incidents || 0} with Narcan
             </Text>
           </View>
 
           <View style={styles.metricCard}>
             <View style={styles.metricHeader}>
               <Package size={20} color="#059669" />
-              <Text style={styles.metricTitle}>Kits Distributed</Text>
+              <Text style={styles.metricTitle}>Outreach Activities</Text>
             </View>
-            <Text style={styles.metricValue}>{data?.distributions?.total || 0}</Text>
+            <Text style={styles.metricValue}>{kpis?.total_outreach || 0}</Text>
             <Text style={styles.metricSubtext}>
-              {data?.distributions?.narcan || 0} Narcan kits
+              {kpis?.total_kits || 0} kits distributed
             </Text>
           </View>
 
           <View style={styles.metricCard}>
             <View style={styles.metricHeader}>
-              <TrendingUp size={20} color="#3b82f6" />
-              <Text style={styles.metricTitle}>Survival Rate</Text>
+              <Users size={20} color="#3b82f6" />
+              <Text style={styles.metricTitle}>People Reached</Text>
             </View>
-            <Text style={styles.metricValue}>
-              {data?.incidents?.survivalRate ? `${(data.incidents.survivalRate * 100).toFixed(1)}%` : 'N/A'}
-            </Text>
+            <Text style={styles.metricValue}>{kpis?.people_reached || 0}</Text>
             <Text style={styles.metricSubtext}>
-              {data?.incidents?.survived || 0} survived
+              Avg {kpis?.avg_people_per_outreach || 0} per outreach
             </Text>
           </View>
 
           <View style={styles.metricCard}>
             <View style={styles.metricHeader}>
-              <Users size={20} color="#7c3aed" />
-              <Text style={styles.metricTitle}>Coverage</Text>
+              <MapPin size={20} color="#7c3aed" />
+              <Text style={styles.metricTitle}>Geographic Coverage</Text>
             </View>
-            <Text style={styles.metricValue}>{data?.coverage?.zipCodes || 0}</Text>
-            <Text style={styles.metricSubtext}>ZIP codes served</Text>
+            <Text style={styles.metricValue}>{kpis?.unique_zip_codes || 0}</Text>
+            <Text style={styles.metricSubtext}>
+              {kpis?.active_locations || 0} active locations
+            </Text>
           </View>
         </View>
 
@@ -244,30 +223,24 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
-  periodSelector: {
+  periodInfo: {
     backgroundColor: '#ffffff',
     paddingVertical: 16,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
     borderBottomColor: '#e5e7eb',
-  },
-  periodButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginRight: 12,
-    backgroundColor: '#f3f4f6',
-  },
-  periodButtonSelected: {
-    backgroundColor: '#3b82f6',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   periodText: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '600',
-    color: '#6b7280',
+    color: '#374151',
   },
-  periodTextSelected: {
-    color: '#ffffff',
+  lastUpdated: {
+    fontSize: 12,
+    color: '#6b7280',
   },
   metricsGrid: {
     flexDirection: 'row',
