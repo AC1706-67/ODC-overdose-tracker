@@ -1,10 +1,40 @@
-node_modules
-.git
-android/.gradle
-android/app/build
-android/build
-.expo
+# build artifacts & caches
+android/.gradle/
+android/build/
+android/app/build/
+android/app/*.apk
+ios/Pods/
+ios/build/
+*.xcworkspace/xcuserdata/
+.expo/
+.expo-shared/
+dist/
+build/
+.cache/
+.next/
+.turbo/
+node_modules/.cache/
 *.log
+.git/
+
+# VCS, IDE, logs
+.git/
+.github/
+.vscode/
+.idea/
 .DS_Store
-build-and-install.ps1
-build-and-install.js
+*.log
+coverage/
+
+# large/raw assets you don't need on the build server
+assets/raw/
+**/*.psd
+**/*.ai
+**/*.sketch
+**/*.zip
+**/*.mp4
+**/*.wav
+
+# misc
+*.keystore
+*.jks

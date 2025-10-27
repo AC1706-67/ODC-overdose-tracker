@@ -8,6 +8,7 @@ import { StatusBar } from 'expo-status-bar';
 import { View, StyleSheet } from 'react-native';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 import { useSession } from '@/hooks/useSession';
+import { OrgProvider } from '../src/context/OrgContext';
 
 function WithInsetsContainer({ children }: { children: React.ReactNode }) {
   const insets = useSafeAreaInsets();
@@ -54,25 +55,27 @@ export default function RootLayout() {
   }, [session, segments, isNavigationReady]);
 
   return (
-    <SafeAreaProvider>
-      <StatusBar style="dark" translucent={false} backgroundColor="#ffffff" />
-      <WithInsetsContainer>
-        <Stack 
-          screenOptions={{
-            headerTransparent: false,
-            // Make sure Router doesn't add extra space on top:
-            contentStyle: { backgroundColor: '#ffffff', paddingTop: 0 },
-            headerStyle: { backgroundColor: '#ffffff' },
-            headerTitleStyle: { color: '#111827' }, // slate-900
-            headerTintColor: '#111827',
-            headerShown: false,
-          }}
-        >
-          <Stack.Screen name="login" options={{ headerShown: false }} />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-      </WithInsetsContainer>
-    </SafeAreaProvider>
+    <OrgProvider>
+      <SafeAreaProvider>
+        <StatusBar style="dark" translucent={false} backgroundColor="#ffffff" />
+        <WithInsetsContainer>
+          <Stack 
+            screenOptions={{
+              headerTransparent: false,
+              // Make sure Router doesn't add extra space on top:
+              contentStyle: { backgroundColor: '#ffffff', paddingTop: 0 },
+              headerStyle: { backgroundColor: '#ffffff' },
+              headerTitleStyle: { color: '#111827' }, // slate-900
+              headerTintColor: '#111827',
+              headerShown: false,
+            }}
+          >
+            <Stack.Screen name="login" options={{ headerShown: false }} />
+            <Stack.Screen name="+not-found" />
+          </Stack>
+        </WithInsetsContainer>
+      </SafeAreaProvider>
+    </OrgProvider>
   );
 }
 
