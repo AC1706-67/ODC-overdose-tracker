@@ -1,13 +1,21 @@
-import { supabase } from '../lib/supabase';
+import { supabase } from '@/src/lib/supabase';
 
-export async function fetchDashboardDirect(activeOrgId: string) {
+export async function fetchDashboardDirect(activeOrgId: string | null) {
   const since = new Date(Date.now() - 30*24*60*60*1000).toISOString();
   
-  const { data, error } = await supabase
+  let query = supabase
     .from("outreach_logs")
     .select("num_kits, people_reached, location")
-    .eq("organization_id", activeOrgId)
     .gte("created_at", since);
+  
+  // If activeOrgId is null, get anonymous data (where organization_id is null)
+  if (activeOrgId === null) {
+    query = query.is("organization_id", null);
+  } else {
+    query = query.eq("organization_id", activeOrgId);
+  }
+  
+  const { data, error } = await query;
     
   if (error) throw error;
 

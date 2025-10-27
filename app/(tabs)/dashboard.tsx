@@ -8,8 +8,10 @@ import {
   Dimensions,
 } from 'react-native';
 import { BarChart3, Users, Package, Heart, Download, MapPin } from 'lucide-react-native';
-import { useOrg } from '../../src/context/OrgContext';
-import { fetchDashboardDirect } from '../../src/api/dashboard';
+import { useOrg } from '@/src/context/OrgContext';
+import { fetchDashboardDirect } from '@/src/api/dashboard';
+import OrgDiagnostic from '@/components/OrgDiagnostic';
+import SelectOrg from '@/components/SelectOrg';
 
 const { width } = Dimensions.get('window');
 
@@ -24,7 +26,7 @@ export default function DashboardScreen() {
   const [loading, setLoading] = useState(true);
 
   const refresh = async () => {
-    if (!activeOrgId) return;
+    if (activeOrgId === undefined) return; // Only skip if undefined, allow null
     try {
       setLoading(true);
       const res = await fetchDashboardDirect(activeOrgId);
@@ -110,12 +112,18 @@ export default function DashboardScreen() {
             </View>
           </View>
 
+          {/* Diagnostic */}
+          <OrgDiagnostic />
+          
+          {/* Organization Selector */}
+          {activeOrgId === undefined && <SelectOrg />}
+
           {/* Status Message */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Dashboard Status</Text>
             {loading ? (
               <Text style={styles.statusText}>Loading dashboard data...</Text>
-            ) : activeOrgId ? (
+            ) : activeOrgId !== undefined ? (
               <Text style={styles.statusText}>✅ Dashboard loaded successfully</Text>
             ) : (
               <Text style={styles.statusText}>⚠️ No organization selected</Text>

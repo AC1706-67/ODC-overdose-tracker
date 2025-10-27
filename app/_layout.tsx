@@ -8,7 +8,7 @@ import { StatusBar } from 'expo-status-bar';
 import { View, StyleSheet } from 'react-native';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 import { useSession } from '@/hooks/useSession';
-import { OrgProvider } from '../src/context/OrgContext';
+import { OrgProvider } from '@/src/context/OrgContext';
 
 function WithInsetsContainer({ children }: { children: React.ReactNode }) {
   const insets = useSafeAreaInsets();
