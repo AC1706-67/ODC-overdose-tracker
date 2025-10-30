@@ -64,7 +64,10 @@ export default function SettingsScreen() {
     setTapCount(newCount);
     
     if (newCount >= 7) {
-      setShowDiagnostics(true);
+      // Only show diagnostics in development or when explicitly enabled
+      if (__DEV__ || process.env.EXPO_PUBLIC_SHOW_DIAGNOSTICS === 'true') {
+        setShowDiagnostics(true);
+      }
       setTapCount(0);
     }
     
