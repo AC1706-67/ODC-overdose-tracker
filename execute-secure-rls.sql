@@ -109,4 +109,4 @@ ORDER BY policyname;
 -- Check anonymous record count
 SELECT COUNT(*) AS anonymous_records 
 FROM outreach_logs 
-WHERE organization_id IS NULL;
+WHERE organization_id IS NUL
