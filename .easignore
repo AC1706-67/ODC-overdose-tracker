@@ -17,6 +17,14 @@ node_modules/.cache/
 *.log
 .git/
 
+# Reduce file size - exclude all existing APKs and test files
+*.apk
+test-*.js
+apply-dashboard-migration.js
+fix-*.sql
+components/DiagnosticsScreen.tsx
+components/OrgDiagnostic.tsx
+
 # VCS, IDE, logs
 .git/
 .github/

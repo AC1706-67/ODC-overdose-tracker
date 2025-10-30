@@ -11,25 +11,33 @@ import {
 import { Package, CircleCheck as CheckCircle, Wifi, WifiOff } from 'lucide-react-native';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { supabase } from '@/lib/supabase';
+import { useOrg } from '@/src/context/OrgContext';
 
-const KIT_TYPES = ['Narcan', 'Feminine Hygiene', 'Hygiene', 'Safe Sex'];
+const SUPPLY_TYPES = ['Narcan', 'Feminine Hygiene', 'Hygiene', 'Safe Sex', 'Wound Care'];
+const COMMON_ZIP_CODES = ['79901', '79902', '79903', '79904', '79905', '79906', '79907', '79908', '79915', '79924', '79925', '79930', '79932', '79934', '79935', '79936'];
 
 export default function DistributionScreen() {
+  const { activeOrgId } = useOrg();
   const [zipCode, setZipCode] = useState('');
   const [location, setLocation] = useState('');
-  const [selectedKitTypes, setSelectedKitTypes] = useState<string[]>([]);
-  const [numKits, setNumKits] = useState('0');
-  const [peopleReached, setPeopleReached] = useState('0');
+  const [selectedSupplyTypes, setSelectedSupplyTypes] = useState<string[]>([]);
+  const [numSupplies, setNumSupplies] = useState('0');
+  const [malesReached, setMalesReached] = useState('0');
+  const [femalesReached, setFemalesReached] = useState('0');
   const [notes, setNotes] = useState('');
+  const [outreachDate, setOutreachDate] = useState(new Date().toISOString().split('T')[0]);
+  const [teamMembers, setTeamMembers] = useState('');
+  const [memberOrganization, setMemberOrganization] = useState('');
+  const [tripCount, setTripCount] = useState('1');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { isOnline } = useNetworkStatus();
 
-  const toggleKitType = (kitType: string) => {
-    setSelectedKitTypes(prev => 
-      prev.includes(kitType) 
-        ? prev.filter(type => type !== kitType)
-        : [...prev, kitType]
+  const toggleSupplyType = (supplyType: string) => {
+    setSelectedSupplyTypes(prev => 
+      prev.includes(supplyType) 
+        ? prev.filter(type => type !== supplyType)
+        : [...prev, supplyType]
     );
   };
 
@@ -38,18 +46,23 @@ export default function DistributionScreen() {
       Alert.alert('Invalid ZIP Code', 'Please enter a valid 5-digit ZIP code.');
       return false;
     }
-    if (selectedKitTypes.length === 0) {
-      Alert.alert('Missing Information', 'Select at least one kit type.');
+    if (selectedSupplyTypes.length === 0) {
+      Alert.alert('Missing Information', 'Select at least one supply type.');
       return false;
     }
-    const kitsNum = parseInt(numKits);
-    if (isNaN(kitsNum) || kitsNum < 0) {
-      Alert.alert('Invalid Number', 'Number of kits must be 0 or greater.');
+    const suppliesNum = parseInt(numSupplies);
+    if (isNaN(suppliesNum) || suppliesNum < 0) {
+      Alert.alert('Invalid Number', 'Number of supplies must be 0 or greater.');
       return false;
     }
-    const peopleNum = parseInt(peopleReached);
-    if (isNaN(peopleNum) || peopleNum < 0) {
-      Alert.alert('Invalid Number', 'People reached must be 0 or greater.');
+    const malesNum = parseInt(malesReached);
+    if (isNaN(malesNum) || malesNum < 0) {
+      Alert.alert('Invalid Number', 'Males reached must be 0 or greater.');
+      return false;
+    }
+    const femalesNum = parseInt(femalesReached);
+    if (isNaN(femalesNum) || femalesNum < 0) {
+      Alert.alert('Invalid Number', 'Females reached must be 0 or greater.');
       return false;
     }
     return true;
@@ -60,24 +73,63 @@ export default function DistributionScreen() {
 
     setIsSubmitting(true);
     try {
-      const { error } = await supabase.from('outreach_logs').insert({
+      // Get user session for user_id
+      const session = (await supabase.auth.getSession()).data.session;
+      const userId = session?.user?.id || null;
+
+      // Parse team members into array if provided
+      const teamMembersArray = teamMembers 
+        ? teamMembers.split(/[,&]/).map(name => name.trim()).filter(name => name)
+        : [];
+
+      const payload = {
+        organization_id: activeOrgId || null,
+        user_id: userId,
+        outreach_date: outreachDate, // Already in YYYY-MM-DD format
         zip_code: zipCode,
         location: location || null,
-        kit_types: selectedKitTypes,
-        num_kits: Number(numKits || 0),
-        people_reached: Number(peopleReached || 0),
+        kit_types: selectedSupplyTypes, // Already an array
+        num_kits: Number(numSupplies || 0),
+        people_reached: Number(malesReached || 0) + Number(femalesReached || 0),
+        males_reached: Number(malesReached || 0),
+        females_reached: Number(femalesReached || 0),
+        trip_count: Number(tripCount || 1),
+        team_members: teamMembersArray.length > 0 ? teamMembersArray : null,
+        team_organization: memberOrganization || null,
         notes: notes || null,
-      });
+      };
 
-      if (error) throw error;
+      console.log('Outreach payload:', payload);
+
+      const { data, error } = await supabase
+        .from('outreach_logs')
+        .insert(payload)
+        .select('*');
+
+      if (error) {
+        console.log('OUTREACH INSERT ERROR', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        });
+        throw error;
+      }
+
+      console.log('Outreach submitted successfully:', data);
 
       // Reset form
       setZipCode('');
       setLocation('');
-      setSelectedKitTypes([]);
-      setNumKits('0');
-      setPeopleReached('0');
+      setSelectedSupplyTypes([]);
+      setNumSupplies('0');
+      setMalesReached('0');
+      setFemalesReached('0');
       setNotes('');
+      setOutreachDate(new Date().toISOString().split('T')[0]);
+      setTeamMembers('');
+      setMemberOrganization('');
+      setTripCount('1');
 
       Alert.alert('Success', 'Outreach recorded.');
     } catch (error) {
@@ -122,6 +174,28 @@ export default function DistributionScreen() {
               keyboardType="numeric"
               maxLength={5}
             />
+            <Text style={styles.quickSelectLabel}>Quick Select:</Text>
+            <View style={styles.zipOptionsGrid}>
+              {COMMON_ZIP_CODES.map((zip) => (
+                <TouchableOpacity
+                  key={zip}
+                  style={[
+                    styles.zipOptionButton,
+                    zipCode === zip && styles.zipOptionButtonSelected,
+                  ]}
+                  onPress={() => setZipCode(zip)}
+                >
+                  <Text
+                    style={[
+                      styles.zipOptionText,
+                      zipCode === zip && styles.zipOptionTextSelected,
+                    ]}
+                  >
+                    {zip}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
 
           <View style={styles.field}>
@@ -136,21 +210,21 @@ export default function DistributionScreen() {
           </View>
 
           <View style={styles.field}>
-            <Text style={styles.label}>Kit Type(s) *</Text>
+            <Text style={styles.label}>Supply Type(s) *</Text>
             <View style={styles.optionsGrid}>
-              {KIT_TYPES.map((option) => (
+              {SUPPLY_TYPES.map((option) => (
                 <TouchableOpacity
                   key={option}
                   style={[
                     styles.optionButton,
-                    selectedKitTypes.includes(option) && styles.optionButtonSelected,
+                    selectedSupplyTypes.includes(option) && styles.optionButtonSelected,
                   ]}
-                  onPress={() => toggleKitType(option)}
+                  onPress={() => toggleSupplyType(option)}
                 >
                   <Text
                     style={[
                       styles.optionText,
-                      selectedKitTypes.includes(option) && styles.optionTextSelected,
+                      selectedSupplyTypes.includes(option) && styles.optionTextSelected,
                     ]}
                   >
                     {option}
@@ -161,23 +235,76 @@ export default function DistributionScreen() {
           </View>
 
           <View style={styles.field}>
-            <Text style={styles.label}>Number of Kits</Text>
+            <Text style={styles.label}>Number of Supplies</Text>
             <TextInput
               style={styles.input}
-              value={numKits}
-              onChangeText={setNumKits}
+              value={numSupplies}
+              onChangeText={setNumSupplies}
               placeholder="0"
               keyboardType="numeric"
             />
           </View>
 
           <View style={styles.field}>
-            <Text style={styles.label}>People Reached</Text>
+            <Text style={styles.label}>Males Reached</Text>
             <TextInput
               style={styles.input}
-              value={peopleReached}
-              onChangeText={setPeopleReached}
+              value={malesReached}
+              onChangeText={setMalesReached}
               placeholder="0"
+              keyboardType="numeric"
+            />
+          </View>
+
+          <View style={styles.field}>
+            <Text style={styles.label}>Females Reached</Text>
+            <TextInput
+              style={styles.input}
+              value={femalesReached}
+              onChangeText={setFemalesReached}
+              placeholder="0"
+              keyboardType="numeric"
+            />
+          </View>
+
+          <View style={styles.field}>
+            <Text style={styles.label}>Outreach Date</Text>
+            <TextInput
+              style={styles.input}
+              value={outreachDate}
+              onChangeText={setOutreachDate}
+              placeholder="YYYY-MM-DD"
+            />
+          </View>
+
+          <View style={styles.field}>
+            <Text style={styles.label}>Team Members</Text>
+            <TextInput
+              style={styles.input}
+              value={teamMembers}
+              onChangeText={setTeamMembers}
+              placeholder="e.g., John D., Maria S., Alex R."
+              multiline
+            />
+          </View>
+
+          <View style={styles.field}>
+            <Text style={styles.label}>Team Organization</Text>
+            <TextInput
+              style={styles.input}
+              value={memberOrganization}
+              onChangeText={setMemberOrganization}
+              placeholder="e.g., Casa Vida, El Paso Health Dept"
+            />
+          </View>
+
+          <View style={styles.field}>
+            <Text style={styles.label}>Number of Trips</Text>
+            <TextInput
+              style={styles.input}
+              value={tripCount}
+              onChangeText={setTripCount}
+              placeholder="1"
               keyboardType="numeric"
             />
           </View>
@@ -341,5 +468,38 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     marginLeft: 8,
+  },
+  quickSelectLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#6b7280',
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  zipOptionsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 8,
+  },
+  zipOptionButton: {
+    backgroundColor: '#f3f4f6',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+  },
+  zipOptionButtonSelected: {
+    backgroundColor: '#3b82f6',
+    borderColor: '#3b82f6',
+  },
+  zipOptionText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#374151',
+  },
+  zipOptionTextSelected: {
+    color: '#ffffff',
   },
 });

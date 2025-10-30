@@ -20,7 +20,7 @@ export default function DiagnosticsScreen({ visible, onClose }: DiagnosticsScree
   const diagnostics = {
     'Build Type': __DEV__ ? 'Debug' : 'Release',
     'OTA Updates': 'Disabled (Expo Updates)',
-    'React Native': require('react-native/package.json').version,
+    'React Native': require('react-native').version || 'Unknown',
     'New Architecture': 'Disabled (Classic Bridge)',
     'Hermes': 'Enabled',
     'Expo SDK': Constants.expoVersion || 'Unknown',

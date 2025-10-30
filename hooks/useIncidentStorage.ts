@@ -80,7 +80,8 @@ export function useIncidentStorage() {
           approx_age: incident.approx_age,
           narcan_used: incident.narcan_used,
           survival: incident.survival,
-          client_id: incident.client_id,
+          organization_id: null, // Force null to avoid RLS issues
+          client_id: incident.client_id, // This field is required
         })
         .select('incident_id')
         .single();
