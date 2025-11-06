@@ -10,7 +10,11 @@
     "lint": "expo lint",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "scan:brand": "node scripts/forbidden-scan.js"
+    "scan:brand": "node scripts/forbidden-scan.js",
+    "test": "node __tests__/run-all-tests.js",
+    "test:analytics": "node __tests__/enhanced-outreach-analytics.test.js",
+    "test:components": "node __tests__/dashboard-components.test.js",
+    "test:performance": "node __tests__/analytics-performance.test.js"
   },
   "dependencies": {
     "@expo/metro-runtime": "~6.1.2",

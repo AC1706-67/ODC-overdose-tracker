@@ -168,6 +168,8 @@ export default function DashboardCharts({ cards, timeSeries }: DashboardChartsPr
           data={weeklyData}
           width={screenWidth - 40}
           height={200}
+          yAxisLabel=""
+          yAxisSuffix=""
           chartConfig={chartConfig}
           verticalLabelRotation={0}
           showValuesOnTopOfBars

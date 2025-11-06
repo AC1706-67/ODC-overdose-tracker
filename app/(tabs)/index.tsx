@@ -15,9 +15,11 @@ import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 const GENDER_OPTIONS = ['Male', 'Female', 'Other', 'Prefer not to say', 'Unknown'];
 const AGE_OPTIONS = ['<18', '18-25', '26-35', '36-45', '46-55', '56-65', '65+', 'Unknown'];
 const SURVIVAL_OPTIONS = ['Survived', 'Deceased', 'Unknown'];
+const ZIP_CODE_OPTIONS = ['Enter ZIP Code', 'NA', 'Unknown'];
 
 export default function IncidentScreen() {
   const [zipCode, setZipCode] = useState('');
+  const [zipCodeMode, setZipCodeMode] = useState('Enter ZIP Code');
   const [gender, setGender] = useState('');
   const [age, setAge] = useState('');
   const [narcanUsed, setNarcanUsed] = useState<boolean | null>(null);
@@ -28,8 +30,13 @@ export default function IncidentScreen() {
   const { isOnline } = useNetworkStatus();
 
   const validateForm = () => {
-    if (!zipCode || zipCode.length !== 5 || !/^\d{5}$/.test(zipCode)) {
-      Alert.alert('Invalid ZIP Code', 'Please enter a valid 5-digit ZIP code.');
+    if (zipCodeMode === 'Enter ZIP Code') {
+      if (!zipCode || zipCode.length !== 5 || !/^\d{5}$/.test(zipCode)) {
+        Alert.alert('Invalid ZIP Code', 'Please enter a valid 5-digit ZIP code or select NA/Unknown.');
+        return false;
+      }
+    } else if (!zipCodeMode) {
+      Alert.alert('Missing ZIP Code', 'Please select a ZIP code option.');
       return false;
     }
     if (!gender || !age || narcanUsed === null || !survival) {
@@ -44,8 +51,9 @@ export default function IncidentScreen() {
 
     setIsSubmitting(true);
     try {
+      const finalZipCode = zipCodeMode === 'Enter ZIP Code' ? zipCode : zipCodeMode;
       await submitIncident({
-        zip_code: zipCode,
+        zip_code: finalZipCode,
         gender,
         approx_age: age,
         narcan_used: narcanUsed!,
@@ -54,6 +62,7 @@ export default function IncidentScreen() {
 
       // Reset form
       setZipCode('');
+      setZipCodeMode('Enter ZIP Code');
       setGender('');
       setAge('');
       setNarcanUsed(null);
@@ -104,14 +113,37 @@ export default function IncidentScreen() {
         <View style={styles.form}>
           <View style={styles.field}>
             <Text style={styles.label}>ZIP Code *</Text>
-            <TextInput
-              style={styles.input}
-              value={zipCode}
-              onChangeText={setZipCode}
-              placeholder="12345"
-              keyboardType="numeric"
-              maxLength={5}
-            />
+            <View style={styles.optionsGrid}>
+              {ZIP_CODE_OPTIONS.map((option) => (
+                <TouchableOpacity
+                  key={option}
+                  style={[
+                    styles.optionButton,
+                    zipCodeMode === option && styles.optionButtonSelected,
+                  ]}
+                  onPress={() => setZipCodeMode(option)}
+                >
+                  <Text
+                    style={[
+                      styles.optionText,
+                      zipCodeMode === option && styles.optionTextSelected,
+                    ]}
+                  >
+                    {option}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            {zipCodeMode === 'Enter ZIP Code' && (
+              <TextInput
+                style={[styles.input, { marginTop: 12 }]}
+                value={zipCode}
+                onChangeText={setZipCode}
+                placeholder="12345"
+                keyboardType="numeric"
+                maxLength={5}
+              />
+            )}
           </View>
 
           <View style={styles.field}>

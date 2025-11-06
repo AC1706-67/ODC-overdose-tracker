@@ -177,6 +177,8 @@ export default function TeamDashboard() {
             data={monthlyBarData}
             width={width - 40}
             height={200}
+            yAxisLabel=""
+            yAxisSuffix=""
             chartConfig={chartConfig}
             verticalLabelRotation={0}
             showValuesOnTopOfBars
