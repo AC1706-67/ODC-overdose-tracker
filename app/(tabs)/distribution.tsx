@@ -12,14 +12,42 @@ import { Package, CircleCheck as CheckCircle, Wifi, WifiOff } from 'lucide-react
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { supabase } from '@/lib/supabase';
 import { useOrg } from '@/src/context/OrgContext';
+import TeamMemberPicker from '@/components/TeamMemberPicker';
+import LocationPicker from '@/components/LocationPicker';
+import { RequireOutreach } from '@/components/RequireOutreach';
 
 const SUPPLY_TYPES = ['Narcan', 'Feminine Hygiene', 'Hygiene', 'Safe Sex', 'Wound Care'];
 const COMMON_ZIP_CODES = ['79901', '79902', '79903', '79904', '79905', '79906', '79907', '79908', '79915', '79924', '79925', '79930', '79932', '79934', '79935', '79936'];
+const ZIP_CODE_OPTIONS = ['Enter ZIP Code', 'NA', 'Unknown'];
+
+interface SelectedTeamMember {
+  id: string;
+  name: string;
+  organization_id: string;
+  email?: string;
+  phone?: string;
+  role?: string;
+  is_active: boolean;
+  role_in_activity?: string;
+}
+
+interface Location {
+  id: string;
+  name: string;
+  address?: string;
+  zip_code?: string;
+  city?: string;
+  state?: string;
+  location_type: 'intersection' | 'address' | 'area';
+  is_active: boolean;
+}
 
 export default function DistributionScreen() {
   const { activeOrgId } = useOrg();
   const [zipCode, setZipCode] = useState('');
+  const [zipCodeMode, setZipCodeMode] = useState('Enter ZIP Code');
   const [location, setLocation] = useState('');
+  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [selectedSupplyTypes, setSelectedSupplyTypes] = useState<string[]>([]);
   const [numSupplies, setNumSupplies] = useState('0');
   const [malesReached, setMalesReached] = useState('0');
@@ -27,6 +55,7 @@ export default function DistributionScreen() {
   const [notes, setNotes] = useState('');
   const [outreachDate, setOutreachDate] = useState(new Date().toISOString().split('T')[0]);
   const [teamMembers, setTeamMembers] = useState('');
+  const [selectedTeamMembers, setSelectedTeamMembers] = useState<SelectedTeamMember[]>([]);
   const [memberOrganization, setMemberOrganization] = useState('');
   const [tripCount, setTripCount] = useState('1');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -42,8 +71,13 @@ export default function DistributionScreen() {
   };
 
   const validateForm = () => {
-    if (!zipCode || zipCode.length !== 5 || !/^\d{5}$/.test(zipCode)) {
-      Alert.alert('Invalid ZIP Code', 'Please enter a valid 5-digit ZIP code.');
+    if (zipCodeMode === 'Enter ZIP Code') {
+      if (!zipCode || zipCode.length !== 5 || !/^\d{5}$/.test(zipCode)) {
+        Alert.alert('Invalid ZIP Code', 'Please enter a valid 5-digit ZIP code or select NA/Unknown.');
+        return false;
+      }
+    } else if (!zipCodeMode) {
+      Alert.alert('Missing ZIP Code', 'Please select a ZIP code option.');
       return false;
     }
     if (selectedSupplyTypes.length === 0) {
@@ -77,50 +111,78 @@ export default function DistributionScreen() {
       const session = (await supabase.auth.getSession()).data.session;
       const userId = session?.user?.id || null;
 
-      // Parse team members into array if provided
-      const teamMembersArray = teamMembers 
+      // Parse legacy team members into array if provided (for backward compatibility)
+      const legacyTeamMembersArray = teamMembers 
         ? teamMembers.split(/[,&]/).map(name => name.trim()).filter(name => name)
         : [];
 
+      const finalZipCode = zipCodeMode === 'Enter ZIP Code' ? zipCode : zipCodeMode;
+      
+      // Prepare the main outreach log payload
       const payload = {
         organization_id: activeOrgId || null,
         user_id: userId,
-        outreach_date: outreachDate, // Already in YYYY-MM-DD format
-        zip_code: zipCode,
-        location: location || null,
-        kit_types: selectedSupplyTypes, // Already an array
+        outreach_date: outreachDate,
+        zip_code: finalZipCode,
+        location_id: selectedLocation?.id || null,
+        legacy_location: selectedLocation ? null : (location || null), // Use legacy field if no location selected
+        kit_types: selectedSupplyTypes,
         num_kits: Number(numSupplies || 0),
         people_reached: Number(malesReached || 0) + Number(femalesReached || 0),
         males_reached: Number(malesReached || 0),
         females_reached: Number(femalesReached || 0),
         trip_count: Number(tripCount || 1),
-        team_members: teamMembersArray.length > 0 ? teamMembersArray : null,
+        legacy_team_members: legacyTeamMembersArray.length > 0 ? legacyTeamMembersArray : null, // Keep legacy for backward compatibility
         team_organization: memberOrganization || null,
         notes: notes || null,
       };
 
       console.log('Outreach payload:', payload);
 
-      const { data, error } = await supabase
+      // Insert the outreach log
+      const { data: outreachData, error: outreachError } = await supabase
         .from('outreach_logs')
         .insert(payload)
-        .select('*');
+        .select('*')
+        .single();
 
-      if (error) {
+      if (outreachError) {
         console.log('OUTREACH INSERT ERROR', {
-          code: error.code,
-          message: error.message,
-          details: error.details,
-          hint: error.hint
+          code: outreachError.code,
+          message: outreachError.message,
+          details: outreachError.details,
+          hint: outreachError.hint
         });
-        throw error;
+        throw outreachError;
       }
 
-      console.log('Outreach submitted successfully:', data);
+      // Insert team member associations if any are selected
+      if (selectedTeamMembers.length > 0) {
+        const teamMemberAssociations = selectedTeamMembers.map(member => ({
+          outreach_log_id: outreachData.id,
+          team_member_id: member.id,
+          role_in_activity: member.role_in_activity || 'volunteer'
+        }));
+
+        const { error: teamMemberError } = await supabase
+          .from('outreach_team_members')
+          .insert(teamMemberAssociations);
+
+        if (teamMemberError) {
+          console.error('Team member association error:', teamMemberError);
+          // Don't fail the whole submission for team member association errors
+          Alert.alert('Warning', 'Outreach recorded but team member associations may not have been saved properly.');
+        }
+      }
+
+      console.log('Outreach submitted successfully:', outreachData);
 
       // Reset form
       setZipCode('');
+      setZipCodeMode('Enter ZIP Code');
       setLocation('');
+      setSelectedLocation(null);
+      setSelectedTeamMembers([]);
       setSelectedSupplyTypes([]);
       setNumSupplies('0');
       setMalesReached('0');
@@ -141,8 +203,9 @@ export default function DistributionScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+    <RequireOutreach>
+      <View style={styles.container}>
+        <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <View style={styles.titleRow}>
             <Package size={24} color="#059669" />
@@ -166,48 +229,69 @@ export default function DistributionScreen() {
         <View style={styles.form}>
           <View style={styles.field}>
             <Text style={styles.label}>ZIP Code *</Text>
-            <TextInput
-              style={styles.input}
-              value={zipCode}
-              onChangeText={setZipCode}
-              placeholder="12345"
-              keyboardType="numeric"
-              maxLength={5}
-            />
-            <Text style={styles.quickSelectLabel}>Quick Select:</Text>
-            <View style={styles.zipOptionsGrid}>
-              {COMMON_ZIP_CODES.map((zip) => (
+            <View style={styles.optionsGrid}>
+              {ZIP_CODE_OPTIONS.map((option) => (
                 <TouchableOpacity
-                  key={zip}
+                  key={option}
                   style={[
-                    styles.zipOptionButton,
-                    zipCode === zip && styles.zipOptionButtonSelected,
+                    styles.optionButton,
+                    zipCodeMode === option && styles.optionButtonSelected,
                   ]}
-                  onPress={() => setZipCode(zip)}
+                  onPress={() => setZipCodeMode(option)}
                 >
                   <Text
                     style={[
-                      styles.zipOptionText,
-                      zipCode === zip && styles.zipOptionTextSelected,
+                      styles.optionText,
+                      zipCodeMode === option && styles.optionTextSelected,
                     ]}
                   >
-                    {zip}
+                    {option}
                   </Text>
                 </TouchableOpacity>
               ))}
             </View>
+            {zipCodeMode === 'Enter ZIP Code' && (
+              <>
+                <TextInput
+                  style={[styles.input, { marginTop: 12 }]}
+                  value={zipCode}
+                  onChangeText={setZipCode}
+                  placeholder="12345"
+                  keyboardType="numeric"
+                  maxLength={5}
+                />
+                <Text style={styles.quickSelectLabel}>Quick Select:</Text>
+                <View style={styles.zipOptionsGrid}>
+                  {COMMON_ZIP_CODES.map((zip) => (
+                    <TouchableOpacity
+                      key={zip}
+                      style={[
+                        styles.zipOptionButton,
+                        zipCode === zip && styles.zipOptionButtonSelected,
+                      ]}
+                      onPress={() => setZipCode(zip)}
+                    >
+                      <Text
+                        style={[
+                          styles.zipOptionText,
+                          zipCode === zip && styles.zipOptionTextSelected,
+                        ]}
+                      >
+                        {zip}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </>
+            )}
           </View>
 
-          <View style={styles.field}>
-            <Text style={styles.label}>Location</Text>
-            <TextInput
-              style={styles.input}
-              value={location}
-              onChangeText={setLocation}
-              placeholder="e.g., Montana & Sioux, GWW/Lomaland, 1499 Lee Treviño"
-              multiline
-            />
-          </View>
+          <LocationPicker
+            selectedLocation={selectedLocation}
+            onLocationChange={setSelectedLocation}
+            legacyLocationText={location}
+            onLegacyLocationChange={setLocation}
+          />
 
           <View style={styles.field}>
             <Text style={styles.label}>Supply Type(s) *</Text>
@@ -277,13 +361,19 @@ export default function DistributionScreen() {
             />
           </View>
 
+          <TeamMemberPicker
+            selectedMembers={selectedTeamMembers}
+            onMembersChange={setSelectedTeamMembers}
+          />
+
+          {/* Legacy team member input for backward compatibility */}
           <View style={styles.field}>
-            <Text style={styles.label}>Team Members</Text>
+            <Text style={styles.label}>Additional Team Members (Legacy)</Text>
             <TextInput
               style={styles.input}
               value={teamMembers}
               onChangeText={setTeamMembers}
-              placeholder="e.g., John D., Maria S., Alex R."
+              placeholder="e.g., John D., Maria S., Alex R. (for non-registered members)"
               multiline
             />
           </View>
@@ -334,6 +424,7 @@ export default function DistributionScreen() {
         </View>
       </ScrollView>
     </View>
+    </RequireOutreach>
   );
 }
 

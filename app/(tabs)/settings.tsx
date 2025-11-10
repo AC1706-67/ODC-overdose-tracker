@@ -8,9 +8,9 @@ import {
   Switch,
   Alert,
 } from 'react-native';
-import { Settings, User, Shield, Database, LogOut, Info } from 'lucide-react-native';
+import { Settings, User, Shield, Database, LogOut, Info, ChevronRight } from 'lucide-react-native';
 import { supabase } from '@/lib/supabase';
-import { useRouter } from 'expo-router';
+import { useRouter, Link } from 'expo-router';
 import DiagnosticsScreen from '@/components/DiagnosticsScreen';
 import { AuthTest } from '@/components/AuthTest';
 
@@ -20,6 +20,59 @@ export default function SettingsScreen() {
   const [autoSync, setAutoSync] = useState(true);
   const [showDiagnostics, setShowDiagnostics] = useState(false);
   const [tapCount, setTapCount] = useState(0);
+  const [userRole, setUserRole] = useState<string>('Loading...');
+  const [orgName, setOrgName] = useState<string>('Loading...');
+
+  // Load user role and organization
+  React.useEffect(() => {
+    loadUserProfile();
+  }, []);
+
+  const loadUserProfile = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Get user's organization membership
+      const { data: membership, error } = await supabase
+        .from('user_organizations')
+        .select(`
+          role,
+          organizations (
+            name
+          )
+        `)
+        .eq('user_id', user.id)
+        .eq('is_active', true)
+        .single();
+
+      if (error) {
+        console.error('Error loading user profile:', error);
+        setUserRole('Peer');
+        setOrgName('Recovery Alliance of El Paso');
+        return;
+      }
+
+      if (membership) {
+        // Format role: capitalize first letter
+        const formattedRole = membership.role 
+          ? membership.role.charAt(0).toUpperCase() + membership.role.slice(1)
+          : 'Peer';
+        setUserRole(formattedRole);
+        
+        // Get organization name from nested select
+        const orgData = membership.organizations as any;
+        setOrgName(orgData?.name || 'Recovery Alliance of El Paso');
+      } else {
+        setUserRole('Peer');
+        setOrgName('Recovery Alliance of El Paso');
+      }
+    } catch (error) {
+      console.error('Error in loadUserProfile:', error);
+      setUserRole('Peer');
+      setOrgName('Recovery Alliance of El Paso');
+    }
+  };
 
   const handleClearData = () => {
     Alert.alert(
@@ -64,7 +117,10 @@ export default function SettingsScreen() {
     setTapCount(newCount);
     
     if (newCount >= 7) {
-      setShowDiagnostics(true);
+      // Only show diagnostics in development or when explicitly enabled
+      if (__DEV__ || process.env.EXPO_PUBLIC_SHOW_DIAGNOSTICS === 'true') {
+        setShowDiagnostics(true);
+      }
       setTapCount(0);
     }
     
@@ -89,11 +145,11 @@ export default function SettingsScreen() {
           </View>
           <TouchableOpacity style={styles.settingItem}>
             <Text style={styles.settingLabel}>Role</Text>
-            <Text style={styles.settingValue}>Frontline Responder</Text>
+            <Text style={styles.settingValue}>{userRole}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.settingItem}>
             <Text style={styles.settingLabel}>Organization</Text>
-            <Text style={styles.settingValue}>Community Health Center</Text>
+            <Text style={styles.settingValue}>{orgName}</Text>
           </TouchableOpacity>
         </View>
 
@@ -165,15 +221,19 @@ export default function SettingsScreen() {
             <Text style={styles.settingValue}>1.0.0</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.settingItem}>
-            <Text style={styles.settingLabel}>Privacy Policy</Text>
-            <Text style={styles.settingAction}>View</Text>
-          </TouchableOpacity>
+          <Link href="/legal/privacy" asChild>
+            <TouchableOpacity style={styles.settingItem}>
+              <Text style={styles.settingLabel}>Privacy Policy</Text>
+              <ChevronRight size={20} color="#9ca3af" />
+            </TouchableOpacity>
+          </Link>
 
-          <TouchableOpacity style={styles.settingItem}>
-            <Text style={styles.settingLabel}>Terms of Service</Text>
-            <Text style={styles.settingAction}>View</Text>
-          </TouchableOpacity>
+          <Link href="/legal/terms" asChild>
+            <TouchableOpacity style={styles.settingItem}>
+              <Text style={styles.settingLabel}>Terms of Service</Text>
+              <ChevronRight size={20} color="#9ca3af" />
+            </TouchableOpacity>
+          </Link>
         </View>
 
         {/* Auth Test */}

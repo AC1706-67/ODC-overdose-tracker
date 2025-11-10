@@ -97,7 +97,7 @@ export function useDashboardData(period: string, zipCode?: string) {
 
       // Distribution by type
       const distributionsByType = distributions.reduce((acc, d) => {
-        const existing = acc.find(item => item.type === d.kit_type);
+        const existing = acc.find((item: { type: string; count: number }) => item.type === d.kit_type);
         if (existing) {
           existing.count += d.kits_given;
         } else {
@@ -108,7 +108,7 @@ export function useDashboardData(period: string, zipCode?: string) {
 
       // Demographics
       const genderCounts = incidents.reduce((acc, i) => {
-        const existing = acc.find(item => item.gender === i.gender);
+        const existing = acc.find((item: { gender: string; count: number }) => item.gender === i.gender);
         if (existing) {
           existing.count++;
         } else {
@@ -118,7 +118,7 @@ export function useDashboardData(period: string, zipCode?: string) {
       }, [] as Array<{ gender: string; count: number }>);
 
       const ageCounts = incidents.reduce((acc, i) => {
-        const existing = acc.find(item => item.age === i.approx_age);
+        const existing = acc.find((item: { age: string; count: number }) => item.age === i.approx_age);
         if (existing) {
           existing.count++;
         } else {

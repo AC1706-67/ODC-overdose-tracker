@@ -46,11 +46,15 @@ export function useIncidentStorage() {
   };
 
   const submitIncident = async (incidentData: IncidentSubmit) => {
+    // Generate proper UUIDs to prevent database errors
+    const incidentId = generateUUID();
+    const clientId = generateUUID();
+    
     const newIncident: Incident = {
-      incident_id: generateUUID(),
+      incident_id: incidentId,
       timestamp: new Date().toISOString(),
       ...incidentData,
-      client_id: generateUUID(),
+      client_id: clientId,
       synced: false,
     };
 
@@ -72,6 +76,11 @@ export function useIncidentStorage() {
   const syncIncident = async (incident: Incident) => {
     try {
       // Submit to Supabase
+      // Ensure client_id is a proper UUID
+      const clientId = incident.client_id && incident.client_id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i) 
+        ? incident.client_id 
+        : generateUUID();
+
       const { data, error } = await supabase
         .from('incidents')
         .insert({
@@ -81,13 +90,22 @@ export function useIncidentStorage() {
           narcan_used: incident.narcan_used,
           survival: incident.survival,
           organization_id: null, // Force null to avoid RLS issues
-          client_id: incident.client_id, // This field is required
+          client_id: clientId, // Guaranteed proper UUID
         })
         .select('incident_id')
         .single();
 
       if (error) {
-        console.error('Supabase error:', error);
+        console.error('Incident sync error:', error);
+        console.error('Payload that failed:', {
+          zip_code: incident.zip_code,
+          gender: incident.gender,
+          approx_age: incident.approx_age,
+          narcan_used: incident.narcan_used,
+          survival: incident.survival,
+          organization_id: null,
+          client_id: clientId
+        });
         return;
       }
 

@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
-import { supabase } from '@/src/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { useOrg } from '@/src/context/OrgContext';
 
 export default function SelectOrg() {
-  const { setActiveOrgId } = useOrg();
+  const { setActiveOrgId } = useOrg() as { setActiveOrgId: (id: string | null) => Promise<void> };
   const [orgs, setOrgs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 

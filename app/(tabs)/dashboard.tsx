@@ -1,11 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { BarChart3 } from 'lucide-react-native';
 import OutreachDashboardScreen from '@/screens/dashboard/OutreachDashboardScreen';
 import HealthDashboardScreen from '@/screens/dashboard/HealthDashboardScreen';
+import { useOrg } from '@/src/context/OrgContext';
+import { canUseOutreach } from '@/src/lib/featureAccess';
 
 export default function DashboardScreen() {
-  const [activeTab, setActiveTab] = useState('outreach');
+  const { activeOrg, loading } = useOrg();
+  const outreachEnabled = !loading && canUseOutreach(activeOrg);
+  const [activeTab, setActiveTab] = useState(outreachEnabled ? 'outreach' : 'health');
+
+  // Update active tab if outreach access changes
+  useEffect(() => {
+    if (!loading && !outreachEnabled && activeTab === 'outreach') {
+      setActiveTab('health');
+    }
+  }, [loading, outreachEnabled, activeTab]);
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <BarChart3 size={24} color="#3b82f6" />
+          <Text style={styles.title}>Community Dashboard</Text>
+        </View>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Loading...</Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -16,14 +41,16 @@ export default function DashboardScreen() {
       
       {/* Custom Tab Bar */}
       <View style={styles.tabBar}>
-        <TouchableOpacity 
-          style={[styles.tab, activeTab === 'outreach' && styles.activeTab]}
-          onPress={() => setActiveTab('outreach')}
-        >
-          <Text style={[styles.tabText, activeTab === 'outreach' && styles.activeTabText]}>
-            Outreach
-          </Text>
-        </TouchableOpacity>
+        {outreachEnabled && (
+          <TouchableOpacity 
+            style={[styles.tab, activeTab === 'outreach' && styles.activeTab]}
+            onPress={() => setActiveTab('outreach')}
+          >
+            <Text style={[styles.tabText, activeTab === 'outreach' && styles.activeTabText]}>
+              Outreach
+            </Text>
+          </TouchableOpacity>
+        )}
         <TouchableOpacity 
           style={[styles.tab, activeTab === 'health' && styles.activeTab]}
           onPress={() => setActiveTab('health')}
@@ -36,7 +63,11 @@ export default function DashboardScreen() {
       
       {/* Tab Content */}
       <View style={styles.content}>
-        {activeTab === 'outreach' ? <OutreachDashboardScreen /> : <HealthDashboardScreen />}
+        {activeTab === 'outreach' && outreachEnabled ? (
+          <OutreachDashboardScreen />
+        ) : (
+          <HealthDashboardScreen />
+        )}
       </View>
     </View>
   );
@@ -87,5 +118,14 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#6b7280',
   },
 });
