@@ -11,8 +11,10 @@ import {
 import { Settings, User, Shield, Database, LogOut, Info, ChevronRight } from 'lucide-react-native';
 import { supabase } from '@/lib/supabase';
 import { useRouter, Link } from 'expo-router';
-import DiagnosticsScreen from '@/components/DiagnosticsScreen';
 import { AuthTest } from '@/components/AuthTest';
+
+// Lazy load DiagnosticsScreen to avoid bundling issues
+const DiagnosticsScreen = React.lazy(() => import('@/components/DiagnosticsScreen'));
 
 export default function SettingsScreen() {
   const [notifications, setNotifications] = useState(true);
@@ -257,10 +259,14 @@ export default function SettingsScreen() {
         </View>
       </ScrollView>
       
-      <DiagnosticsScreen 
-        visible={showDiagnostics} 
-        onClose={() => setShowDiagnostics(false)} 
-      />
+      {showDiagnostics && (
+        <React.Suspense fallback={<View />}>
+          <DiagnosticsScreen 
+            visible={showDiagnostics} 
+            onClose={() => setShowDiagnostics(false)} 
+          />
+        </React.Suspense>
+      )}
     </View>
   );
 }
