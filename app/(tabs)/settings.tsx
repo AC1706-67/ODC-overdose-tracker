@@ -13,8 +13,11 @@ import { supabase } from '@/lib/supabase';
 import { useRouter, Link } from 'expo-router';
 import { AuthTest } from '@/components/AuthTest';
 
-// Lazy load DiagnosticsScreen to avoid bundling issues
-const DiagnosticsScreen = React.lazy(() => import('@/components/DiagnosticsScreen'));
+// DiagnosticsScreen only available in dev mode
+let DiagnosticsScreen: any = null;
+if (__DEV__) {
+  DiagnosticsScreen = require('@/components/DiagnosticsScreen').default;
+}
 
 export default function SettingsScreen() {
   const [notifications, setNotifications] = useState(true);
@@ -259,13 +262,11 @@ export default function SettingsScreen() {
         </View>
       </ScrollView>
       
-      {showDiagnostics && (
-        <React.Suspense fallback={<View />}>
-          <DiagnosticsScreen 
-            visible={showDiagnostics} 
-            onClose={() => setShowDiagnostics(false)} 
-          />
-        </React.Suspense>
+      {showDiagnostics && DiagnosticsScreen && (
+        <DiagnosticsScreen 
+          visible={showDiagnostics} 
+          onClose={() => setShowDiagnostics(false)} 
+        />
       )}
     </View>
   );
