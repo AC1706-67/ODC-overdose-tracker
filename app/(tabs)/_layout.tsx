@@ -1,9 +1,17 @@
 import { Tabs } from 'expo-router';
 import { Activity, BarChart3, Package, Settings } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useOrg } from '@/src/context/OrgContext';
+import { canUseOutreach } from '@/src/lib/featureAccess';
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
+  const { activeOrg, loading } = useOrg();
+  const outreachEnabled = !loading && canUseOutreach(activeOrg);
+
+  if (loading) {
+    return null; // Or a loading spinner
+  }
   
   return (
     <Tabs
@@ -37,7 +45,8 @@ export default function TabLayout() {
         name="distribution"
         options={{
           title: 'Outreach',
-          tabBarIcon: ({ size, color }) => (
+          href: outreachEnabled ? '/distribution' : null,
+          tabBarIcon: ({ size, color}) => (
             <Package size={size} color={color} />
           ),
         }}

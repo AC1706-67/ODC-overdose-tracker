@@ -5,9 +5,6 @@
     "owner": "dr.ecovery",
     "scheme": "compassionatelog",
     "version": "1.5.2",
-    "runtimeVersion": {
-      "policy": "sdkVersion"
-    },
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "userInterfaceStyle": "automatic",

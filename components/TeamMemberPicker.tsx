@@ -89,8 +89,8 @@ export default function TeamMemberPicker({ selectedMembers, onMembersChange }: T
       // Use the create_team_member RPC function
       const { data, error } = await supabase.rpc('create_team_member', {
         p_full_name: newMemberName.trim(),
-        p_email: newMemberEmail.trim(),
-        p_role: newMemberRole.trim(),
+        p_email: newMemberEmail.trim() || null,
+        p_role: newMemberRole.trim() || null,
         p_org_slug: orgData.slug
       });
 
@@ -99,24 +99,28 @@ export default function TeamMemberPicker({ selectedMembers, onMembersChange }: T
         throw error;
       }
 
-      // Convert the returned JSON to TeamMember format
+      // The function returns JSON, so we use the data directly
       const newMember: TeamMember = {
         id: data.id,
         name: data.name,
         organization_id: data.organization_id,
         email: data.email,
-        phone: null, // Not handled by RPC function yet
+        phone: null, // phone is not handled by the function
         role: data.role,
         is_active: data.is_active
       };
 
-      // Add to available members (or update if it was an existing member)
-      if (data.action === 'created') {
-        setAvailableMembers(prev => [...prev, newMember]);
-      } else {
+      // Check if this member already exists in our list (update scenario)
+      const existingMemberIndex = availableMembers.findIndex(m => m.id === newMember.id);
+      
+      if (existingMemberIndex >= 0) {
+        // Update existing member
         setAvailableMembers(prev => 
           prev.map(member => member.id === newMember.id ? newMember : member)
         );
+      } else {
+        // Add new member
+        setAvailableMembers(prev => [...prev, newMember]);
       }
       
       // Auto-select the new/updated member
@@ -143,7 +147,7 @@ export default function TeamMemberPicker({ selectedMembers, onMembersChange }: T
       setNewMemberRole('');
       setIsCreatingNew(false);
       
-      const actionText = data.action === 'created' ? 'created' : 'updated';
+      const actionText = existingMemberIndex >= 0 ? 'updated' : 'created';
       Alert.alert('Success', `Team member ${actionText} and added to outreach`);
     } catch (error) {
       console.error('Error creating team member:', error);

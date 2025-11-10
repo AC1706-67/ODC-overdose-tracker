@@ -40,14 +40,10 @@ export default function LocationPicker({
   const [availableLocations, setAvailableLocations] = useState<Location[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreatingNew, setIsCreatingNew] = useState(false);
-  const [newLocationName, setNewLocationName] = useState('');
-  const [newLocationAddress, setNewLocationAddress] = useState('');
-  const [newLocationZipCode, setNewLocationZipCode] = useState('');
-  const [newLocationCity, setNewLocationCity] = useState('');
-  const [newLocationState, setNewLocationState] = useState('');
-  const [newLocationType, setNewLocationType] = useState<'intersection' | 'address' | 'area'>('intersection');
+  const [newLocationInput, setNewLocationInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [useManualEntry, setUseManualEntry] = useState(false);
+  const [createError, setCreateError] = useState('');
 
   useEffect(() => {
     if (isModalVisible) {
@@ -74,99 +70,61 @@ export default function LocationPicker({
     }
   };
 
-  const normalizeLocationName = (name: string): string => {
-    // Basic normalization: trim, standardize case, remove extra spaces
-    return name.trim().replace(/\s+/g, ' ');
-  };
-
-  const validateZipCode = (zip: string): boolean => {
-    return /^\d{5}(-\d{4})?$/.test(zip);
-  };
-
   const createNewLocation = async () => {
-    if (!newLocationName.trim()) {
-      Alert.alert('Error', 'Location name is required');
-      return;
-    }
-
-    if (newLocationZipCode && !validateZipCode(newLocationZipCode)) {
-      Alert.alert('Error', 'Please enter a valid ZIP code (12345 or 12345-6789)');
+    if (!newLocationInput.trim()) {
+      setCreateError('Location name is required');
       return;
     }
 
     setLoading(true);
+    setCreateError('');
+    
     try {
-      const normalizedName = normalizeLocationName(newLocationName);
-      
-      // Check for existing location with same name
-      const { data: existingLocation } = await supabase
-        .from('locations')
-        .select('*')
-        .ilike('name', normalizedName)
-        .eq('is_active', true)
-        .single();
+      const { data, error } = await supabase.rpc('create_location_simple_v2', {
+        p_name_or_intersection: newLocationInput.trim()
+      });
 
-      if (existingLocation) {
-        Alert.alert(
-          'Location Exists',
-          `A location named "${existingLocation.name}" already exists. Would you like to use it instead?`,
-          [
-            { text: 'Cancel', style: 'cancel' },
-            { 
-              text: 'Use Existing', 
-              onPress: () => {
-                onLocationChange(existingLocation);
-                resetForm();
-                setIsModalVisible(false);
-              }
-            }
-          ]
-        );
-        setLoading(false);
+      if (error) {
+        console.error('create_location_simple_v2 error:', error);
+        setCreateError(error.message || 'Failed to create location');
         return;
       }
 
-      const { data, error } = await supabase
-        .from('locations')
-        .insert([{
-          name: normalizedName,
-          address: newLocationAddress.trim() || null,
-          zip_code: newLocationZipCode.trim() || null,
-          city: newLocationCity.trim() || null,
-          state: newLocationState.trim() || null,
-          location_type: newLocationType,
-          is_active: true
-        }])
-        .select()
-        .single();
+      // Use the returned data to create location object
+      const newLocation: Location = {
+        id: data.id,
+        name: data.name,
+        address: data.address,
+        zip_code: data.zip_code,
+        city: data.city,
+        state: data.state,
+        location_type: data.location_type,
+        is_active: data.is_active
+      };
 
-      if (error) throw error;
-
-      const newLocation = data as Location;
+      // Add to available locations list
       setAvailableLocations(prev => [...prev, newLocation]);
+      
+      // Auto-select the new location
       onLocationChange(newLocation);
       
+      // Close modal and reset form
       resetForm();
       setIsModalVisible(false);
       
-      Alert.alert('Success', 'Location created and selected');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating location:', error);
-      Alert.alert('Error', 'Failed to create location');
+      setCreateError(error?.message || 'Failed to create location');
     } finally {
       setLoading(false);
     }
   };
 
   const resetForm = () => {
-    setNewLocationName('');
-    setNewLocationAddress('');
-    setNewLocationZipCode('');
-    setNewLocationCity('');
-    setNewLocationState('');
-    setNewLocationType('intersection');
+    setNewLocationInput('');
     setIsCreatingNew(false);
     setSearchQuery('');
+    setCreateError('');
   };
 
   const selectLocation = (location: Location) => {
@@ -317,64 +275,18 @@ export default function LocationPicker({
                 
                 <TextInput
                   style={styles.input}
-                  placeholder="Location Name * (e.g., Montana & Sioux)"
-                  value={newLocationName}
-                  onChangeText={setNewLocationName}
+                  placeholder="Enter location name or intersection"
+                  value={newLocationInput}
+                  onChangeText={(text) => {
+                    setNewLocationInput(text);
+                    setCreateError('');
+                  }}
+                  autoFocus
                 />
                 
-                <View style={styles.typeSelector}>
-                  <Text style={styles.typeSelectorLabel}>Location Type:</Text>
-                  <View style={styles.typeOptions}>
-                    {locationTypes.map((type) => (
-                      <TouchableOpacity
-                        key={type.value}
-                        style={[
-                          styles.typeOption,
-                          newLocationType === type.value && styles.typeOptionSelected
-                        ]}
-                        onPress={() => setNewLocationType(type.value)}
-                      >
-                        <Text style={[
-                          styles.typeOptionText,
-                          newLocationType === type.value && styles.typeOptionTextSelected
-                        ]}>
-                          {type.label}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                </View>
-
-                <TextInput
-                  style={styles.input}
-                  placeholder="Street Address (optional)"
-                  value={newLocationAddress}
-                  onChangeText={setNewLocationAddress}
-                />
-                
-                <View style={styles.addressRow}>
-                  <TextInput
-                    style={[styles.input, styles.cityInput]}
-                    placeholder="City"
-                    value={newLocationCity}
-                    onChangeText={setNewLocationCity}
-                  />
-                  <TextInput
-                    style={[styles.input, styles.stateInput]}
-                    placeholder="State"
-                    value={newLocationState}
-                    onChangeText={setNewLocationState}
-                    maxLength={2}
-                  />
-                </View>
-                
-                <TextInput
-                  style={styles.input}
-                  placeholder="ZIP Code (12345 or 12345-6789)"
-                  value={newLocationZipCode}
-                  onChangeText={setNewLocationZipCode}
-                  keyboardType="numeric"
-                />
+                {createError ? (
+                  <Text style={styles.errorText}>{createError}</Text>
+                ) : null}
                 
                 <View style={styles.createFormButtons}>
                   <TouchableOpacity
@@ -384,9 +296,9 @@ export default function LocationPicker({
                     <Text style={styles.cancelButtonText}>Cancel</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={[styles.createButton, !newLocationName.trim() && styles.createButtonDisabled]}
+                    style={[styles.createButton, !newLocationInput.trim() && styles.createButtonDisabled]}
                     onPress={createNewLocation}
-                    disabled={!newLocationName.trim() || loading}
+                    disabled={!newLocationInput.trim() || loading}
                   >
                     <Text style={styles.createButtonText}>
                       {loading ? 'Creating...' : 'Create Location'}
@@ -636,50 +548,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 12,
   },
-  typeSelector: {
-    marginBottom: 12,
-  },
-  typeSelectorLabel: {
+  errorText: {
+    color: '#dc2626',
     fontSize: 14,
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: 8,
-  },
-  typeOptions: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  typeOption: {
-    backgroundColor: '#ffffff',
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-    borderRadius: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  typeOptionSelected: {
-    backgroundColor: '#059669',
-    borderColor: '#059669',
-  },
-  typeOptionText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#374151',
-  },
-  typeOptionTextSelected: {
-    color: '#ffffff',
-  },
-  addressRow: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  cityInput: {
-    flex: 2,
     marginBottom: 12,
-  },
-  stateInput: {
-    flex: 1,
-    marginBottom: 12,
+    marginTop: -8,
   },
   createFormButtons: {
     flexDirection: 'row',

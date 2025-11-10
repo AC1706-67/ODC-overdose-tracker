@@ -1,4 +1,4 @@
-import { supabase } from '@/src/lib/supabase';
+import { supabase } from '@/lib/supabase';
 
 export async function fetchDashboardDirect(activeOrgId: string | null) {
   const since = new Date(Date.now() - 30*24*60*60*1000).toISOString();

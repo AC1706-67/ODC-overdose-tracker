@@ -14,6 +14,7 @@ import { supabase } from '@/lib/supabase';
 import { useOrg } from '@/src/context/OrgContext';
 import TeamMemberPicker from '@/components/TeamMemberPicker';
 import LocationPicker from '@/components/LocationPicker';
+import { RequireOutreach } from '@/components/RequireOutreach';
 
 const SUPPLY_TYPES = ['Narcan', 'Feminine Hygiene', 'Hygiene', 'Safe Sex', 'Wound Care'];
 const COMMON_ZIP_CODES = ['79901', '79902', '79903', '79904', '79905', '79906', '79907', '79908', '79915', '79924', '79925', '79930', '79932', '79934', '79935', '79936'];
@@ -202,8 +203,9 @@ export default function DistributionScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+    <RequireOutreach>
+      <View style={styles.container}>
+        <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <View style={styles.titleRow}>
             <Package size={24} color="#059669" />
@@ -422,6 +424,7 @@ export default function DistributionScreen() {
         </View>
       </ScrollView>
     </View>
+    </RequireOutreach>
   );
 }
 

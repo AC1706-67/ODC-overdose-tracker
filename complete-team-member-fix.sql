@@ -1,5 +1,16 @@
--- Create Team Member RPC Function
--- This function creates a new team member and handles organization slug lookup
+-- Complete fix for team member creation issue
+-- 1. Create organization
+-- 2. Update the create_team_member function to use correct column names
+
+-- First, create a test organization
+INSERT INTO organizations (name, slug, is_active, created_at, updated_at)
+VALUES ('Recovery Alliance', 'recovery-alliance', true, now(), now())
+ON CONFLICT (slug) DO UPDATE SET 
+  is_active = true,
+  updated_at = now();
+
+-- Drop and recreate the function with correct column names
+DROP FUNCTION IF EXISTS public.create_team_member(text, text, text, text);
 
 CREATE OR REPLACE FUNCTION public.create_team_member(
   p_full_name text,
@@ -137,6 +148,11 @@ $$;
 -- Grant execute permission to authenticated users
 GRANT EXECUTE ON FUNCTION public.create_team_member(text, text, text, text) TO authenticated;
 
--- Add helpful comment
-COMMENT ON FUNCTION public.create_team_member(text, text, text, text) IS 
-'Creates a new team member or updates existing one. Parameters: full_name, email, role, org_slug. Returns JSON with member data and action (created/updated).';
+-- Test the function
+SELECT 'Testing create_team_member function:' as info;
+SELECT create_team_member(
+  'Test User',
+  'test@example.com', 
+  'volunteer',
+  'recovery-alliance'
+) as result;

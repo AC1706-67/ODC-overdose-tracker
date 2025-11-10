@@ -1,4 +1,4 @@
-import { supabase } from '@/src/lib/supabase';
+import { supabase } from '@/lib/supabase';
 
 export async function submitOutreach(values: any, activeOrgId: string) {
   const { data: { user } } = await supabase.auth.getUser();
