@@ -105,7 +105,7 @@ export default function TeamMemberPicker({ selectedMembers, onMembersChange }: T
         name: data.name,
         organization_id: data.organization_id,
         email: data.email,
-        phone: null, // phone is not handled by the function
+        phone: undefined, // phone is not handled by the function
         role: data.role,
         is_active: data.is_active
       };
@@ -151,7 +151,8 @@ export default function TeamMemberPicker({ selectedMembers, onMembersChange }: T
       Alert.alert('Success', `Team member ${actionText} and added to outreach`);
     } catch (error) {
       console.error('Error creating team member:', error);
-      Alert.alert('Error', error.message || 'Failed to create team member');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create team member';
+      Alert.alert('Error', errorMessage);
     } finally {
       setLoading(false);
     }

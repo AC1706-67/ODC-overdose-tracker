@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { useOrg } from '@/src/context/OrgContext';
 
 export default function SelectOrg() {
-  const { setActiveOrgId } = useOrg();
+  const { setActiveOrgId } = useOrg() as { setActiveOrgId: (id: string | null) => Promise<void> };
   const [orgs, setOrgs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
