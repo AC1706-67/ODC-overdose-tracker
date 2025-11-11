@@ -2,7 +2,11 @@ const fs = require('fs');
 const path = require('path');
 
 const needles = [/ODC/i, /Overdose Tracker/i, /ODC Tracker/i, /\bOverdose\b/i];
-const skip = new Set(['node_modules', '.git', 'dist', 'build', '.expo', '.gradle', 'ios/Pods', 'android/build']);
+const skip = new Set([
+  'node_modules', '.git', 'dist', 'build', '.expo', '.gradle', 
+  'ios/Pods', 'android/build', 'android/.cxx', '.cxx',
+  '.env', '.env.local', '.env.example' // Skip env files - they're not in the app
+]);
 
 let errors = 0;
 
@@ -13,7 +17,9 @@ function walk(dir) {
       const st = fs.statSync(p);
       
       if (st.isDirectory()) { 
-        if (!skip.has(f)) walk(p); 
+        // Skip if folder name matches or if path contains skip patterns
+        const shouldSkip = skip.has(f) || Array.from(skip).some(pattern => p.includes(pattern));
+        if (!shouldSkip) walk(p); 
         continue; 
       }
       

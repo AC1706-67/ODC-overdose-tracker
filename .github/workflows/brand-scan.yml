@@ -1,14 +1,58 @@
 name: Brand Scan
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
 
 jobs:
   scan:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [18, 20]
+    
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: 
-          node-version: '20'
-      - run: npm ci || npm i
-      - run: npm run scan:brand
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Use Node ${{ matrix.node }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: 'npm'
+      
+      - name: Print env + repo state
+        run: |
+          echo "Node:" $(node -v)
+          echo "NPM:"  $(npm -v)
+          echo "PWD:"  $PWD
+          ls -la
+          test -f package.json && jq '.scripts' package.json || true
+          test -f package-lock.json && echo "lockfile present ✅" || echo "⚠️ NO package-lock.json"
+      
+      - name: Install deps (verbose)
+        run: |
+          # Ensure devDependencies are included
+          unset NODE_ENV
+          npm ci --loglevel verbose || npm i --loglevel verbose
+      
+      - name: Verify scan script exists
+        run: |
+          node -e "const p=require('./package.json'); if(!p.scripts||!p.scripts['scan:brand']) { console.error('Missing \"scan:brand\" script'); process.exit(2) }"
+      
+      - name: Run brand scan
+        id: runscan
+        continue-on-error: true  # Set to false for strict mode
+        run: |
+          set -e
+          npm run -s scan:brand | tee scan-output.txt
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
+      
+      - name: Upload scan output (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: brand-scan-node-${{ matrix.node }}
+          path: scan-output.txt
