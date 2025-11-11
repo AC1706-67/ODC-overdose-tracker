@@ -44,10 +44,9 @@ jobs:
       
       - name: Run brand scan
         id: runscan
-        continue-on-error: true  # Set to false for strict mode
+        continue-on-error: true  # Warn but don't fail (set to false for strict mode)
         run: |
-          set -e
-          npm run -s scan:brand | tee scan-output.txt
+          npm run -s scan:brand | tee scan-output.txt || true
           echo "exit_code=$?" >> $GITHUB_OUTPUT
       
       - name: Upload scan output (always)

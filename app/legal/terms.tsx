@@ -7,7 +7,7 @@ export default function Terms() {
       <Text style={styles.date}>Last updated: November 2025</Text>
 
       <Text style={styles.paragraph}>
-        By using Compassionate LOG ("the App"), you agree to the following terms and conditions.
+        By using Compassionate Log ("the App"), you agree to the following terms and conditions.
         The App is operated under the umbrella of Anonymous Haven and provided for informational,
         non-clinical purposes only.
       </Text>
@@ -23,7 +23,7 @@ export default function Terms() {
       <Text style={styles.paragraph}>
         Certain features such as the Outreach Log are made available only to authorized
         organizations and may be limited, inactive, or subject to testing during development. The
-        primary live feature is the Compassionate LOG.
+        primary live feature is the Compassionate Log.
       </Text>
 
       <Text style={styles.sectionTitle}>3. User Responsibility</Text>

@@ -1,4 +1,4 @@
-# Compassionate LOG
+# Compassionate Log
 
 A React Native mobile application that helps communities record acts of care and compassion that save lives, designed for healthcare professionals, peer support specialists, and community responders.
 
@@ -165,7 +165,7 @@ Compassionate-LOG/
 adb install -r path/to/your.apk
 
 # Launch app
-adb shell am start -n org.Compassionate LOG.log/.MainActivity
+adb shell am start -n org.Compassionate Log.log/.MainActivity
 ```
 
 ## Version History
@@ -190,9 +190,9 @@ This project is developed for public health purposes. Please ensure compliance w
 
 For technical issues or feature requests, please create an issue in this repository.
 
-## About Compassionate LOG
+## About Compassionate Log
 
-Compassionate LOG supports community health initiatives by providing healthcare professionals, peer support specialists, and first responders with tools to record acts of care and compassion that save lives.
+Compassionate Log supports community health initiatives by providing healthcare professionals, peer support specialists, and first responders with tools to record acts of care and compassion that save lives.
 
 ---
 

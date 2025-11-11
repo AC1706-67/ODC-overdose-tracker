@@ -1,4 +1,4 @@
-# 🍎 Compassionate LOG - Apple TestFlight Setup Guide
+# 🍎 Compassionate Log - Apple TestFlight Setup Guide
 
 ## Prerequisites
 
@@ -9,7 +9,7 @@
 
 ### 2. App Store Connect Setup
 - **Access**: https://appstoreconnect.apple.com/
-- **Create App**: New app with bundle ID `org.Compassionate LOG.overdose`
+- **Create App**: New app with bundle ID `org.Compassionate Log.overdose`
 
 ## Step-by-Step TestFlight Implementation
 
@@ -19,8 +19,8 @@
    ```
    - Login to Apple Developer Portal
    - Certificates, Identifiers & Profiles → Identifiers
-   - Register new App ID: org.Compassionate LOG.log
-   - Description: Compassionate LOG - Recording acts of care and compassion
+   - Register new App ID: org.Compassionate Log.log
+   - Description: Compassionate Log - Recording acts of care and compassion
    - Capabilities: None required for basic functionality
    ```
 
@@ -29,9 +29,9 @@
    - Login to App Store Connect
    - My Apps → + (New App)
    - Platform: iOS
-   - Name: Compassionate LOG
-   - Bundle ID: org.Compassionate LOG.log
-   - SKU: Compassionate LOG-log-2024
+   - Name: Compassionate Log
+   - Bundle ID: org.Compassionate Log.log
+   - SKU: Compassionate Log-log-2024
    - User Access: Full Access
    ```
 
@@ -117,7 +117,7 @@ npx eas submit --platform ios --profile store
 ### Required Information
 ```
 App Information:
-- Name: Compassionate LOG
+- Name: Compassionate Log
 - Subtitle: Recording acts of care and compassion that save lives
 - Category: Medical
 - Content Rights: Your organization owns rights
@@ -125,7 +125,7 @@ App Information:
 App Review Information:
 - Contact Information: Your details
 - Demo Account: Test credentials for reviewers
-- Notes: "Compassionate LOG helps communities record acts of care and compassion that save lives"
+- Notes: "Compassionate Log helps communities record acts of care and compassion that save lives"
 
 App Privacy:
 - Data Collection: Health data, location (if used)
@@ -181,4 +181,4 @@ App Privacy:
 5. 🔄 Submit to TestFlight
 6. 🔄 Add testers and distribute
 
-Compassionate LOG is now ready for iOS TestFlight distribution! 🚀
+Compassionate Log is now ready for iOS TestFlight distribution! 🚀

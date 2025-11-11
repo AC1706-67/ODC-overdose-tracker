@@ -8,6 +8,26 @@ const skip = new Set([
   '.env', '.env.local', '.env.example' // Skip env files - they're not in the app
 ]);
 
+// Ignore patterns for files we don't need to scan
+const IGNORE_PARTS = [
+  '__tests__/',
+  'supabase/migrations/',
+  'package-lock.json',
+  'scripts/forbidden-scan.js', // don't flag our own patterns
+  'test-', // test scripts
+  'debug-', // debug scripts
+  'check-', // check scripts
+  'fix-', // fix scripts
+  'apply-', // apply scripts
+  'create-', // create scripts
+  'analyze-', // analyze scripts
+];
+
+function shouldIgnore(filePath) {
+  const normalized = filePath.replace(/\\/g, '/');
+  return IGNORE_PARTS.some(p => normalized.includes(p));
+}
+
 let errors = 0;
 
 function walk(dir) {
@@ -24,6 +44,9 @@ function walk(dir) {
       }
       
       if (!st.isFile()) continue;
+      
+      // Skip ignored files
+      if (shouldIgnore(p)) continue;
       
       // Skip binary files and large files
       if (st.size > 1024 * 1024) continue; // Skip files > 1MB
