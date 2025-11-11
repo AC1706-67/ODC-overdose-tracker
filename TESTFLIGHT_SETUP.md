@@ -9,7 +9,7 @@
 
 ### 2. App Store Connect Setup
 - **Access**: https://appstoreconnect.apple.com/
-- **Create App**: New app with bundle ID `org.odc.overdose`
+- **Create App**: New app with bundle ID `org.Compassionate LOG.overdose`
 
 ## Step-by-Step TestFlight Implementation
 
@@ -19,7 +19,7 @@
    ```
    - Login to Apple Developer Portal
    - Certificates, Identifiers & Profiles → Identifiers
-   - Register new App ID: org.odc.log
+   - Register new App ID: org.Compassionate LOG.log
    - Description: Compassionate LOG - Recording acts of care and compassion
    - Capabilities: None required for basic functionality
    ```
@@ -30,8 +30,8 @@
    - My Apps → + (New App)
    - Platform: iOS
    - Name: Compassionate LOG
-   - Bundle ID: org.odc.log
-   - SKU: odc-log-2024
+   - Bundle ID: org.Compassionate LOG.log
+   - SKU: Compassionate LOG-log-2024
    - User Access: Full Access
    ```
 

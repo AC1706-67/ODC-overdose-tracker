@@ -165,7 +165,7 @@ Compassionate-LOG/
 adb install -r path/to/your.apk
 
 # Launch app
-adb shell am start -n org.odc.log/.MainActivity
+adb shell am start -n org.Compassionate LOG.log/.MainActivity
 ```
 
 ## Version History
