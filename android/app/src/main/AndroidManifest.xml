@@ -26,8 +26,9 @@
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="compassionatelog"/>
-        <data android:scheme="exp+odc-overdose-tracker"/>
+        <data android:scheme="exp+compassionate-log"/>
       </intent-filter>
     </activity>
   </application>
 </manifest>
+

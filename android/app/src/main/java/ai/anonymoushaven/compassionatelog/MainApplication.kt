@@ -1,4 +1,4 @@
-package org.odc.log
+package ai.anonymoushaven.compassionatelog
 
 import android.app.Application
 import android.content.res.Configuration
@@ -54,3 +54,5 @@ class MainApplication : Application(), ReactApplication {
     ApplicationLifecycleDispatcher.onConfigurationChanged(this, newConfig)
   }
 }
+
+

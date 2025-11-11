@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Compassionate Log",
-    "slug": "Compassionate Log-overdose-tracker",
+    "slug": "compassionate-log",
     "owner": "dr.ecovery",
     "scheme": "compassionatelog",
     "version": "1.5.2",
@@ -13,7 +13,7 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "org.Compassionate Log.log",
+      "bundleIdentifier": "ai.anonymoushaven.compassionatelog",
       "buildNumber": "9",
       "infoPlist": {
         "NSHealthShareUsageDescription": "Compassionate Log helps communities record acts of care and compassion that save lives.",
@@ -25,7 +25,7 @@
       }
     },
     "android": {
-      "package": "org.Compassionate Log.log",
+      "package": "ai.anonymoushaven.compassionatelog",
       "versionCode": 9
     },
     "web": {

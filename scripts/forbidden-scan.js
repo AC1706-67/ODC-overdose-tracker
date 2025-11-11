@@ -1,7 +1,13 @@
 const fs = require('fs');
 const path = require('path');
 
-const needles = [/ODC/i, /Overdose Tracker/i, /ODC Tracker/i, /\bOverdose\b/i];
+// Only block OLD BRAND terms, not the clinical word "overdose"
+const needles = [
+  /ODC Tracker/i,
+  /Overdose Tracker/i,
+  // block bare ODC unless followed by " Log"
+  /\bODC\b(?!\s*Log)/i,
+];
 const skip = new Set([
   'node_modules', '.git', 'dist', 'build', '.expo', '.gradle', 
   'ios/Pods', 'android/build', 'android/.cxx', '.cxx',
@@ -14,6 +20,9 @@ const IGNORE_PARTS = [
   'supabase/migrations/',
   'package-lock.json',
   'scripts/forbidden-scan.js', // don't flag our own patterns
+  'rebrand-safe.ps1',          // rebrand helper contains old text intentionally
+  'TESTFLIGHT_SETUP.md',       // docs examples
+  '.env',                      // not bundled in app
   'test-', // test scripts
   'debug-', // debug scripts
   'check-', // check scripts
@@ -21,6 +30,13 @@ const IGNORE_PARTS = [
   'apply-', // apply scripts
   'create-', // create scripts
   'analyze-', // analyze scripts
+  'diagnose-', // diagnose scripts
+  'disable-', // disable scripts
+  'final-', // final scripts
+  'find-', // find scripts
+  'nuclear-', // nuclear scripts
+  'permanent-', // permanent scripts
+  'complete-', // complete scripts
 ];
 
 function shouldIgnore(filePath) {

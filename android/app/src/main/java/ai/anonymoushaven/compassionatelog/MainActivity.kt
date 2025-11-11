@@ -1,4 +1,4 @@
-package org.odc.log
+package ai.anonymoushaven.compassionatelog
 
 import android.os.Build
 import android.os.Bundle
@@ -59,3 +59,5 @@ class MainActivity : ReactActivity() {
       super.invokeDefaultOnBackPressed()
   }
 }
+
+
