@@ -3,34 +3,59 @@ import { View, TextInput, Button, Alert, Text, StyleSheet, TouchableOpacity } fr
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'expo-router';
 
-export default function Login() {
+export default function SignUp() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  async function signIn() {
-    if (!email || !password) {
-      Alert.alert('Error', 'Please enter both email and password');
+  async function signUp() {
+    // Validation
+    if (!email || !password || !confirmPassword) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match');
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert('Error', 'Password must be at least 6 characters');
       return;
     }
 
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signUp({ 
+      email, 
+      password,
+    });
     setLoading(false);
     
     if (error) {
-      Alert.alert('Sign in failed', error.message);
+      Alert.alert('Sign up failed', error.message);
       return;
     }
     
-    router.replace('/');
+    // Success
+    Alert.alert(
+      'Success',
+      'Account created! You can now sign in.',
+      [
+        {
+          text: 'OK',
+          onPress: () => router.back(),
+        },
+      ]
+    );
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Compassionate LOG</Text>
-      <Text style={styles.subtitle}>Recording acts of care and compassion - Sign in to continue</Text>
+      <Text style={styles.title}>Create Account</Text>
+      <Text style={styles.subtitle}>Join Compassionate LOG to start recording acts of care</Text>
       
       <TextInput
         placeholder="Email"
@@ -43,7 +68,7 @@ export default function Login() {
       />
       
       <TextInput
-        placeholder="Password"
+        placeholder="Password (min 6 characters)"
         secureTextEntry
         value={password}
         onChangeText={setPassword}
@@ -51,19 +76,28 @@ export default function Login() {
         editable={!loading}
       />
       
+      <TextInput
+        placeholder="Confirm Password"
+        secureTextEntry
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
+        style={styles.input}
+        editable={!loading}
+      />
+      
       <Button 
-        title={loading ? "Signing in..." : "Sign in"} 
-        onPress={signIn}
+        title={loading ? "Creating account..." : "Sign Up"} 
+        onPress={signUp}
         disabled={loading}
       />
 
       <TouchableOpacity 
-        onPress={() => router.push('/signup')}
+        onPress={() => router.back()}
         style={styles.linkContainer}
         disabled={loading}
       >
         <Text style={styles.linkText}>
-          Don't have an account? <Text style={styles.linkBold}>Sign up</Text>
+          Already have an account? <Text style={styles.linkBold}>Sign in</Text>
         </Text>
       </TouchableOpacity>
     </View>
