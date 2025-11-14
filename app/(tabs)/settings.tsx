@@ -49,31 +49,26 @@ export default function SettingsScreen() {
         `)
         .eq('user_id', user.id)
         .eq('is_active', true)
-        .single();
+        .maybeSingle();
 
-      if (error) {
-        console.error('Error loading user profile:', error);
+      // If no membership found (new user), use defaults silently
+      if (error || !membership) {
         setUserRole('Peer');
         setOrgName('Recovery Alliance of El Paso');
         return;
       }
 
-      if (membership) {
-        // Format role: capitalize first letter
-        const formattedRole = membership.role 
-          ? membership.role.charAt(0).toUpperCase() + membership.role.slice(1)
-          : 'Peer';
-        setUserRole(formattedRole);
-        
-        // Get organization name from nested select
-        const orgData = membership.organizations as any;
-        setOrgName(orgData?.name || 'Recovery Alliance of El Paso');
-      } else {
-        setUserRole('Peer');
-        setOrgName('Recovery Alliance of El Paso');
-      }
+      // Format role: capitalize first letter
+      const formattedRole = membership.role 
+        ? membership.role.charAt(0).toUpperCase() + membership.role.slice(1)
+        : 'Peer';
+      setUserRole(formattedRole);
+      
+      // Get organization name from nested select
+      const orgData = membership.organizations as any;
+      setOrgName(orgData?.name || 'Recovery Alliance of El Paso');
     } catch (error) {
-      console.error('Error in loadUserProfile:', error);
+      // Silently handle errors for new users
       setUserRole('Peer');
       setOrgName('Recovery Alliance of El Paso');
     }

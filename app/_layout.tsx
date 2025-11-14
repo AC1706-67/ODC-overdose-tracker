@@ -43,13 +43,13 @@ export default function RootLayout() {
     // Wait for navigation to be ready and session to be determined
     if (!isNavigationReady || session === undefined) return;
     
-    const inAuth = segments[0] === 'login';
+    const inAuth = segments[0] === 'login' || segments[0] === 'signup';
     
     if (!session && !inAuth) {
-      // User is not signed in and not on login page, redirect to login
+      // User is not signed in and not on login/signup page, redirect to login
       router.replace('/login');
     } else if (session && inAuth) {
-      // User is signed in but on login page, redirect to home
+      // User is signed in but on login/signup page, redirect to home
       router.replace('/');
     }
   }, [session, segments, isNavigationReady]);
@@ -71,6 +71,7 @@ export default function RootLayout() {
             }}
           >
             <Stack.Screen name="login" options={{ headerShown: false }} />
+            <Stack.Screen name="signup" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" />
           </Stack>
         </WithInsetsContainer>
