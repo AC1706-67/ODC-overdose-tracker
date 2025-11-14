@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Compassionate Log",
-    "slug": "compassionate-log",
+    "slug": "odc-overdose-tracker",
     "owner": "dr.ecovery",
     "scheme": "compassionatelog",
     "version": "1.5.2",
