@@ -1,34 +1,45 @@
 -- Add audit/tracking columns to all main tables
 -- This ensures every record knows WHO created it and WHEN
+-- NOTE: created_by and created_at already exist, this adds updated_at
 
--- 1. Incidents table
-ALTER TABLE incidents 
-  ADD COLUMN IF NOT EXISTS created_by UUID REFERENCES auth.users(id),
-  ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+-- 1. Incidents table - add updated_at if missing
+DO $$ 
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+      AND table_name = 'incidents' 
+      AND column_name = 'updated_at'
+  ) THEN
+    ALTER TABLE incidents ADD COLUMN updated_at TIMESTAMPTZ DEFAULT NOW();
+  END IF;
+END $$;
 
--- Set created_by for existing records (if any don't have it)
--- This is safe - it won't overwrite existing values
-UPDATE incidents 
-SET created_by = auth.uid() 
-WHERE created_by IS NULL;
+-- 2. Outreach logs table - add updated_at if missing
+DO $$ 
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+      AND table_name = 'outreach_logs' 
+      AND column_name = 'updated_at'
+  ) THEN
+    ALTER TABLE outreach_logs ADD COLUMN updated_at TIMESTAMPTZ DEFAULT NOW();
+  END IF;
+END $$;
 
--- 2. Outreach logs table
-ALTER TABLE outreach_logs 
-  ADD COLUMN IF NOT EXISTS created_by UUID REFERENCES auth.users(id),
-  ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
-
-UPDATE outreach_logs 
-SET created_by = auth.uid() 
-WHERE created_by IS NULL;
-
--- 3. Distributions table (if you have one)
-ALTER TABLE distributions 
-  ADD COLUMN IF NOT EXISTS created_by UUID REFERENCES auth.users(id),
-  ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
-
-UPDATE distributions 
-SET created_by = auth.uid() 
-WHERE created_by IS NULL;
+-- 3. Distributions table - add updated_at if missing
+DO $$ 
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+      AND table_name = 'distributions' 
+      AND column_name = 'updated_at'
+  ) THEN
+    ALTER TABLE distributions ADD COLUMN updated_at TIMESTAMPTZ DEFAULT NOW();
+  END IF;
+END $$;
 
 -- 4. Create trigger to auto-update updated_at
 CREATE OR REPLACE FUNCTION update_updated_at_column()
