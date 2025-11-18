@@ -80,12 +80,12 @@ export default function LocationPicker({
     setCreateError('');
     
     try {
-      const { data, error } = await supabase.rpc('create_location_simple_v2', {
+      const { data, error } = await supabase.rpc('create_location_simple', {
         p_name_or_intersection: newLocationInput.trim()
       });
 
       if (error) {
-        console.error('create_location_simple_v2 error:', error);
+        console.error('create_location_simple error:', error);
         setCreateError(error.message || 'Failed to create location');
         return;
       }
