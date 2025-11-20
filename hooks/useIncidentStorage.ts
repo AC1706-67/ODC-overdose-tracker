@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '@/lib/supabase';
+import { useOrg } from '@/src/context/OrgContext';
 
 export interface Incident {
   incident_id: string;
@@ -25,6 +26,7 @@ export interface IncidentSubmit {
 const INCIDENTS_KEY = 'incidents';
 
 export function useIncidentStorage() {
+  const { activeOrgId } = useOrg();
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [pendingCount, setPendingCount] = useState(0);
 
@@ -75,6 +77,18 @@ export function useIncidentStorage() {
 
   const syncIncident = async (incident: Incident) => {
     try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      // Don't sync if no org or user
+      if (!activeOrgId || !user) {
+        console.warn('[useIncidentStorage] Cannot sync: missing org or user', { 
+          hasOrg: !!activeOrgId, 
+          hasUser: !!user 
+        });
+        return;
+      }
+      
       // Submit to Supabase
       // Ensure client_id is a proper UUID
       const clientId = incident.client_id && incident.client_id.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i) 
@@ -89,8 +103,9 @@ export function useIncidentStorage() {
           approx_age: incident.approx_age,
           narcan_used: incident.narcan_used,
           survival: incident.survival,
-          organization_id: null, // Force null to avoid RLS issues
-          client_id: clientId, // Guaranteed proper UUID
+          organization_id: activeOrgId, // ✅ Use current organization
+          created_by: user.id,           // ✅ Track who created it
+          client_id: clientId,
         })
         .select('incident_id')
         .single();
