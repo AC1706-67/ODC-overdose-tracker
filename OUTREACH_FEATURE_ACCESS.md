@@ -1,113 +1,169 @@
 # Outreach Feature Access Control
 
-This document explains how the Outreach feature is restricted to specific organizations.
+This document explains how the Outreach feature access is controlled.
 
 ## Overview
 
-The Outreach Log feature is only available to **Recovery Alliance of El Paso** (RAEP). This is enforced at both the frontend (UI) and backend (database) levels.
+The Outreach Log feature is available to **all active organization members**. Access control is enforced at the database level using Row Level Security (RLS), which automatically isolates data by organization membership.
 
 ## Frontend Implementation
 
-### 1. Feature Flag Helper (`src/lib/featureAccess.ts`)
+### 1. Feature Visibility (`src/lib/featureAccess.ts`)
 
-Determines which organizations can access the Outreach feature:
+Simple check - show Outreach tab if user has an active organization:
 
 ```typescript
 import { canUseOutreach } from '@/src/lib/featureAccess';
 
-if (canUseOutreach(activeOrg)) {
-  // Show outreach features
-}
+const { activeOrg } = useOrg();
+const showOutreach = canUseOutreach(activeOrg);
+
+// Returns true if user belongs to any organization
+// RLS handles data isolation automatically
 ```
 
-### 2. Enhanced Org Context (`src/context/OrgContext.tsx`)
+### 2. Organization Context (`src/context/OrgContext.tsx`)
 
-Now includes full organization data (id, slug, name) instead of just the ID.
+Provides current organization data:
 
 ```typescript
 const { activeOrg, loading } = useOrg();
 // activeOrg contains: { id, slug, name, is_active }
 ```
 
-### 3. Route Guard (`components/RequireOutreach.tsx`)
+### 3. Tab Visibility (`app/(tabs)/_layout.tsx` and `app/(tabs)/dashboard.tsx`)
 
-Wrap any outreach screen/component to restrict access:
+Outreach tab is shown/hidden based on organization membership:
 
 ```typescript
-import { RequireOutreach } from '@/components/RequireOutreach';
+const outreachEnabled = !loading && canUseOutreach(activeOrg);
 
-export default function OutreachScreen() {
-  return (
-    <RequireOutreach>
-      {/* Your outreach UI here */}
-    </RequireOutreach>
-  );
-}
+// Tab only appears if user has an active organization
 ```
-
-Non-RAEP users will see a message and be redirected to the dashboard.
 
 ## Backend Implementation
 
-### RLS Policies (`supabase/migrations/20251108_outreach_feature_access.sql`)
+### RLS Policies (Supabase)
 
-Database-level security ensures only RAEP users can:
-- Read outreach_logs
-- Write to outreach_logs
-- Access related locations and team_members
+Database-level Row Level Security ensures proper data isolation:
 
-Even if someone reverse-engineers the API, they cannot access outreach data unless they're in RAEP.
-
-## Setup Instructions
-
-### 1. Run the SQL Migration
-
-In your Supabase SQL Editor, run:
+**SELECT Policy**: Users can only see outreach logs from their own organization
 ```sql
--- Contents of supabase/migrations/20251108_outreach_feature_access.sql
+-- Users can read logs from their organization
+CREATE POLICY "Users can view org outreach logs"
+  ON outreach_logs FOR SELECT
+  USING (
+    organization_id IN (
+      SELECT organization_id 
+      FROM user_organizations 
+      WHERE user_id = auth.uid() AND is_active = true
+    )
+  );
 ```
 
-This will:
-- Create/update the RAEP organization
-- Enable RLS on outreach tables
-- Create policies that restrict access to RAEP users only
-
-### 2. Ensure User-Organization Mapping
-
-Make sure users are properly linked to organizations in the `user_organizations` table:
-
+**INSERT Policy**: Users can create logs for their organization
 ```sql
-INSERT INTO user_organizations (user_id, organization_id, is_active)
-VALUES (
-  'user-uuid-here',
-  (SELECT id FROM organizations WHERE slug = 'recovery-alliance-el-paso'),
-  true
-);
+-- Users can create logs for their organization
+CREATE POLICY "Users can create org outreach logs"
+  ON outreach_logs FOR INSERT
+  WITH CHECK (
+    organization_id IN (
+      SELECT organization_id 
+      FROM user_organizations 
+      WHERE user_id = auth.uid() AND is_active = true
+    )
+  );
 ```
 
-### 3. Test Access Control
+**UPDATE/DELETE Policies**: Only creators or admin-level roles can modify logs
 
-1. **As RAEP user**: Should see and access outreach features
-2. **As non-RAEP user**: Should NOT see outreach tab/features
-3. **Direct API access**: Non-RAEP users get zero rows from outreach queries
+### Security Benefits
 
-## Adding More Organizations
+- **Automatic isolation**: Users only see data from their organization
+- **No frontend filtering needed**: Database enforces access control
+- **API-safe**: Even with direct API access, users cannot access other orgs' data
+- **Multi-tenant ready**: Each organization's data is completely isolated
 
-To enable outreach for another organization:
+## How It Works
 
-1. **Update `src/lib/featureAccess.ts`**:
+### User Flow
+
+1. **User signs up** → Joins an organization (via onboarding)
+2. **User logs in** → OrgContext loads their organization membership
+3. **Outreach tab appears** → If user has active organization
+4. **User creates outreach log** → Automatically tagged with their organization_id
+5. **User views logs** → Only sees logs from their organization
+
+### Data Isolation Example
+
 ```typescript
-const OUTREACH_ENABLED_ORGS = new Set([
-  'recovery-alliance-el-paso',
-  'new-org-slug-here', // Add new org
-]);
+// User A (Recovery Alliance) creates a log
+await supabase.from('outreach_logs').insert({
+  organization_id: activeOrgId, // Recovery Alliance ID
+  location: 'Downtown',
+  // ... other fields
+});
+
+// User A queries logs
+const { data } = await supabase.from('outreach_logs').select('*');
+// Returns only Recovery Alliance logs (RLS filters automatically)
+
+// User B (Anonymous Haven) queries logs
+const { data } = await supabase.from('outreach_logs').select('*');
+// Returns only Anonymous Haven logs (different organization)
 ```
 
-2. **Update RLS policies** in the SQL migration to include the new org slug
+### No Cross-Organization Access
 
-## Security Notes
+Even if User A tries to query User B's organization:
+```typescript
+const { data } = await supabase
+  .from('outreach_logs')
+  .select('*')
+  .eq('organization_id', 'other-org-id'); // Trying to access another org
 
-- Frontend checks provide UX (hide features)
-- Backend RLS provides security (enforce access)
-- Both layers work together for defense in depth
-- Even with API keys, non-RAEP users cannot access outreach data
+// Result: Empty array (RLS blocks access)
+```
+
+## Testing Access Control
+
+### Test 1: Verify Tab Visibility
+```typescript
+// User with organization → Should see Outreach tab
+// User without organization → Should NOT see Outreach tab
+```
+
+### Test 2: Verify Data Isolation
+```sql
+-- As User A (Org 1)
+SELECT COUNT(*) FROM outreach_logs; -- Returns Org 1 count
+
+-- As User B (Org 2)  
+SELECT COUNT(*) FROM outreach_logs; -- Returns Org 2 count (different)
+```
+
+### Test 3: Verify Write Protection
+```typescript
+// Try to create log for different organization
+await supabase.from('outreach_logs').insert({
+  organization_id: 'other-org-id', // Not user's org
+  location: 'Test'
+});
+// Result: Error - RLS policy violation
+```
+
+## Migration Notes
+
+The RLS policies have been cleaned up to:
+- Remove legacy organization-specific checks
+- Use pure organization membership for access control
+- Support any number of organizations automatically
+- Provide consistent access patterns across all tables
+
+## Security Summary
+
+✅ **Frontend**: Shows/hides Outreach tab based on organization membership
+✅ **Backend**: RLS enforces data isolation at database level  
+✅ **Multi-tenant**: Each organization's data is completely isolated
+✅ **Scalable**: Works for any number of organizations without code changes
+✅ **Secure**: No way to access other organizations' data, even via API

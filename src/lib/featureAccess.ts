@@ -6,35 +6,20 @@ export type Org = {
   features?: Record<string, any>;
 };
 
-// Normalize strings: trim and lowercase
-function norm(s?: string) {
-  return (s ?? '').trim().toLowerCase();
-}
-
-// Canonical Recovery Alliance of El Paso org ID
-const CANON_RAEP_ID = '6e892800-0429-442f-bff8-417b4d4ec793';
-
+/**
+ * Determines if a user can access the Outreach feature.
+ * 
+ * With RLS enabled on outreach_logs, access control is handled at the database level.
+ * Users can only see/create outreach logs for their own organization.
+ * 
+ * Frontend logic: Show Outreach tab if user belongs to any active organization.
+ * Backend RLS: Automatically filters data by organization membership.
+ * 
+ * @param org - The user's active organization
+ * @returns true if user has an active organization membership
+ */
 export function canUseOutreach(org?: Org | null) {
-  if (!org) return false;
-
-  // 1) Explicit DB flags win
-  if (org.outreach_enabled === true) return true;
-  if (org.features?.outreach === true) return true;
-
-  // 2) Canonical RAEP org id
-  if (org.id === CANON_RAEP_ID) return true;
-
-  // 3) Fallback: known slugs/names (normalized)
-  const allowedSlugs = new Set([
-    'recovery-alliance-el-paso',
-    'recovery-alliance-of-el-paso',
-    'recovery-alliance', // keep if you still use it
-  ]);
-  
-  const allowedNames = new Set([
-    'recovery alliance of el paso',
-    'recovery alliance',
-  ]);
-
-  return allowedSlugs.has(norm(org.slug)) || allowedNames.has(norm(org.name));
+  // Simple check: if user has an active organization, they can see Outreach
+  // RLS policies handle all data isolation automatically
+  return !!org && !!org.id;
 }
