@@ -16,9 +16,19 @@ export interface Organization {
   logo_url?: string;
   settings: Record<string, any>;
   is_active: boolean;
+  is_certified: boolean;
+  status: OrganizationStatus;
+  created_by?: string;
+  approved_by?: string;
+  approved_at?: string;
+  contact_email?: string;
+  contact_name?: string;
+  certification_notes?: string;
   created_at: string;
   updated_at: string;
 }
+
+export type OrganizationStatus = 'pending' | 'approved' | 'rejected' | 'suspended';
 
 export type OrganizationType = 
   | 'Health Center'
@@ -76,6 +86,32 @@ export interface OrganizationInvite {
   expires_at: string;
   accepted_at?: string;
   created_at: string;
+}
+
+export interface OrganizationInviteCode {
+  id: string;
+  organization_id: string;
+  code: string;
+  description?: string;
+  role: UserRole;
+  is_active: boolean;
+  max_uses?: number;
+  current_uses: number;
+  expires_at?: string;
+  created_by?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OrganizationRequest {
+  name: string;
+  type: OrganizationType;
+  city?: string;
+  state?: string;
+  website?: string;
+  contact_email: string;
+  contact_name: string;
+  description?: string;
 }
 
 export interface UserOrganizationInfo {

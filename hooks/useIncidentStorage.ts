@@ -78,13 +78,13 @@ export function useIncidentStorage() {
   const syncIncident = async (incident: Incident) => {
     try {
       // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
       
       // Don't sync if no org or user
-      if (!activeOrgId || !user) {
+      if (!activeOrgId || !currentUser) {
         console.warn('[useIncidentStorage] Cannot sync: missing org or user', { 
           hasOrg: !!activeOrgId, 
-          hasUser: !!user 
+          hasUser: !!currentUser 
         });
         return;
       }
@@ -104,7 +104,7 @@ export function useIncidentStorage() {
           narcan_used: incident.narcan_used,
           survival: incident.survival,
           organization_id: activeOrgId, // ✅ Use current organization
-          created_by: user.id,           // ✅ Track who created it
+          created_by: currentUser.id,   // ✅ Track who created it
           client_id: clientId,
         })
         .select('incident_id')
