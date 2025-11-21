@@ -36,15 +36,17 @@ export function OrgProvider({ children }: { children: ReactNode }) {
         if (user) {
           console.log('[OrgContext] Loading org for user:', user.id);
           
-          // Get user's organization membership
-          const { data: membership, error: membershipError } = await supabase
+          // Get user's organization memberships (may be multiple)
+          const { data: memberships, error: membershipError } = await supabase
             .from('user_organizations')
             .select('organization_id')
             .eq('user_id', user.id)
-            .eq('is_active', true)
-            .single();
+            .eq('is_active', true);
 
-          console.log('[OrgContext] Membership result:', JSON.stringify({ membership, error: membershipError }));
+          console.log('[OrgContext] Membership result:', JSON.stringify({ memberships, error: membershipError }));
+
+          // Use first membership if available
+          const membership = memberships && memberships.length > 0 ? memberships[0] : null;
 
           if (membership?.organization_id) {
             console.log('[OrgContext] Found organization_id:', membership.organization_id);

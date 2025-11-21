@@ -9,6 +9,11 @@ export default function TabLayout() {
   const { activeOrg, loading } = useOrg();
   const outreachEnabled = !loading && canUseOutreach(activeOrg);
 
+  // Debug logging
+  console.log('[TabLayout] activeOrg:', JSON.stringify(activeOrg));
+  console.log('[TabLayout] loading:', loading);
+  console.log('[TabLayout] outreachEnabled:', outreachEnabled);
+
   if (loading) {
     return null; // Or a loading spinner
   }
