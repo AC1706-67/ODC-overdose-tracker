@@ -41,7 +41,7 @@ interface ActivityTimeline {
 }
 
 export default function OutreachDashboardScreen() {
-  const { activeOrgId } = useOrg();
+  const { activeOrgId, activeOrg } = useOrg();
   const [cards, setCards] = useState({ 
     outreach_activities: 0, 
     kits_distributed: 0, 
@@ -256,6 +256,12 @@ export default function OutreachDashboardScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
+        {/* Organization Context Banner */}
+        <View style={styles.orgBanner}>
+          <Text style={styles.orgLabel}>Organization:</Text>
+          <Text style={styles.orgName}>{activeOrg?.name || 'No Organization Selected'}</Text>
+        </View>
+
         {/* Time Period Info */}
         <View style={styles.periodInfo}>
           <Text style={styles.periodText}>Last 30 Days</Text>
@@ -328,6 +334,26 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+  },
+  orgBanner: {
+    backgroundColor: '#eff6ff',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#bfdbfe',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  orgLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1e40af',
+  },
+  orgName: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#1e3a8a',
   },
   periodInfo: {
     backgroundColor: '#ffffff',

@@ -43,7 +43,7 @@ interface ActivityTimelineItem {
 type ViewMode = 'overview' | 'individual' | 'timeline' | 'comparison';
 
 export default function TeamMemberAnalytics() {
-  const { activeOrgId } = useOrg();
+  const { activeOrgId, activeOrg } = useOrg();
   const [teamMembers, setTeamMembers] = useState<TeamMemberStats[]>([]);
   const [activities, setActivities] = useState<ActivityTimelineItem[]>([]);
   const [selectedMember, setSelectedMember] = useState<TeamMemberStats | null>(null);
@@ -301,6 +301,12 @@ export default function TeamMemberAnalytics() {
         <Text style={styles.title}>Team Member Analytics</Text>
       </View>
 
+      {/* Organization Context Banner */}
+      <View style={styles.orgBanner}>
+        <Text style={styles.orgLabel}>Organization:</Text>
+        <Text style={styles.orgName}>{activeOrg?.name || 'No Organization Selected'}</Text>
+      </View>
+
       {renderViewModeSelector()}
 
       {viewMode === 'overview' && renderOverview()}
@@ -329,6 +335,26 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#111827',
     marginLeft: 12,
+  },
+  orgBanner: {
+    backgroundColor: '#eff6ff',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#bfdbfe',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  orgLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1e40af',
+  },
+  orgName: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#1e3a8a',
   },
   viewModeSelector: {
     flexDirection: 'row',
