@@ -3,8 +3,10 @@ import { View, Text, TextInput, StyleSheet, TouchableOpacity, SafeAreaView, Aler
 import { router } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { Ionicons } from '@expo/vector-icons';
+import { useOrg } from '@/src/context/OrgContext';
 
 export default function EnterCodeScreen() {
+  const { setActiveOrgId } = useOrg();
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -80,6 +82,9 @@ export default function EnterCodeScreen() {
 
       // Increment code usage
       await supabase.rpc('increment_invite_code_usage', { code_text: code.toUpperCase() });
+
+      // Set the active org in context
+      await setActiveOrgId(inviteCode.organization_id);
 
       Alert.alert('Success!', 'You have joined the organization', [
         { text: 'OK', onPress: () => router.replace('/(tabs)') }

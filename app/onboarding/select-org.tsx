@@ -4,8 +4,10 @@ import { router } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { Ionicons } from '@expo/vector-icons';
 import type { Organization } from '@/types/organization';
+import { useOrg } from '@/src/context/OrgContext';
 
 export default function SelectOrgScreen() {
+  const { setActiveOrgId } = useOrg();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
   const [joining, setJoining] = useState<string | null>(null);
@@ -67,6 +69,9 @@ export default function SelectOrgScreen() {
         });
 
       if (error) throw error;
+
+      // Set the active org in context
+      await setActiveOrgId(orgId);
 
       Alert.alert('Success!', 'You have joined the organization', [
         { text: 'OK', onPress: () => router.replace('/(tabs)') }

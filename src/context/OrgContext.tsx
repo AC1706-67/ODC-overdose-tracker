@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '@/lib/supabase';
+import { router } from 'expo-router';
 
 export interface Organization {
   id: string;
@@ -72,6 +73,12 @@ export function OrgProvider({ children }: { children: ReactNode }) {
             }
           } else {
             console.warn('[OrgContext] ❌ No membership found or no organization_id');
+            
+            // User has no organization - redirect to onboarding
+            console.log('[OrgContext] Redirecting to onboarding...');
+            setLoading(false);
+            router.replace('/onboarding');
+            return;
           }
         }
 
@@ -80,6 +87,10 @@ export function OrgProvider({ children }: { children: ReactNode }) {
         if (saved) {
           setActiveOrgIdState(saved);
           await loadOrgData(saved);
+        } else {
+          // No saved org and no membership - redirect to onboarding
+          console.log('[OrgContext] No saved org, redirecting to onboarding...');
+          router.replace('/onboarding');
         }
       } catch (error) {
         console.warn('Failed to load org:', error);
