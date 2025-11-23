@@ -4,7 +4,6 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import type { OrganizationType } from '@/types/organization';
 import { submitCertificationRequest } from '@/src/api/organizationOnboarding';
-import { formatInviteCode } from '@/src/utils/inviteCodes';
 
 const ORG_TYPES: OrganizationType[] = [
   'Health Center',
@@ -39,7 +38,7 @@ export default function RequestOrgScreen() {
 
     setLoading(true);
     try {
-      const result = await submitCertificationRequest({
+      await submitCertificationRequest({
         organizationName: formData.name,
         organizationType: formData.type,
         city: formData.city,
@@ -50,11 +49,9 @@ export default function RequestOrgScreen() {
         description: formData.description,
       });
 
-      const formattedCode = formatInviteCode(result.inviteCode);
-
       Alert.alert(
         'Request Submitted!',
-        `Your certification request has been submitted.\n\nFor testing, your temporary invite code is:\n\n${formattedCode}\n\nYou can use "I have an organization code" to join this organization.`,
+        'Your organization certification request has been submitted. You will be notified when it is reviewed.',
         [{ text: 'OK', onPress: () => router.replace('/onboarding') }]
       );
     } catch (error: any) {

@@ -1,5 +1,4 @@
 import { supabase } from '@/lib/supabase';
-import { generateInviteCode } from '@/src/utils/inviteCodes';
 
 export type CertificationFormValues = {
   organizationName: string;
@@ -14,7 +13,7 @@ export type CertificationFormValues = {
 
 /**
  * Submit an organization certification request
- * Creates the org, certification request, and generates an invite code for testing
+ * Just creates the certification request - no org creation or invite codes
  */
 export async function submitCertificationRequest(values: CertificationFormValues) {
   const {
@@ -37,98 +36,31 @@ export async function submitCertificationRequest(values: CertificationFormValues
     throw new Error('You must be logged in to submit a request.');
   }
 
-  // 1) Create or find organization
-  const { data: existingOrgs, error: orgLookupError } = await supabase
-    .from('organizations')
-    .select('id')
-    .eq('name', organizationName.trim())
-    .limit(1);
-
-  if (orgLookupError) {
-    console.error('Org lookup error', orgLookupError);
-    throw new Error('Failed to submit request. Please try again.');
-  }
-
-  let organizationId: string;
-
-  if (existingOrgs && existingOrgs.length > 0) {
-    organizationId = existingOrgs[0].id;
-  } else {
-    // Create slug from name
-    const slug = organizationName
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-|-$/g, '');
-
-    const { data: newOrg, error: createOrgError } = await supabase
-      .from('organizations')
-      .insert({
-        name: organizationName.trim(),
-        slug,
-        type: organizationType,
-        city: city || null,
-        state: state || null,
-        website: website || null,
-        contact_email: contactEmail,
-        contact_name: contactName,
-        description: description || null,
-        is_certified: false,
-        is_public: true,
-        is_active: true,
-        status: 'pending',
-        created_by: user.id,
-      })
-      .select('id')
-      .single();
-
-    if (createOrgError || !newOrg) {
-      console.error('Create org error', createOrgError);
-      throw new Error(createOrgError?.message || 'Failed to create organization. Please try again.');
-    }
-
-    organizationId = newOrg.id;
-  }
-
-  // 2) Insert certification request
+  // 🔹 JUST create a certification request – no org creation here
   const { error: requestError } = await supabase
     .from('organization_certification_requests')
     .insert({
       organization_name: organizationName.trim(),
       organization_type: organizationType,
-      city,
-      state,
-      website,
+      city: city || null,
+      state: state || null,
+      website: website || null,
       contact_name: contactName,
       contact_email: contactEmail,
-      description,
+      description: description || null,
       created_by: user.id,
     });
 
   if (requestError) {
     console.error('Certification request error', requestError);
-    throw new Error(requestError.message || 'Failed to submit certification request. Please try again.');
+    throw new Error(
+      requestError.message || 'Failed to submit certification request. Please try again.'
+    );
   }
 
-  // 3) For testing: create an invite code so the user can immediately join
-  const inviteCode = generateInviteCode();
-
-  const { error: inviteError } = await supabase
-    .from('organization_invite_codes')
-    .insert({
-      organization_id: organizationId,
-      code: inviteCode,
-      created_by: user.id,
-      is_active: true,
-    });
-
-  if (inviteError) {
-    console.error('Invite code creation error', inviteError);
-    // Do not block the request, just log it.
-  }
-
+  // Keep return shape simple for now
   return {
-    organizationId,
-    inviteCode, // show this to the user in a success message
+    success: true,
   };
 }
 
