@@ -8,7 +8,7 @@ import { StatusBar } from 'expo-status-bar';
 import { View, StyleSheet } from 'react-native';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 import { useSession } from '@/hooks/useSession';
-import { OrgProvider } from '@/src/context/OrgContext';
+import { OrgProvider, useOrg } from '@/src/context/OrgContext';
 
 function WithInsetsContainer({ children }: { children: React.ReactNode }) {
   const insets = useSafeAreaInsets();
@@ -22,11 +22,10 @@ function WithInsetsContainer({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function RootLayout() {
+function NavigationController() {
   const [isNavigationReady, setIsNavigationReady] = useState(false);
-  useFrameworkReady();
-  
   const session = useSession();
+  const { status: orgStatus, loading: orgLoading } = useOrg();
   const router = useRouter();
   const segments = useSegments();
 
@@ -41,37 +40,73 @@ export default function RootLayout() {
 
   useEffect(() => {
     // Wait for navigation to be ready and session to be determined
-    if (!isNavigationReady || session === undefined) return;
+    if (!isNavigationReady || session === undefined || orgLoading) return;
     
     const inAuth = segments[0] === 'login' || segments[0] === 'signup';
+    const inOnboarding = segments[0] === 'onboarding';
+    const inTabs = segments[0] === '(tabs)';
     
+    console.log('[Navigation] session:', !!session, 'orgStatus:', orgStatus, 'segments:', segments[0]);
+    
+    // Not logged in → go to login
     if (!session && !inAuth) {
-      // User is not signed in and not on login/signup page, redirect to login
+      console.log('[Navigation] No session, redirecting to login');
       router.replace('/login');
-    } else if (session && inAuth) {
-      // User is signed in but on login/signup page, redirect to home
-      router.replace('/');
+      return;
     }
-  }, [session, segments, isNavigationReady]);
+    
+    // Logged in but on auth screen → go to appropriate place
+    if (session && inAuth) {
+      if (orgStatus === 'no-org' || orgStatus === 'error') {
+        console.log('[Navigation] Logged in, no org, redirecting to onboarding');
+        router.replace('/onboarding');
+      } else if (orgStatus === 'ready') {
+        console.log('[Navigation] Logged in with org, redirecting to tabs');
+        router.replace('/(tabs)');
+      }
+      return;
+    }
+    
+    // Logged in, no org, not in onboarding → go to onboarding
+    if (session && (orgStatus === 'no-org' || orgStatus === 'error') && !inOnboarding) {
+      console.log('[Navigation] User needs org, redirecting to onboarding');
+      router.replace('/onboarding');
+      return;
+    }
+    
+    // Logged in, has org, in onboarding → go to tabs
+    if (session && orgStatus === 'ready' && inOnboarding) {
+      console.log('[Navigation] User has org, leaving onboarding');
+      router.replace('/(tabs)');
+      return;
+    }
+  }, [session, orgStatus, orgLoading, segments, isNavigationReady]);
+
+  return null;
+}
+
+export default function RootLayout() {
+  useFrameworkReady();
 
   return (
     <OrgProvider>
       <SafeAreaProvider>
         <StatusBar style="dark" translucent={false} backgroundColor="#ffffff" />
         <WithInsetsContainer>
+          <NavigationController />
           <Stack 
             screenOptions={{
               headerTransparent: false,
-              // Make sure Router doesn't add extra space on top:
               contentStyle: { backgroundColor: '#ffffff', paddingTop: 0 },
               headerStyle: { backgroundColor: '#ffffff' },
-              headerTitleStyle: { color: '#111827' }, // slate-900
+              headerTitleStyle: { color: '#111827' },
               headerTintColor: '#111827',
               headerShown: false,
             }}
           >
             <Stack.Screen name="login" options={{ headerShown: false }} />
             <Stack.Screen name="signup" options={{ headerShown: false }} />
+            <Stack.Screen name="onboarding" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" />
           </Stack>
         </WithInsetsContainer>
