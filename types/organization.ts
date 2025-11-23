@@ -35,7 +35,7 @@ export type OrganizationType =
   | 'Hospital'
   | 'Community Organization'
   | 'Government Agency'
-  | 'Harm Reduction Program'
+  | 'Compassionate Community Engagement (CCE)'
   | 'Peer Support Network'
   | 'Faith-Based Organization'
   | 'Other';

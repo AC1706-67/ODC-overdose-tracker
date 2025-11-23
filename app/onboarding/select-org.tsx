@@ -3,12 +3,23 @@ import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, FlatList, Activ
 import { router } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { Ionicons } from '@expo/vector-icons';
-import type { Organization } from '@/types/organization';
+
 import { useOrg } from '@/src/context/OrgContext';
+import { loadCertifiedOrganizations } from '@/src/api/organizationOnboarding';
+
+type CertifiedOrg = {
+  id: string;
+  name: string;
+  slug: string;
+  type: string;
+  city?: string;
+  state?: string;
+  description?: string;
+};
 
 export default function SelectOrgScreen() {
   const { setActiveOrgId } = useOrg();
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [organizations, setOrganizations] = useState<CertifiedOrg[]>([]);
   const [loading, setLoading] = useState(true);
   const [joining, setJoining] = useState<string | null>(null);
 
@@ -18,19 +29,12 @@ export default function SelectOrgScreen() {
 
   const loadOrganizations = async () => {
     try {
-      const { data, error } = await supabase
-        .from('organizations')
-        .select('*')
-        .eq('is_certified', true)
-        .eq('status', 'approved')
-        .eq('is_active', true)
-        .order('name');
-
-      if (error) throw error;
-      setOrganizations(data || []);
-    } catch (error) {
+      const data = await loadCertifiedOrganizations();
+      setOrganizations(data);
+    } catch (error: any) {
       console.error('Error loading organizations:', error);
-      Alert.alert('Error', 'Failed to load organizations');
+      // Only show error dialog if the query itself failed
+      Alert.alert('Error', error.message || 'Something went wrong loading organizations. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -84,7 +88,7 @@ export default function SelectOrgScreen() {
     }
   };
 
-  const renderOrganization = ({ item }: { item: Organization }) => (
+  const renderOrganization = ({ item }: { item: CertifiedOrg }) => (
     <TouchableOpacity
       style={styles.orgCard}
       onPress={() => handleJoinOrg(item.id)}
@@ -127,7 +131,10 @@ export default function SelectOrgScreen() {
       ) : organizations.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Ionicons name="business-outline" size={64} color="#d1d5db" />
-          <Text style={styles.emptyText}>No certified organizations available</Text>
+          <Text style={styles.emptyText}>No certified organizations are available yet.</Text>
+          <Text style={styles.emptySubtext}>
+            Check back later or request certification for your organization.
+          </Text>
         </View>
       ) : (
         <FlatList
@@ -173,8 +180,17 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: '#6b7280',
+    fontWeight: '600',
+    color: '#374151',
     marginTop: 16,
+    textAlign: 'center',
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: '#6b7280',
+    marginTop: 8,
+    textAlign: 'center',
+    paddingHorizontal: 32,
   },
   list: {
     padding: 16,

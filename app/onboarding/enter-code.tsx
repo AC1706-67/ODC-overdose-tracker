@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, SafeAreaView, Alert, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
-import { supabase } from '@/lib/supabase';
 import { Ionicons } from '@expo/vector-icons';
 import { useOrg } from '@/src/context/OrgContext';
+import { joinOrganizationWithCode } from '@/src/api/organizationOnboarding';
 
 export default function EnterCodeScreen() {
   const { setActiveOrgId } = useOrg();
@@ -18,80 +18,17 @@ export default function EnterCodeScreen() {
 
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        Alert.alert('Error', 'You must be logged in');
-        return;
-      }
-
-      // Look up the invite code
-      const { data: inviteCode, error: codeError } = await supabase
-        .from('organization_invite_codes')
-        .select('organization_id, role, is_active, max_uses, current_uses, expires_at')
-        .eq('code', code.toUpperCase())
-        .single();
-
-      if (codeError || !inviteCode) {
-        Alert.alert('Invalid Code', 'This organization code is not valid');
-        return;
-      }
-
-      if (!inviteCode.is_active) {
-        Alert.alert('Inactive Code', 'This code is no longer active');
-        return;
-      }
-
-      if (inviteCode.expires_at && new Date(inviteCode.expires_at) < new Date()) {
-        Alert.alert('Expired Code', 'This code has expired');
-        return;
-      }
-
-      if (inviteCode.max_uses && inviteCode.current_uses >= inviteCode.max_uses) {
-        Alert.alert('Code Limit Reached', 'This code has reached its maximum uses');
-        return;
-      }
-
-      // Check if already a member
-      const { data: existing } = await supabase
-        .from('user_organizations')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('organization_id', inviteCode.organization_id)
-        .single();
-
-      if (existing) {
-        Alert.alert('Already a Member', 'You are already a member of this organization');
-        router.replace('/(tabs)');
-        return;
-      }
-
-      // Join the organization
-      const { error: joinError } = await supabase
-        .from('user_organizations')
-        .insert({
-          user_id: user.id,
-          organization_id: inviteCode.organization_id,
-          role: inviteCode.role,
-        });
-
-      if (joinError) {
-        console.error('Join error:', joinError);
-        Alert.alert('Error', 'Failed to join organization');
-        return;
-      }
-
-      // Increment code usage
-      await supabase.rpc('increment_invite_code_usage', { code_text: code.toUpperCase() });
+      const result = await joinOrganizationWithCode(code);
 
       // Set the active org in context
-      await setActiveOrgId(inviteCode.organization_id);
+      await setActiveOrgId(result.organizationId);
 
       Alert.alert('Success!', 'You have joined the organization', [
         { text: 'OK', onPress: () => router.replace('/(tabs)') }
       ]);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error:', error);
-      Alert.alert('Error', 'Something went wrong');
+      Alert.alert('Error', error.message || 'Something went wrong');
     } finally {
       setLoading(false);
     }

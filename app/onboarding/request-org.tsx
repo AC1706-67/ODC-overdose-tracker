@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
-import { supabase } from '@/lib/supabase';
 import { Ionicons } from '@expo/vector-icons';
 import type { OrganizationType } from '@/types/organization';
+import { submitCertificationRequest } from '@/src/api/organizationOnboarding';
+import { formatInviteCode } from '@/src/utils/inviteCodes';
 
 const ORG_TYPES: OrganizationType[] = [
   'Health Center',
   'Hospital',
   'Community Organization',
   'Government Agency',
-  'Harm Reduction Program',
+  'Compassionate Community Engagement (CCE)',
   'Peer Support Network',
   'Faith-Based Organization',
   'Other',
@@ -38,63 +39,27 @@ export default function RequestOrgScreen() {
 
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        Alert.alert('Error', 'You must be logged in');
-        return;
-      }
+      const result = await submitCertificationRequest({
+        organizationName: formData.name,
+        organizationType: formData.type,
+        city: formData.city,
+        state: formData.state,
+        website: formData.website,
+        contactName: formData.contactName,
+        contactEmail: formData.contactEmail,
+        description: formData.description,
+      });
 
-      // Create slug from name
-      const slug = formData.name
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-|-$/g, '');
-
-      // Create organization request
-      const { data: org, error: orgError } = await supabase
-        .from('organizations')
-        .insert({
-          name: formData.name,
-          slug,
-          type: formData.type,
-          city: formData.city || null,
-          state: formData.state || null,
-          website: formData.website || null,
-          contact_email: formData.contactEmail,
-          contact_name: formData.contactName,
-          description: formData.description || null,
-          status: 'pending',
-          is_certified: false,
-          is_active: false,
-          created_by: user.id,
-        })
-        .select()
-        .single();
-
-      if (orgError) {
-        console.error('Org creation error:', orgError);
-        Alert.alert('Error', 'Failed to submit request. This organization may already exist.');
-        return;
-      }
-
-      // Add requester as pending owner
-      await supabase
-        .from('user_organizations')
-        .insert({
-          user_id: user.id,
-          organization_id: org.id,
-          role: 'Owner',
-          is_active: false, // Will be activated when org is approved
-        });
+      const formattedCode = formatInviteCode(result.inviteCode);
 
       Alert.alert(
         'Request Submitted!',
-        'Your organization certification request has been submitted. You will be notified when it is reviewed.',
-        [{ text: 'OK', onPress: () => router.replace('/(tabs)') }]
+        `Your certification request has been submitted.\n\nFor testing, your temporary invite code is:\n\n${formattedCode}\n\nYou can use "I have an organization code" to join this organization.`,
+        [{ text: 'OK', onPress: () => router.replace('/onboarding') }]
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error:', error);
-      Alert.alert('Error', 'Something went wrong');
+      Alert.alert('Error', error.message || 'Something went wrong');
     } finally {
       setLoading(false);
     }
