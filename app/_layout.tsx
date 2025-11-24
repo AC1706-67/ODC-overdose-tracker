@@ -60,23 +60,23 @@ function NavigationController() {
       if (orgStatus === 'no-org' || orgStatus === 'error') {
         console.log('[Navigation] Logged in, no org, redirecting to onboarding');
         router.replace('/onboarding');
-      } else if (orgStatus === 'ready') {
-        console.log('[Navigation] Logged in with org, redirecting to tabs');
+      } else if (orgStatus === 'ready' || orgStatus === 'skipped') {
+        console.log('[Navigation] Logged in with org or skipped, redirecting to tabs');
         router.replace('/(tabs)');
       }
       return;
     }
     
-    // Logged in, no org, not in onboarding → go to onboarding
+    // Logged in, no org, not in onboarding → go to onboarding (unless skipped)
     if (session && (orgStatus === 'no-org' || orgStatus === 'error') && !inOnboarding) {
       console.log('[Navigation] User needs org, redirecting to onboarding');
       router.replace('/onboarding');
       return;
     }
     
-    // Logged in, has org, in onboarding → go to tabs
-    if (session && orgStatus === 'ready' && inOnboarding) {
-      console.log('[Navigation] User has org, leaving onboarding');
+    // Logged in, has org or skipped, in onboarding → go to tabs
+    if (session && (orgStatus === 'ready' || orgStatus === 'skipped') && inOnboarding) {
+      console.log('[Navigation] User has org or skipped, leaving onboarding');
       router.replace('/(tabs)');
       return;
     }

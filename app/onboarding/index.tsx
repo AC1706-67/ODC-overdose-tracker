@@ -2,8 +2,16 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useOrg } from '@/src/context/OrgContext';
 
 export default function OnboardingScreen() {
+  const { skipOnboarding } = useOrg();
+
+  const handleSkip = async () => {
+    await skipOnboarding();
+    router.replace('/(tabs)');
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
@@ -60,7 +68,7 @@ export default function OnboardingScreen() {
 
         <TouchableOpacity
           style={styles.skipButton}
-          onPress={() => router.replace('/(tabs)')}
+          onPress={handleSkip}
         >
           <Text style={styles.skipText}>Skip for now</Text>
         </TouchableOpacity>

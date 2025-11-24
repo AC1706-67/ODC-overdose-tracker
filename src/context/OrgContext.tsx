@@ -11,7 +11,7 @@ export interface Organization {
   features?: Record<string, any>;
 }
 
-export type OrgStatus = 'loading' | 'no-org' | 'ready' | 'error';
+export type OrgStatus = 'loading' | 'no-org' | 'ready' | 'error' | 'skipped';
 
 interface OrgContextType {
   activeOrgId: string | null;
@@ -20,6 +20,7 @@ interface OrgContextType {
   status: OrgStatus;
   setActiveOrgId: (id: string) => Promise<void>;
   clearActiveOrg: () => Promise<void>;
+  skipOnboarding: () => Promise<void>;
 }
 
 const OrgContext = createContext<OrgContextType | undefined>(undefined);
@@ -34,6 +35,15 @@ export function OrgProvider({ children }: { children: ReactNode }) {
     // Load user's organization on app start
     (async () => {
       try {
+        // Check if user has skipped onboarding
+        const hasSkipped = await AsyncStorage.getItem('onboardingSkipped');
+        if (hasSkipped === 'true') {
+          console.log('[OrgContext] User has skipped onboarding');
+          setStatus('skipped');
+          setLoading(false);
+          return;
+        }
+
         // First, try to get the user's organization from user_organizations
         const { data: { user } } = await supabase.auth.getUser();
         
@@ -131,11 +141,14 @@ export function OrgProvider({ children }: { children: ReactNode }) {
   const setActiveOrgId = async (id: string) => {
     try {
       await AsyncStorage.setItem('activeOrgId', id);
+      await AsyncStorage.removeItem('onboardingSkipped'); // Clear skip flag when joining org
       setActiveOrgIdState(id);
       await loadOrgData(id);
+      setStatus('ready');
     } catch (error) {
       console.warn('Failed to save org:', error);
       setActiveOrgIdState(id); // Still set in memory
+      setStatus('ready');
     }
   };
 
@@ -151,8 +164,19 @@ export function OrgProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const skipOnboarding = async () => {
+    try {
+      await AsyncStorage.setItem('onboardingSkipped', 'true');
+      setStatus('skipped');
+      console.log('[OrgContext] User skipped onboarding');
+    } catch (error) {
+      console.warn('Failed to save skip preference:', error);
+      setStatus('skipped'); // Still set in memory
+    }
+  };
+
   return (
-    <OrgContext.Provider value={{ activeOrgId, activeOrg, loading, status, setActiveOrgId, clearActiveOrg }}>
+    <OrgContext.Provider value={{ activeOrgId, activeOrg, loading, status, setActiveOrgId, clearActiveOrg, skipOnboarding }}>
       {children}
     </OrgContext.Provider>
   );

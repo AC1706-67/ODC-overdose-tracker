@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, FlatList, ActivityIndicator, Alert } from 'react-native';
 import { router } from 'expo-router';
-import { supabase } from '@/lib/supabase';
 import { Ionicons } from '@expo/vector-icons';
 
 import { useOrg } from '@/src/context/OrgContext';
-import { loadCertifiedOrganizations } from '@/src/api/organizationOnboarding';
+import { getJoinableCertifiedOrganizations, joinOrganization, getMyOrganizations } from '@/src/api/orgMembership';
 
 type CertifiedOrg = {
   id: string;
@@ -20,99 +19,93 @@ type CertifiedOrg = {
 export default function SelectOrgScreen() {
   const { setActiveOrgId } = useOrg();
   const [organizations, setOrganizations] = useState<CertifiedOrg[]>([]);
+  const [myOrgIds, setMyOrgIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [joining, setJoining] = useState<string | null>(null);
 
   useEffect(() => {
-    loadOrganizations();
+    loadData();
   }, []);
 
-  const loadOrganizations = async () => {
+  const loadData = async () => {
     try {
-      const data = await loadCertifiedOrganizations();
-      setOrganizations(data);
+      // Load both joinable orgs and user's current memberships
+      const [orgs, myOrgs] = await Promise.all([
+        getJoinableCertifiedOrganizations(),
+        getMyOrganizations()
+      ]);
+      
+      setOrganizations(orgs);
+      setMyOrgIds(new Set(myOrgs.map(m => m.organization_id)));
     } catch (error: any) {
       console.error('Error loading organizations:', error);
-      // Only show error dialog if the query itself failed
       Alert.alert('Error', error.message || 'Something went wrong loading organizations. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleJoinOrg = async (orgId: string) => {
+  const handleJoinOrg = async (orgId: string, orgName: string) => {
     setJoining(orgId);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        Alert.alert('Error', 'You must be logged in');
-        return;
-      }
-
-      // Check if already a member
-      const { data: existing } = await supabase
-        .from('user_organizations')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('organization_id', orgId)
-        .single();
-
-      if (existing) {
-        Alert.alert('Already a Member', 'You are already a member of this organization');
-        router.replace('/(tabs)');
-        return;
-      }
-
-      // Join as Responder
-      const { error } = await supabase
-        .from('user_organizations')
-        .insert({
-          user_id: user.id,
-          organization_id: orgId,
-          role: 'Responder',
-        });
-
-      if (error) throw error;
-
-      // Set the active org in context
+      // Join the organization
+      await joinOrganization(orgId, 'Responder');
+      
+      // Set as active org
       await setActiveOrgId(orgId);
 
-      Alert.alert('Success!', 'You have joined the organization', [
+      Alert.alert('Success!', `You have joined ${orgName}`, [
         { text: 'OK', onPress: () => router.replace('/(tabs)') }
       ]);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error joining organization:', error);
-      Alert.alert('Error', 'Failed to join organization');
+      Alert.alert('Error', error.message || 'Failed to join organization');
     } finally {
       setJoining(null);
     }
   };
 
-  const renderOrganization = ({ item }: { item: CertifiedOrg }) => (
-    <TouchableOpacity
-      style={styles.orgCard}
-      onPress={() => handleJoinOrg(item.id)}
-      disabled={joining !== null}
-    >
-      <View style={styles.orgInfo}>
-        <Text style={styles.orgName}>{item.name}</Text>
-        {item.city && item.state && (
-          <Text style={styles.orgLocation}>{item.city}, {item.state}</Text>
+  const renderOrganization = ({ item }: { item: CertifiedOrg }) => {
+    const isMember = myOrgIds.has(item.id);
+    
+    return (
+      <View style={styles.orgCard}>
+        <View style={styles.orgInfo}>
+          <View style={styles.orgHeader}>
+            <Text style={styles.orgName}>{item.name}</Text>
+            {isMember && (
+              <View style={styles.memberBadge}>
+                <Ionicons name="checkmark-circle" size={14} color="#059669" />
+                <Text style={styles.memberText}>Member</Text>
+              </View>
+            )}
+          </View>
+          {item.city && item.state && (
+            <Text style={styles.orgLocation}>{item.city}, {item.state}</Text>
+          )}
+          {item.description && (
+            <Text style={styles.orgDescription} numberOfLines={2}>
+              {item.description}
+            </Text>
+          )}
+          <Text style={styles.orgType}>{item.type}</Text>
+        </View>
+        {!isMember && (
+          <TouchableOpacity
+            style={[styles.joinButton, joining === item.id && styles.joinButtonDisabled]}
+            onPress={() => handleJoinOrg(item.id, item.name)}
+            disabled={joining !== null}
+          >
+            {joining === item.id ? (
+              <ActivityIndicator color="#ffffff" size="small" />
+            ) : (
+              <Text style={styles.joinButtonText}>Join</Text>
+            )}
+          </TouchableOpacity>
         )}
-        {item.description && (
-          <Text style={styles.orgDescription} numberOfLines={2}>
-            {item.description}
-          </Text>
-        )}
-        <Text style={styles.orgType}>{item.type}</Text>
       </View>
-      {joining === item.id ? (
-        <ActivityIndicator color="#2563eb" />
-      ) : (
-        <Ionicons name="chevron-forward" size={24} color="#9ca3af" />
-      )}
-    </TouchableOpacity>
-  );
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -210,12 +203,32 @@ const styles = StyleSheet.create({
   },
   orgInfo: {
     flex: 1,
+    marginRight: 12,
+  },
+  orgHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
   },
   orgName: {
     fontSize: 16,
     fontWeight: '600',
     color: '#111827',
-    marginBottom: 4,
+    marginRight: 8,
+  },
+  memberBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#d1fae5',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 10,
+  },
+  memberText: {
+    fontSize: 11,
+    color: '#059669',
+    marginLeft: 3,
+    fontWeight: '500',
   },
   orgLocation: {
     fontSize: 14,
@@ -231,5 +244,21 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#9ca3af',
     fontStyle: 'italic',
+  },
+  joinButton: {
+    backgroundColor: '#059669',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+    minWidth: 80,
+    alignItems: 'center',
+  },
+  joinButtonDisabled: {
+    opacity: 0.6,
+  },
+  joinButtonText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
