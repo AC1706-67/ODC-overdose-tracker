@@ -220,6 +220,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: 24,
+    paddingBottom: 100, // Extra space for phone navigation bar
   },
   iconContainer: {
     width: 96,
