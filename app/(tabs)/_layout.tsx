@@ -6,12 +6,15 @@ import { canUseOutreach } from '@/src/lib/featureAccess';
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
-  const { activeOrg, loading } = useOrg();
-  const outreachEnabled = !loading && canUseOutreach(activeOrg);
+  const { activeOrg, loading, status } = useOrg();
+  const hasOrg = !loading && (status === 'ready' || (activeOrg && activeOrg.id));
+  const outreachEnabled = hasOrg && canUseOutreach(activeOrg);
 
   // Debug logging
   console.log('[TabLayout] activeOrg:', JSON.stringify(activeOrg));
   console.log('[TabLayout] loading:', loading);
+  console.log('[TabLayout] status:', status);
+  console.log('[TabLayout] hasOrg:', hasOrg);
   console.log('[TabLayout] outreachEnabled:', outreachEnabled);
 
   if (loading) {
@@ -60,6 +63,7 @@ export default function TabLayout() {
         name="dashboard"
         options={{
           title: 'Dashboard',
+          href: hasOrg ? '/dashboard' : null,
           tabBarIcon: ({ size, color }) => (
             <BarChart3 size={size} color={color} />
           ),
