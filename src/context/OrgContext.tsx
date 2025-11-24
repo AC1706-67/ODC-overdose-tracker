@@ -76,7 +76,7 @@ export function OrgProvider({ children }: { children: ReactNode }) {
             // Now get the full organization data
             const { data: org, error: orgError } = await supabase
               .from('organizations')
-              .select('id, slug, name, is_active')
+              .select('id, slug, name, is_active, outreach_enabled')
               .eq('id', membership.organization_id)
               .single();
 
@@ -126,7 +126,7 @@ export function OrgProvider({ children }: { children: ReactNode }) {
     try {
       const { data, error } = await supabase
         .from('organizations')
-        .select('id, slug, name, is_active')
+        .select('id, slug, name, is_active, outreach_enabled')
         .eq('id', orgId)
         .single();
 
