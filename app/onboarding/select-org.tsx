@@ -48,15 +48,28 @@ export default function SelectOrgScreen() {
   const handleJoinOrg = async (orgId: string, orgName: string) => {
     setJoining(orgId);
     try {
-      // Join the organization
-      await joinOrganization(orgId, 'Responder');
+      const isMember = myOrgIds.has(orgId);
       
-      // Set as active org
-      await setActiveOrgId(orgId);
+      if (isMember) {
+        // User is already a member, just set as active org
+        console.log('[SelectOrg] User is already a member, setting as active org');
+        await setActiveOrgId(orgId);
+        
+        Alert.alert('Success!', `Switched to ${orgName}`, [
+          { text: 'OK', onPress: () => router.replace('/(tabs)') }
+        ]);
+      } else {
+        // User is not a member, join the organization first
+        console.log('[SelectOrg] User is not a member, joining organization');
+        await joinOrganization(orgId, 'Responder');
+        
+        // Set as active org
+        await setActiveOrgId(orgId);
 
-      Alert.alert('Success!', `You have joined ${orgName}`, [
-        { text: 'OK', onPress: () => router.replace('/(tabs)') }
-      ]);
+        Alert.alert('Success!', `You have joined ${orgName}`, [
+          { text: 'OK', onPress: () => router.replace('/(tabs)') }
+        ]);
+      }
     } catch (error: any) {
       console.error('Error joining organization:', error);
       Alert.alert('Error', error.message || 'Failed to join organization');
@@ -90,19 +103,22 @@ export default function SelectOrgScreen() {
           )}
           <Text style={styles.orgType}>{item.type}</Text>
         </View>
-        {!isMember && (
-          <TouchableOpacity
-            style={[styles.joinButton, joining === item.id && styles.joinButtonDisabled]}
-            onPress={() => handleJoinOrg(item.id, item.name)}
-            disabled={joining !== null}
-          >
-            {joining === item.id ? (
-              <ActivityIndicator color="#ffffff" size="small" />
-            ) : (
-              <Text style={styles.joinButtonText}>Join</Text>
-            )}
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity
+          style={[
+            isMember ? styles.selectButton : styles.joinButton,
+            joining === item.id && styles.joinButtonDisabled
+          ]}
+          onPress={() => handleJoinOrg(item.id, item.name)}
+          disabled={joining !== null}
+        >
+          {joining === item.id ? (
+            <ActivityIndicator color="#ffffff" size="small" />
+          ) : (
+            <Text style={styles.joinButtonText}>
+              {isMember ? 'Select' : 'Join'}
+            </Text>
+          )}
+        </TouchableOpacity>
       </View>
     );
   };
@@ -247,6 +263,14 @@ const styles = StyleSheet.create({
   },
   joinButton: {
     backgroundColor: '#059669',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+    minWidth: 80,
+    alignItems: 'center',
+  },
+  selectButton: {
+    backgroundColor: '#2563eb',
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 8,
