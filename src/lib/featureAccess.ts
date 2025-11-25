@@ -12,14 +12,13 @@ export type Org = {
  * With RLS enabled on outreach_logs, access control is handled at the database level.
  * Users can only see/create outreach logs for their own organization.
  * 
- * Frontend logic: Show Outreach tab if user belongs to any active organization.
+ * Frontend logic: Show Outreach tab if user belongs to an organization with outreach enabled.
  * Backend RLS: Automatically filters data by organization membership.
  * 
  * @param org - The user's active organization
- * @returns true if user has an active organization membership
+ * @returns true if user has an active organization with outreach_enabled = true
  */
 export function canUseOutreach(org?: Org | null) {
-  // Simple check: if user has an active organization, they can see Outreach
-  // RLS policies handle all data isolation automatically
-  return !!org && !!org.id;
+  // Check if user has an active organization AND outreach is enabled for that org
+  return !!org && !!org.id && org.outreach_enabled === true;
 }
