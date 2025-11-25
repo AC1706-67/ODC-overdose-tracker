@@ -7,7 +7,9 @@ import { canUseOutreach } from '@/src/lib/featureAccess';
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
   const { activeOrg, loading, status } = useOrg();
-  const hasOrg = !loading && (status === 'ready' || (activeOrg && activeOrg.id));
+  
+  // Simplified: if we have an activeOrg with an ID, user has an org
+  const hasOrg = !loading && activeOrg && activeOrg.id;
   const outreachEnabled = hasOrg && canUseOutreach(activeOrg);
 
   // Debug logging
@@ -16,6 +18,7 @@ export default function TabLayout() {
   console.log('[TabLayout] status:', status);
   console.log('[TabLayout] hasOrg:', hasOrg);
   console.log('[TabLayout] outreachEnabled:', outreachEnabled);
+  console.log('[TabLayout] activeOrg.outreach_enabled:', activeOrg?.outreach_enabled);
 
   if (loading) {
     return null; // Or a loading spinner
