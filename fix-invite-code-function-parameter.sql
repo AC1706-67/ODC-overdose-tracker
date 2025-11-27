@@ -3,9 +3,14 @@
 -- ============================================================================
 -- Use p_code parameter name (p_ prefix is PostgreSQL convention)
 -- Fully qualify table/column names to avoid ambiguity
+-- Must DROP first because PostgreSQL won't allow parameter rename in-place
 -- ============================================================================
 
-CREATE OR REPLACE FUNCTION public.increment_invite_code_usage(p_code text)
+-- Drop the old function with code_text parameter
+DROP FUNCTION IF EXISTS public.increment_invite_code_usage(text);
+
+-- Create the corrected function with p_code parameter
+CREATE FUNCTION public.increment_invite_code_usage(p_code text)
 RETURNS uuid AS $$
 DECLARE
   org_id uuid;
@@ -22,6 +27,9 @@ BEGIN
   RETURN org_id;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER VOLATILE;
+
+-- Grant execute permission to authenticated users
+GRANT EXECUTE ON FUNCTION public.increment_invite_code_usage(text) TO authenticated;
 
 -- Verify the function was updated
 SELECT 
