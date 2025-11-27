@@ -27,7 +27,7 @@ export interface DashboardData {
   }>;
 }
 
-export function useDashboardData(period: string, zipCode?: string) {
+export function useDashboardData(period: string, zipCode?: string, organizationId?: string | null) {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -65,6 +65,12 @@ export function useDashboardData(period: string, zipCode?: string) {
         .from('distributions')
         .select('*')
         .gte('timestamp', startDate.toISOString());
+
+      // Filter by organization if provided
+      if (organizationId) {
+        incidentsQuery = incidentsQuery.eq('organization_id', organizationId);
+        distributionsQuery = distributionsQuery.eq('organization_id', organizationId);
+      }
 
       if (zipCode) {
         incidentsQuery = incidentsQuery.eq('zip_code', zipCode);
@@ -181,7 +187,7 @@ export function useDashboardData(period: string, zipCode?: string) {
 
   useEffect(() => {
     fetchData();
-  }, [period, zipCode]);
+  }, [period, zipCode, organizationId]);
 
   const refresh = () => {
     fetchData();

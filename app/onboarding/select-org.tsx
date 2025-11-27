@@ -14,6 +14,7 @@ type CertifiedOrg = {
   city?: string;
   state?: string;
   description?: string;
+  is_demo_organization?: boolean;
 };
 
 export default function SelectOrgScreen() {
@@ -80,12 +81,19 @@ export default function SelectOrgScreen() {
 
   const renderOrganization = ({ item }: { item: CertifiedOrg }) => {
     const isMember = myOrgIds.has(item.id);
+    const isDemo = item.is_demo_organization === true;
     
     return (
       <View style={styles.orgCard}>
         <View style={styles.orgInfo}>
           <View style={styles.orgHeader}>
             <Text style={styles.orgName}>{item.name}</Text>
+            {isDemo && (
+              <View style={styles.demoBadge}>
+                <Ionicons name="flask" size={12} color="#7c3aed" />
+                <Text style={styles.demoText}>Demo</Text>
+              </View>
+            )}
             {isMember && (
               <View style={styles.memberBadge}>
                 <Ionicons name="checkmark-circle" size={14} color="#059669" />
@@ -99,6 +107,11 @@ export default function SelectOrgScreen() {
           {item.description && (
             <Text style={styles.orgDescription} numberOfLines={2}>
               {item.description}
+            </Text>
+          )}
+          {isDemo && (
+            <Text style={styles.demoExplanation}>
+              Use this organization to test the app before going live.
             </Text>
           )}
           <Text style={styles.orgType}>{item.type}</Text>
@@ -245,6 +258,27 @@ const styles = StyleSheet.create({
     color: '#059669',
     marginLeft: 3,
     fontWeight: '500',
+  },
+  demoBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ede9fe',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 10,
+    marginLeft: 6,
+  },
+  demoText: {
+    fontSize: 11,
+    color: '#7c3aed',
+    marginLeft: 3,
+    fontWeight: '500',
+  },
+  demoExplanation: {
+    fontSize: 12,
+    color: '#7c3aed',
+    fontStyle: 'italic',
+    marginBottom: 4,
   },
   orgLocation: {
     fontSize: 14,

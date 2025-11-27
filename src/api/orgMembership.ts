@@ -58,10 +58,11 @@ export async function getMyOrganizations(): Promise<OrgMembership[]> {
 export async function getJoinableCertifiedOrganizations() {
   const { data, error } = await supabase
     .from('organizations')
-    .select('id, name, slug, type, city, state, description, is_certified, is_public')
+    .select('id, name, slug, type, city, state, description, is_certified, is_public, is_demo_organization')
     .eq('is_certified', true)
     .eq('is_public', true)
     .eq('is_active', true)
+    .order('is_demo_organization', { ascending: false }) // Show demo orgs first
     .order('name', { ascending: true });
 
   if (error) {
