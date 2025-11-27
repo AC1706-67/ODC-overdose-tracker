@@ -176,7 +176,7 @@ CREATE POLICY "org_admins_delete_outreach_logs"
 -- ============================================================================
 
 -- Check if distributions table exists and has organization_id
-DO $
+DO $$
 BEGIN
   IF EXISTS (
     SELECT 1 FROM information_schema.tables 
@@ -256,7 +256,7 @@ BEGIN
         )
       )';
   END IF;
-END $;
+END $$;
 
 -- ============================================================================
 -- PART 5: CREATE INCIDENT_ZIP_AGGREGATE VIEW
@@ -326,7 +326,7 @@ ON CONFLICT (slug) DO UPDATE SET
 
 -- Update the auto-assignment function to assign new users to demo org
 CREATE OR REPLACE FUNCTION public.auto_assign_default_organization()
-RETURNS TRIGGER AS $
+RETURNS TRIGGER AS $$
 DECLARE
   demo_org_id UUID;
 BEGIN
@@ -358,7 +358,7 @@ BEGIN
 
   RETURN NEW;
 END;
-$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ============================================================================
 -- PART 8: VERIFICATION QUERIES
