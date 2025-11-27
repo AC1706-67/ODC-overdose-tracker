@@ -1,26 +1,27 @@
 -- ============================================================================
 -- FIX: Update increment_invite_code_usage parameter name
 -- ============================================================================
--- Change parameter from code_text to code for consistency
+-- Use p_code parameter name (p_ prefix is PostgreSQL convention)
+-- Fully qualify table/column names to avoid ambiguity
 -- ============================================================================
 
-CREATE OR REPLACE FUNCTION public.increment_invite_code_usage(code text)
+CREATE OR REPLACE FUNCTION public.increment_invite_code_usage(p_code text)
 RETURNS uuid AS $$
 DECLARE
   org_id uuid;
 BEGIN
-  UPDATE organization_invite_codes
+  UPDATE public.organization_invite_codes
   SET current_uses = current_uses + 1
-  WHERE code = code  -- Now matches the parameter name
-    AND is_active = true
-    AND (expires_at IS NULL OR expires_at > now())
-    AND (max_uses IS NULL OR current_uses < max_uses)
+  WHERE organization_invite_codes.code = p_code
+    AND organization_invite_codes.is_active = true
+    AND (organization_invite_codes.expires_at IS NULL OR organization_invite_codes.expires_at > now())
+    AND (organization_invite_codes.max_uses IS NULL OR organization_invite_codes.current_uses < organization_invite_codes.max_uses)
   RETURNING organization_id INTO org_id;
   
   -- Returns NULL if no matching code found or limits exceeded
   RETURN org_id;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
+$$ LANGUAGE plpgsql SECURITY DEFINER VOLATILE;
 
 -- Verify the function was updated
 SELECT 

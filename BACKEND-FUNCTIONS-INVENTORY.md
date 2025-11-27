@@ -109,14 +109,15 @@ RETURNS TABLE (
 )
 ```
 
-### `increment_invite_code_usage(code)`
+### `increment_invite_code_usage(p_code)`
 **File:** `supabase/migrations/20251119_add_org_certification_and_codes.sql` (updated in `fix-invite-code-function-parameter.sql`)
 **Purpose:** Increment usage count for an invite code and return org ID
 **Parameters:**
-- `code` (text) - The invite code
+- `p_code` (text) - The invite code (p_ prefix follows PostgreSQL convention)
 **Returns:** `uuid` - Organization ID
 **Security:** `SECURITY DEFINER`
 **Side Effects:** Increments `current_uses` counter
+**Frontend call:** `.rpc('increment_invite_code_usage', { p_code: code })`
 
 ---
 

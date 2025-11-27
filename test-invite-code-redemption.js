@@ -130,7 +130,7 @@ try {
     // Alternative: Test the RPC function directly
     console.log('\n6️⃣ Testing increment_invite_code_usage RPC...');
     const { data: rpcResult, error: rpcError } = await supabase
-      .rpc('increment_invite_code_usage', { code: testCode.toUpperCase() });
+      .rpc('increment_invite_code_usage', { p_code: testCode.toUpperCase() });
 
     if (rpcError) {
       console.error('❌ RPC Error:', rpcError);

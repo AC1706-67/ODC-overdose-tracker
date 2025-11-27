@@ -98,7 +98,7 @@ async function testJoinOrganizationWithCode(rawCode) {
     console.log(`\n📝 Incrementing usage counter...`);
     try {
       const { data: rpcResult, error: rpcError } = await supabase
-        .rpc('increment_invite_code_usage', { code: code });
+        .rpc('increment_invite_code_usage', { p_code: code });
 
       if (rpcError) {
         console.warn('⚠️  Could not increment usage:', rpcError.message);
