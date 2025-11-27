@@ -109,14 +109,14 @@ RETURNS TABLE (
 )
 ```
 
-### `increment_invite_code_usage(code_text)`
-**File:** `supabase/migrations/20251119_add_org_certification_and_codes.sql`
+### `increment_invite_code_usage(code)`
+**File:** `supabase/migrations/20251119_add_org_certification_and_codes.sql` (updated in `fix-invite-code-function-parameter.sql`)
 **Purpose:** Increment usage count for an invite code and return org ID
 **Parameters:**
-- `code_text` (text) - The invite code
+- `code` (text) - The invite code
 **Returns:** `uuid` - Organization ID
 **Security:** `SECURITY DEFINER`
-**Side Effects:** Increments `times_used` counter
+**Side Effects:** Increments `current_uses` counter
 
 ---
 

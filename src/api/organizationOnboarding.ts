@@ -190,7 +190,7 @@ export async function joinOrganizationWithCode(rawCode: string) {
 
   // 4) Increment code usage (if RPC exists)
   try {
-    await supabase.rpc('increment_invite_code_usage', { code_text: code });
+    await supabase.rpc('increment_invite_code_usage', { code: code });
   } catch (e) {
     console.warn('Could not increment invite code usage:', e);
   }
