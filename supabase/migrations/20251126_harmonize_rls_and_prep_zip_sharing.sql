@@ -224,14 +224,13 @@ BEGIN
         )
       )';
 
-    -- UPDATE: Users can update distributions they created OR if they're in the org
+    -- UPDATE: Users can update distributions if they're in the org
     EXECUTE 'CREATE POLICY "org_members_update_distributions"
       ON public.distributions
       FOR UPDATE
       TO authenticated
       USING (
-        distributions.submitted_by = auth.uid()
-        OR EXISTS (
+        EXISTS (
           SELECT 1
           FROM public.user_organizations uo
           WHERE uo.user_id = auth.uid()
