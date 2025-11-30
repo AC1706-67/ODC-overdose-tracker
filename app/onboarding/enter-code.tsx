@@ -28,7 +28,23 @@ export default function EnterCodeScreen() {
       ]);
     } catch (error: any) {
       console.error('Error:', error);
-      Alert.alert('Error', error.message || 'Something went wrong');
+      
+      // Check if user needs to accept terms
+      if (error.message === 'TERMS_NOT_ACCEPTED') {
+        Alert.alert(
+          'Terms Required',
+          'You must accept our Terms of Service and Privacy Policy before joining an organization.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { 
+              text: 'Accept Terms', 
+              onPress: () => router.push('/consent')
+            }
+          ]
+        );
+      } else {
+        Alert.alert('Error', error.message || 'Something went wrong');
+      }
     } finally {
       setLoading(false);
     }

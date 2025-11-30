@@ -87,6 +87,22 @@ export async function joinOrganization(orgId: string, role: string = 'Responder'
     throw new Error('You must be logged in to join an organization.');
   }
 
+  // Check if user has accepted terms
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('terms_accepted_at, privacy_accepted_at')
+    .eq('id', user.id)
+    .single();
+
+  if (profileError) {
+    console.error('Profile lookup error', profileError);
+    throw new Error('Failed to verify account status. Please try again.');
+  }
+
+  if (!profile?.terms_accepted_at || !profile?.privacy_accepted_at) {
+    throw new Error('TERMS_NOT_ACCEPTED');
+  }
+
   // Check if already a member
   const { data: existing } = await supabase
     .from('user_organizations')

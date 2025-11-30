@@ -13,12 +13,6 @@ interface DashboardChartsProps {
     females_reached: number;
     active_locations: number;
   };
-  timeSeries?: Array<{
-    day: string;
-    outreach_count: number;
-    kits_distributed: number;
-    people_reached: number;
-  }>;
 }
 
 export default function DashboardCharts({ cards, timeSeries }: DashboardChartsProps) {

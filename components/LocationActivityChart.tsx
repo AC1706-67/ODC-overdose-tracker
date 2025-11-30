@@ -6,7 +6,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { BarChart, PieChart } from 'react-native-chart-kit';
-import { BarChart3, PieChart as PieChartIcon } from 'lucide-react-native';
+import { BarChart3 } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
 

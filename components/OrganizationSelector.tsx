@@ -8,7 +8,7 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import { Building2, ChevronDown, Users, Settings } from 'lucide-react-native';
+import { Building2, ChevronDown, Users } from 'lucide-react-native';
 import { useUserOrganizations, useProfile } from '@/hooks/useOrganizations';
 import { UserOrganizationInfo } from '@/types/organization';
 

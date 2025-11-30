@@ -73,7 +73,23 @@ export default function SelectOrgScreen() {
       }
     } catch (error: any) {
       console.error('Error joining organization:', error);
-      Alert.alert('Error', error.message || 'Failed to join organization');
+      
+      // Check if user needs to accept terms
+      if (error.message === 'TERMS_NOT_ACCEPTED') {
+        Alert.alert(
+          'Terms Required',
+          'You must accept our Terms of Service and Privacy Policy before joining an organization.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { 
+              text: 'Accept Terms', 
+              onPress: () => router.push('/consent')
+            }
+          ]
+        );
+      } else {
+        Alert.alert('Error', error.message || 'Failed to join organization');
+      }
     } finally {
       setJoining(null);
     }

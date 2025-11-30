@@ -8,7 +8,7 @@ import {
   Dimensions,
   RefreshControl,
 } from 'react-native';
-import { Users, Calendar, MapPin, TrendingUp, Building } from 'lucide-react-native';
+import { Users, Calendar, TrendingUp, Building } from 'lucide-react-native';
 import { useOrg } from '@/src/context/OrgContext';
 import { fetchTeamDashboardData } from '@/src/api/teamDashboard';
 import { PieChart, BarChart } from 'react-native-chart-kit';

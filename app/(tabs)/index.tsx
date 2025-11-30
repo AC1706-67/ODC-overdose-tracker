@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -69,7 +69,7 @@ export default function IncidentScreen() {
       setSurvival('');
 
       Alert.alert('Success', 'Incident recorded successfully.');
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'Failed to record incident. It will be saved locally and synced when online.');
     } finally {
       setIsSubmitting(false);

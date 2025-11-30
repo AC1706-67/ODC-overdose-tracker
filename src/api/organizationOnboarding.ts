@@ -49,10 +49,9 @@ export async function submitCertificationRequest(values: CertificationFormValues
       throw orgLookupError;
     }
 
-    let organizationId: string;
-
+    // Check if org exists or create it
     if (existingOrgs && existingOrgs.length > 0) {
-      organizationId = existingOrgs[0].id;
+      // Org already exists, we'll use it for the certification request
     } else {
       // 2) Create org
       const slug = organizationName
@@ -60,7 +59,7 @@ export async function submitCertificationRequest(values: CertificationFormValues
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-|-$/g, '');
 
-      const { data: orgInsertData, error: orgInsertError } = await supabase
+      const { error: orgInsertError } = await supabase
         .from('organizations')
         .insert({
           name: organizationName.trim(),
@@ -75,16 +74,12 @@ export async function submitCertificationRequest(values: CertificationFormValues
           is_public: false,
           status: 'pending',
           created_by: user.id,
-        })
-        .select('id')
-        .single();
+        });
 
       if (orgInsertError) {
         console.error('Org insert error', orgInsertError);
         throw orgInsertError;
       }
-
-      organizationId = orgInsertData.id;
     }
 
     // 3) Insert certification request
@@ -128,6 +123,22 @@ export async function joinOrganizationWithCode(rawCode: string) {
 
   if (userError || !user) {
     throw new Error('You must be logged in to join an organization.');
+  }
+
+  // Check if user has accepted terms
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('terms_accepted_at, privacy_accepted_at')
+    .eq('id', user.id)
+    .single();
+
+  if (profileError) {
+    console.error('Profile lookup error', profileError);
+    throw new Error('Failed to verify account status. Please try again.');
+  }
+
+  if (!profile?.terms_accepted_at || !profile?.privacy_accepted_at) {
+    throw new Error('TERMS_NOT_ACCEPTED');
   }
 
   // 1) Look up invite code

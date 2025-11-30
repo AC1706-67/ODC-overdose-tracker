@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { TrendingUp, Target, Users, Calendar, Award, AlertTriangle } from 'lucide-react-native';
 
-const { width } = Dimensions.get('window');
+
 
 interface LocationCoverage {
   location_id: string;

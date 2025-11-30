@@ -4,27 +4,40 @@ A React Native mobile application that helps communities record acts of care and
 
 ## Features
 
-### Authentication System
-- Secure email/password login with Supabase
-- Persistent session management
-- Role-based access control
-- Automatic session restoration
+### Multi-Organization Support
+- Join multiple organizations with invite codes
+- Switch between organizations seamlessly
+- Organization-specific data isolation
+- Certified organization directory
+- Request new organization certification
+
+### Authentication & Onboarding
+- Secure email/password authentication with Supabase
+- Terms of Service and Privacy Policy acceptance tracking
+- Guided onboarding flow for new users
+- Persistent session management with automatic restoration
+- Role-based access control (Admin, Coordinator, Responder)
 
 ### Incident Reporting
 - Compassionate health incident logging
 - Anonymous data collection (ZIP code, demographics, outcomes)
 - Offline-first with automatic sync
 - Real-time validation and error handling
+- Organization-scoped data access
 
-### Kit Distribution Tracking
-- Log Narcan and harm reduction kit distributions
-- Track distribution by type and location
-- Monitor inventory and usage patterns
+### Outreach & Distribution Tracking
+- Enhanced outreach logging with team member tracking
+- Location-based analytics and coverage mapping
+- Kit distribution tracking (Narcan, harm reduction supplies)
+- Team member performance metrics
+- ZIP code-based geographic analysis
 
-### Community Dashboard
-- Real-time statistics and trends
-- Survival rates and intervention effectiveness
-- Geographic coverage analysis
+### Analytics Dashboards
+- **Health Dashboard**: Real-time incident statistics and trends
+- **Outreach Dashboard**: Distribution patterns and effectiveness
+- **Team Analytics**: Member performance and activity timelines
+- **Location Analytics**: Geographic coverage and hotspot identification
+- Survival rates and intervention effectiveness metrics
 - Demographic insights for public health planning
 
 ### Offline Capabilities
@@ -37,20 +50,32 @@ A React Native mobile application that helps communities record acts of care and
 
 - **Framework**: React Native with Expo (Managed Workflow)
 - **Navigation**: Expo Router (file-based routing)
-- **Database**: Supabase (PostgreSQL with real-time subscriptions)
-- **Authentication**: Supabase Auth
+- **Database**: Supabase (PostgreSQL with Row Level Security)
+- **Authentication**: Supabase Auth with JWT tokens
 - **Storage**: AsyncStorage for offline persistence
 - **UI**: React Native with Lucide React Native icons
+- **Charts**: Victory Native for data visualization
 - **Build**: EAS Build for Android/iOS deployment
+- **Code Quality**: ESLint with TypeScript support
 
-## Getting Started
+## Quick Start
+
+### For Testers
+
+**Android**: Download the latest APK from releases or scan the QR code provided by your organization.
+
+**iOS**: Join TestFlight using the invite link sent to your email.
+
+### For Developers
 
 ### Prerequisites
 - Node.js 18+ 
 - npm or yarn
-- Expo CLI
+- Expo CLI (`npm install -g expo-cli`)
+- EAS CLI (`npm install -g eas-cli`)
 - Android Studio (for Android development)
-- Xcode (for iOS development)
+- Xcode (for iOS development, macOS only)
+- Supabase account
 
 ### Installation
 
@@ -71,10 +96,20 @@ A React Native mobile application that helps communities record acts of care and
    # Edit .env with your Supabase credentials
    ```
 
-4. **Start development server**
+4. **Run database migrations**
+   - Open your Supabase project dashboard
+   - Go to SQL Editor
+   - Run migrations from `supabase/migrations/` in order
+
+5. **Start development server**
    ```bash
    npx expo start
    ```
+
+6. **Run on device/simulator**
+   - Press `a` for Android
+   - Press `i` for iOS (macOS only)
+   - Scan QR code with Expo Go app
 
 ### Environment Variables
 
@@ -83,6 +118,8 @@ Create a `.env` file with:
 EXPO_PUBLIC_SUPABASE_URL=your_supabase_project_url
 EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
+
+Get these from your Supabase project settings → API.
 
 ## Building & Deployment
 
@@ -117,47 +154,107 @@ Compassionate-LOG/
 ├── app/                    # Expo Router screens
 │   ├── (tabs)/            # Tab navigation screens
 │   │   ├── index.tsx      # Incident reporting
-│   │   ├── dashboard.tsx  # Analytics dashboard
-│   │   ├── distribution.tsx # Kit distribution
-│   │   └── settings.tsx   # App settings
+│   │   ├── dashboard.tsx  # Health analytics dashboard
+│   │   ├── distribution.tsx # Outreach & distribution
+│   │   └── settings.tsx   # App settings & org switcher
+│   ├── onboarding/        # Onboarding flow
+│   │   ├── index.tsx      # Onboarding entry
+│   │   ├── select-org.tsx # Certified org selection
+│   │   ├── enter-code.tsx # Invite code redemption
+│   │   └── request-org.tsx # New org certification
+│   ├── legal/             # Legal documents
+│   │   ├── terms.tsx      # Terms of Service
+│   │   └── privacy.tsx    # Privacy Policy
 │   ├── login.tsx          # Authentication screen
-│   └── _layout.tsx        # Root layout with auth gating
+│   ├── signup.tsx         # Registration with terms acceptance
+│   ├── consent.tsx        # Terms acceptance screen
+│   └── _layout.tsx        # Root layout with auth & org gating
 ├── components/            # Reusable UI components
+│   ├── TeamDashboard.tsx  # Team analytics
+│   ├── LocationAnalytics.tsx # Geographic analytics
+│   ├── DashboardCharts.tsx # Health metrics charts
+│   └── OrganizationSelector.tsx # Org switcher
 ├── hooks/                 # Custom React hooks
-├── lib/                   # Utilities and configurations
-│   └── supabase.ts       # Supabase client setup
-├── supabase/             # Database migrations
+│   ├── useIncidentStorage.ts # Incident data management
+│   ├── useDistributionStorage.ts # Distribution tracking
+│   ├── useDashboardData.ts # Dashboard data fetching
+│   └── useOrganizations.ts # Org membership management
+├── src/
+│   ├── api/              # API layer
+│   │   ├── organizationOnboarding.ts # Onboarding logic
+│   │   ├── orgMembership.ts # Org management
+│   │   ├── teamDashboard.ts # Team analytics
+│   │   └── enhancedOutreach.ts # Outreach analytics
+│   ├── context/          # React Context providers
+│   │   └── OrgContext.tsx # Organization state management
+│   └── utils/            # Utility functions
+│       ├── auth.ts       # Authentication helpers
+│       └── logger.ts     # Logging utilities
+├── supabase/             # Database migrations & functions
+│   └── migrations/       # SQL migration files
+├── types/                # TypeScript type definitions
 └── assets/               # Images and static files
 ```
 
 ## Database Schema
 
-### Tables
-- **incidents**: Health incident records
-- **distributions**: Kit distribution logs
-- **users**: Authentication and user management
+### Core Tables
+- **profiles**: User profiles with terms acceptance tracking
+- **organizations**: Organization registry with certification status
+- **user_organizations**: Multi-org membership with roles
+- **organization_invite_codes**: Secure invite code system
+- **organization_certification_requests**: New org certification workflow
+
+### Data Tables
+- **incidents**: Health incident records (org-scoped)
+- **outreach_logs**: Enhanced outreach tracking with team members and locations
+- **distributions**: Kit distribution logs (legacy, migrated to outreach_logs)
+
+### Analytics Views
+- **health_dashboard_view**: Aggregated health metrics by organization
+- **team_member_analytics**: Team performance metrics
+- **location_analytics**: Geographic coverage analysis
 
 ### Key Features
-- Row Level Security (RLS) enabled
-- Owner-bound data access
-- Real-time subscriptions
-- Automatic timestamps
+- **Row Level Security (RLS)**: Organization-scoped data isolation
+- **Multi-tenancy**: Complete data separation between organizations
+- **Audit Trails**: Created/updated timestamps on all tables
+- **Real-time Subscriptions**: Live data updates
+- **Performance Indexes**: Optimized queries for analytics
 
 ## Security & Privacy
 
-- **No PII Collection**: Only anonymous demographic data
+- **No PII Collection**: Only anonymous demographic data (ZIP codes, age ranges)
 - **HIPAA Compliant**: No personally identifiable health information
-- **Secure Authentication**: Supabase Auth with JWT tokens
-- **Data Encryption**: All data encrypted in transit and at rest
-- **Role-Based Access**: Users can only access their own data
+- **Secure Authentication**: Supabase Auth with JWT tokens and session management
+- **Data Encryption**: All data encrypted in transit (TLS) and at rest
+- **Multi-Tenant Isolation**: Complete data separation between organizations via RLS
+- **Role-Based Access Control**: Admin, Coordinator, and Responder roles
+- **Terms Acceptance Tracking**: Legal compliance with audit trail
+- **Organization-Scoped Data**: Users only access data from their organizations
+- **Invite-Only Access**: Secure invite code system for organization membership
 
 ## Testing
 
-### Manual Testing
-- Authentication flow testing
-- Offline/online sync verification
-- Cross-device compatibility testing
-- Database connection validation
+### Code Quality
+```bash
+# Run ESLint
+npx eslint src app components hooks types
+
+# Type checking
+npx tsc --noEmit
+```
+
+### Manual Testing Checklist
+- [ ] Authentication flow (signup, login, logout)
+- [ ] Terms acceptance at signup
+- [ ] Onboarding flow (select org, enter code, request certification)
+- [ ] Organization switching
+- [ ] Incident reporting with offline sync
+- [ ] Outreach logging with team members and locations
+- [ ] Dashboard data loading and visualization
+- [ ] Cross-device compatibility
+- [ ] Database connection validation
 
 ### Device Testing
 ```bash
@@ -165,14 +262,68 @@ Compassionate-LOG/
 adb install -r path/to/your.apk
 
 # Launch app
-adb shell am start -n org.Compassionate Log.log/.MainActivity
+adb shell am start -n org.compassionatelog.app/.MainActivity
+
+# View logs
+adb logcat | grep -i "compassionate"
+```
+
+### Database Verification
+```bash
+# Run verification scripts in Supabase SQL Editor
+# See: verify-legal-acceptance.sql
+# See: verify-org-isolation.sql
+# See: verify-rls-harmonization.sql
 ```
 
 ## Version History
 
+- **v1.5.2** (Current): Legal compliance, terms acceptance, code quality improvements
+- **v1.5.1**: Multi-organization support, enhanced analytics, team tracking
+- **v1.5.0**: Organization onboarding, invite codes, certification workflow
+- **v1.4.0**: Enhanced outreach logging, location analytics, team dashboards
+- **v1.3.0**: Dashboard improvements, RLS harmonization, performance optimization
+- **v1.2.0**: Multi-tenant architecture, organization isolation
 - **v1.1.0**: Authentication system, safe area fixes, universal builds
 - **v1.0.1**: Production setup, environment variables, navigation fixes
 - **v1.0.0**: Initial release with basic incident reporting
+
+## Recent Updates
+
+### Legal & Compliance
+- Terms of Service and Privacy Policy acceptance at signup
+- Consent screen for existing users
+- Version tracking for policy updates
+- Audit trail for legal compliance
+
+### Multi-Organization Features
+- Join multiple organizations with invite codes
+- Switch between organizations seamlessly
+- Organization-specific data isolation with RLS
+- Certified organization directory
+- New organization certification request workflow
+
+### Enhanced Analytics
+- Team member performance tracking
+- Location-based coverage analysis
+- Geographic hotspot identification
+- Real-time dashboard updates
+- Improved data visualization with charts
+
+### Code Quality
+- ESLint configuration with zero warnings
+- TypeScript strict mode compliance
+- Removed all unused variables and imports
+- Improved error handling and logging
+
+## Documentation
+
+- [TestFlight Setup Guide](./TESTFLIGHT_SETUP.md) - iOS deployment instructions
+- [Multi-Org Architecture](./MULTI_ORG_ARCHITECTURE.md) - System design overview
+- [Onboarding Implementation](./ONBOARDING_IMPLEMENTATION_SUMMARY.md) - Onboarding flow details
+- [Legal Acceptance](./LEGAL-ACCEPTANCE-IMPLEMENTATION.md) - Terms tracking implementation
+- [RLS Quick Reference](./RLS-QUICK-REFERENCE.md) - Database security policies
+- [Backend Functions](./BACKEND-FUNCTIONS-INVENTORY.md) - API documentation
 
 ## Contributing
 
@@ -181,6 +332,16 @@ This is a healthcare application for public health purposes. Contributions shoul
 - User experience improvements
 - Security enhancements
 - Accessibility compliance
+- Performance optimization
+- Code quality and maintainability
+
+### Development Guidelines
+- Follow TypeScript strict mode
+- Maintain ESLint compliance (zero warnings)
+- Write descriptive commit messages
+- Test on both iOS and Android
+- Document new features and APIs
+- Ensure HIPAA compliance for health data
 
 ## License
 

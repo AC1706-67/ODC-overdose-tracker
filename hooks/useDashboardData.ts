@@ -36,7 +36,7 @@ export function useDashboardData(period: string, zipCode?: string, organizationI
     try {
       // Calculate date range based on period
       const now = new Date();
-      let startDate = new Date();
+      const startDate = new Date();
       
       switch (period) {
         case 'day':

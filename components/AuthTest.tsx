@@ -16,7 +16,7 @@ export function AuthTest() {
     setTesting(true);
     try {
       // Test a simple select query
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('incidents')
         .select('count')
         .limit(1);
@@ -26,7 +26,7 @@ export function AuthTest() {
       } else {
         Alert.alert('Database Test Passed', 'Successfully connected to Supabase!');
       }
-    } catch (error) {
+    } catch {
       Alert.alert('Database Test Error', 'Unexpected error occurred');
     } finally {
       setTesting(false);

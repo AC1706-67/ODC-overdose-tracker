@@ -11,7 +11,7 @@ import { useSession } from '@/hooks/useSession';
 import { OrgProvider, useOrg } from '@/src/context/OrgContext';
 
 function WithInsetsContainer({ children }: { children: React.ReactNode }) {
-  const insets = useSafeAreaInsets();
+
   return (
     <SafeAreaView style={[styles.safeArea]} edges={['top', 'left', 'right']}>
       {/* Apply extra top padding for Android devices with odd cutouts if needed */}
@@ -44,7 +44,7 @@ function NavigationController() {
     
     const inAuth = segments[0] === 'login' || segments[0] === 'signup';
     const inOnboarding = segments[0] === 'onboarding';
-    const inTabs = segments[0] === '(tabs)';
+
     
     console.log('[Navigation] session:', !!session, 'orgStatus:', orgStatus, 'segments:', segments[0]);
     

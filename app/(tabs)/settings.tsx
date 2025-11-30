@@ -67,7 +67,7 @@ export default function SettingsScreen() {
       // Get organization name from nested select
       const orgData = membership.organizations as any;
       setOrgName(orgData?.name || 'Recovery Alliance of El Paso');
-    } catch (error) {
+    } catch {
       // Silently handle errors for new users
       setUserRole('Peer');
       setOrgName('Recovery Alliance of El Paso');

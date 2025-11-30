@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { MapPin, Navigation, Users, Calendar } from 'lucide-react-native';
 
-const { width } = Dimensions.get('window');
+
 
 interface LocationCoverage {
   location_id: string;
