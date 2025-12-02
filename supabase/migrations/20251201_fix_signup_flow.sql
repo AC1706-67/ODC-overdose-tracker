@@ -48,7 +48,7 @@ RETURNS trigger
 SECURITY DEFINER
 SET search_path = public
 LANGUAGE plpgsql
-AS $
+AS $$
 DECLARE
   default_org_id UUID;
   user_display_name TEXT;
@@ -140,7 +140,7 @@ EXCEPTION
     RAISE WARNING 'Error in handle_new_user_signup for %: %', NEW.email, SQLERRM;
     RETURN NEW;
 END;
-$;
+$$;
 
 -- ============================================================================
 -- STEP 4: Create trigger
@@ -154,7 +154,8 @@ CREATE TRIGGER on_auth_user_created
 -- STEP 5: Fix RLS policies for profiles table
 -- ============================================================================
 
--- Drop existing restrictive policies that might block inserts
+-- Drop existing policies
+DROP POLICY IF EXISTS "Enable insert for authentication" ON public.profiles;
 DROP POLICY IF EXISTS "Users can view own profile" ON public.profiles;
 DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
 DROP POLICY IF EXISTS "Managers can view org member profiles" ON public.profiles;
@@ -206,6 +207,7 @@ CREATE POLICY "Managers can view org member profiles"
 -- ============================================================================
 
 -- Drop existing policies
+DROP POLICY IF EXISTS "Enable insert for new users" ON public.user_organizations;
 DROP POLICY IF EXISTS "Users can view own memberships" ON public.user_organizations;
 DROP POLICY IF EXISTS "Managers can view org memberships" ON public.user_organizations;
 DROP POLICY IF EXISTS "Admins can manage memberships" ON public.user_organizations;
