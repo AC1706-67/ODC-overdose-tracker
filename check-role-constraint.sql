@@ -1,17 +1,20 @@
--- Check the constraint definition for user_organizations table
+-- Check the role constraint on user_organizations table
 SELECT 
-  conname, 
-  pg_get_constraintdef(c.oid) AS definition 
-FROM pg_constraint c 
-JOIN pg_class t ON c.conrelid = t.oid 
-WHERE t.relname = 'user_organizations';
+  '=== user_organizations role constraint ===' as section,
+  conname as constraint_name,
+  pg_get_constraintdef(oid) as constraint_definition
+FROM pg_constraint
+WHERE conrelid = 'public.user_organizations'::regclass
+  AND conname LIKE '%role%';
 
--- Check column types and nullability
+-- Show the table definition
 SELECT 
-  column_name, 
-  data_type, 
+  '=== user_organizations table columns ===' as section,
+  column_name,
+  data_type,
   is_nullable,
   column_default
-FROM information_schema.columns 
-WHERE table_name = 'user_organizations'
+FROM information_schema.columns
+WHERE table_schema = 'public'
+  AND table_name = 'user_organizations'
 ORDER BY ordinal_position;
