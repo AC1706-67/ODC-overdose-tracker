@@ -47,31 +47,70 @@ export default function SignUp() {
 
     setLoading(true);
     const now = new Date().toISOString();
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          terms_accepted_at: now,
-          privacy_accepted_at: now,
-          accepted_version: '1.0',
+    
+    try {
+      // Step 1: Create auth user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            terms_accepted_at: now,
+            privacy_accepted_at: now,
+            accepted_version: '1.0',
+          },
         },
-      },
-    });
-    setLoading(false);
+      });
 
-    if (error) {
-      Alert.alert('Sign up failed', error.message);
-      return;
+      if (authError) {
+        Alert.alert('Sign up failed', authError.message);
+        return;
+      }
+
+      // Step 2: Set up profile and org assignment
+      if (authData.user) {
+        if (authData.session) {
+          // User is auto-signed in (no email confirmation required)
+          // Call setup function while authenticated
+          const { error: setupError } = await supabase.rpc('handle_new_user_signup_manual', {
+            user_id: authData.user.id,
+            user_email: authData.user.email,
+            user_metadata: authData.user.user_metadata,
+          });
+
+          if (setupError) {
+            console.error('Profile setup error:', setupError);
+          }
+
+          // Sign out so they can sign in properly
+          await supabase.auth.signOut();
+          
+          Alert.alert('Success', 'Account created! You can now sign in.', [
+            {
+              text: 'OK',
+              onPress: () => router.back(),
+            },
+          ]);
+        } else {
+          // Email confirmation required - profile will be created on first login
+          Alert.alert(
+            'Check your email',
+            'Please check your email to confirm your account, then sign in.',
+            [
+              {
+                text: 'OK',
+                onPress: () => router.back(),
+              },
+            ]
+          );
+        }
+      }
+    } catch (err) {
+      Alert.alert('Error', 'An unexpected error occurred');
+      console.error('Signup error:', err);
+    } finally {
+      setLoading(false);
     }
-
-    // Success
-    Alert.alert('Success', 'Account created! You can now sign in.', [
-      {
-        text: 'OK',
-        onPress: () => router.back(),
-      },
-    ]);
   }
 
   return (

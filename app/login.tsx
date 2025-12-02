@@ -24,18 +24,43 @@ export default function Login() {
     }
 
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    setLoading(false);
+    
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (error) {
-      Alert.alert('Sign in failed', error.message);
-      return;
+      if (error) {
+        Alert.alert('Sign in failed', error.message);
+        return;
+      }
+
+      // Check if profile exists, if not create it (for users who confirmed email)
+      if (data.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('id', data.user.id)
+          .single();
+
+        if (!profile) {
+          // Profile doesn't exist, create it now
+          await supabase.rpc('handle_new_user_signup_manual', {
+            user_id: data.user.id,
+            user_email: data.user.email,
+            user_metadata: data.user.user_metadata,
+          });
+        }
+      }
+
+      router.replace('/');
+    } catch (err) {
+      console.error('Login error:', err);
+      Alert.alert('Error', 'An unexpected error occurred');
+    } finally {
+      setLoading(false);
     }
-
-    router.replace('/');
   }
 
   return (
