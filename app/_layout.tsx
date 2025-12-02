@@ -3,7 +3,7 @@ import 'react-native-get-random-values';
 
 import React, { useEffect, useState } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
-import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { View, StyleSheet } from 'react-native';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
@@ -11,13 +11,10 @@ import { useSession } from '@/hooks/useSession';
 import { OrgProvider, useOrg } from '@/src/context/OrgContext';
 
 function WithInsetsContainer({ children }: { children: React.ReactNode }) {
-
   return (
     <SafeAreaView style={[styles.safeArea]} edges={['top', 'left', 'right']}>
       {/* Apply extra top padding for Android devices with odd cutouts if needed */}
-      <View style={{ flex: 1, paddingTop: 0 }}>
-        {children}
-      </View>
+      <View style={{ flex: 1, paddingTop: 0 }}>{children}</View>
     </SafeAreaView>
   );
 }
@@ -34,48 +31,66 @@ function NavigationController() {
     const timer = setTimeout(() => {
       setIsNavigationReady(true);
     }, 100);
-    
+
     return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
     // Wait for navigation to be ready and session to be determined
     if (!isNavigationReady || session === undefined || orgLoading) return;
-    
+
     const inAuth = segments[0] === 'login' || segments[0] === 'signup';
     const inOnboarding = segments[0] === 'onboarding';
 
-    
-    console.log('[Navigation] session:', !!session, 'orgStatus:', orgStatus, 'segments:', segments[0]);
-    
+    console.log(
+      '[Navigation] session:',
+      !!session,
+      'orgStatus:',
+      orgStatus,
+      'segments:',
+      segments[0],
+    );
+
     // Not logged in → go to login
     if (!session && !inAuth) {
       console.log('[Navigation] No session, redirecting to login');
       router.replace('/login');
       return;
     }
-    
+
     // Logged in but on auth screen → go to appropriate place
     if (session && inAuth) {
       if (orgStatus === 'no-org' || orgStatus === 'error') {
-        console.log('[Navigation] Logged in, no org, redirecting to onboarding');
+        console.log(
+          '[Navigation] Logged in, no org, redirecting to onboarding',
+        );
         router.replace('/onboarding');
       } else if (orgStatus === 'ready' || orgStatus === 'skipped') {
-        console.log('[Navigation] Logged in with org or skipped, redirecting to tabs');
+        console.log(
+          '[Navigation] Logged in with org or skipped, redirecting to tabs',
+        );
         router.replace('/(tabs)');
       }
       return;
     }
-    
+
     // Logged in, no org, not in onboarding → go to onboarding (unless skipped)
-    if (session && (orgStatus === 'no-org' || orgStatus === 'error') && !inOnboarding) {
+    if (
+      session &&
+      (orgStatus === 'no-org' || orgStatus === 'error') &&
+      !inOnboarding
+    ) {
       console.log('[Navigation] User needs org, redirecting to onboarding');
       router.replace('/onboarding');
       return;
     }
-    
+
     // Logged in, has org or skipped, in onboarding → go to tabs
-    if (session && (orgStatus === 'ready' || orgStatus === 'skipped') && inOnboarding) {
+    if (
+      session &&
+      (orgStatus === 'ready' || orgStatus === 'skipped') &&
+      inOnboarding
+    ) {
       console.log('[Navigation] User has org or skipped, leaving onboarding');
       router.replace('/(tabs)');
       return;
@@ -94,7 +109,7 @@ export default function RootLayout() {
         <StatusBar style="dark" translucent={false} backgroundColor="#ffffff" />
         <WithInsetsContainer>
           <NavigationController />
-          <Stack 
+          <Stack
             screenOptions={{
               headerTransparent: false,
               contentStyle: { backgroundColor: '#ffffff', paddingTop: 0 },

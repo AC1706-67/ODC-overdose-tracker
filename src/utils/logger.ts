@@ -1,6 +1,6 @@
 /**
  * Centralized logging utility for debugging and monitoring
- * 
+ *
  * Features:
  * - Prefixed logs for easy filtering
  * - Different log levels (debug, info, warn, error)
@@ -10,7 +10,8 @@
  */
 
 const IS_DEV = __DEV__;
-const ENABLE_LOGS = IS_DEV || process.env.EXPO_PUBLIC_SHOW_DIAGNOSTICS === 'true';
+const ENABLE_LOGS =
+  IS_DEV || process.env.EXPO_PUBLIC_SHOW_DIAGNOSTICS === 'true';
 
 export enum LogLevel {
   DEBUG = 'DEBUG',
@@ -30,10 +31,16 @@ class Logger {
     this.context = context;
   }
 
-  private formatMessage(level: LogLevel, message: string, data?: LogContext): string {
+  private formatMessage(
+    level: LogLevel,
+    message: string,
+    data?: LogContext,
+  ): string {
     const timestamp = new Date().toISOString();
     const prefix = `[${timestamp}] [${this.context}] [${level}]`;
-    return data ? `${prefix} ${message} ${JSON.stringify(data)}` : `${prefix} ${message}`;
+    return data
+      ? `${prefix} ${message} ${JSON.stringify(data)}`
+      : `${prefix} ${message}`;
   }
 
   /**
@@ -67,10 +74,11 @@ class Logger {
    * Error-level logs (always logged, even in production)
    */
   error(message: string, error?: Error | any, data?: LogContext) {
-    const errorData = error instanceof Error 
-      ? { message: error.message, stack: error.stack, ...data }
-      : { error, ...data };
-    
+    const errorData =
+      error instanceof Error
+        ? { message: error.message, stack: error.stack, ...data }
+        : { error, ...data };
+
     console.error(this.formatMessage(LogLevel.ERROR, message, errorData));
   }
 
@@ -93,7 +101,7 @@ class Logger {
   async time<T>(label: string, fn: () => Promise<T>): Promise<T> {
     const start = Date.now();
     this.debug(`⏱️ Starting: ${label}`);
-    
+
     try {
       const result = await fn();
       const duration = Date.now() - start;
@@ -130,7 +138,7 @@ class Logger {
 
 /**
  * Create a logger for a specific context
- * 
+ *
  * @example
  * const logger = createLogger('AuthService');
  * logger.info('User logged in', { userId: user.id });

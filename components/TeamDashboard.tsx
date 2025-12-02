@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
   Dimensions,
   RefreshControl,
 } from 'react-native';
@@ -79,17 +78,19 @@ export default function TeamDashboard() {
   const orgPieData = stats.organization_breakdown.map((org, index) => ({
     name: org.org || 'Unknown',
     population: org.count,
-    color: ['#3b82f6', '#ef4444', '#f59e0b', '#10b981', '#8b5cf6', '#f97316'][index % 6],
+    color: ['#3b82f6', '#ef4444', '#f59e0b', '#10b981', '#8b5cf6', '#f97316'][
+      index % 6
+    ],
     legendFontColor: '#374151',
     legendFontSize: 12,
   }));
 
   // Monthly activity bar chart
   const monthlyBarData = {
-    labels: stats.monthly_activity.slice(-6).map(m => m.month.slice(0, 3)),
+    labels: stats.monthly_activity.slice(-6).map((m) => m.month.slice(0, 3)),
     datasets: [
       {
-        data: stats.monthly_activity.slice(-6).map(m => m.trips),
+        data: stats.monthly_activity.slice(-6).map((m) => m.trips),
       },
     ],
   };
@@ -103,9 +104,11 @@ export default function TeamDashboard() {
   }
 
   return (
-    <ScrollView 
+    <ScrollView
       style={styles.container}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
     >
       <View style={styles.header}>
         <Users size={24} color="#10b981" />
@@ -146,7 +149,9 @@ export default function TeamDashboard() {
             <TrendingUp size={20} color="#ef4444" />
             <Text style={styles.metricTitle}>Avg per Member</Text>
           </View>
-          <Text style={styles.metricValue}>{stats.avg_trips_per_member.toFixed(1)}</Text>
+          <Text style={styles.metricValue}>
+            {stats.avg_trips_per_member.toFixed(1)}
+          </Text>
           <Text style={styles.metricSubtext}>Trips per person</Text>
         </View>
       </View>
@@ -192,7 +197,8 @@ export default function TeamDashboard() {
         <View style={styles.emptyState}>
           <Text style={styles.emptyTitle}>👥 Team Data Coming Soon</Text>
           <Text style={styles.emptyText}>
-            Start adding team member information to outreach logs to see team analytics!
+            Start adding team member information to outreach logs to see team
+            analytics!
           </Text>
         </View>
       )}

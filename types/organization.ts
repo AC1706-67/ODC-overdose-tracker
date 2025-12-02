@@ -28,9 +28,13 @@ export interface Organization {
   updated_at: string;
 }
 
-export type OrganizationStatus = 'pending' | 'approved' | 'rejected' | 'suspended';
+export type OrganizationStatus =
+  | 'pending'
+  | 'approved'
+  | 'rejected'
+  | 'suspended';
 
-export type OrganizationType = 
+export type OrganizationType =
   | 'Health Center'
   | 'Hospital'
   | 'Community Organization'
@@ -68,13 +72,13 @@ export interface UserOrganization {
   is_active: boolean;
 }
 
-export type UserRole = 
-  | 'Owner'      // Full admin access, can delete org
-  | 'Admin'      // Full management access
-  | 'Manager'    // Can manage users and view all data
+export type UserRole =
+  | 'Owner' // Full admin access, can delete org
+  | 'Admin' // Full management access
+  | 'Manager' // Can manage users and view all data
   | 'Supervisor' // Can view all data, limited user management
-  | 'Responder'  // Can submit incidents/distributions, view own data
-  | 'Viewer';    // Read-only access to aggregated data
+  | 'Responder' // Can submit incidents/distributions, view own data
+  | 'Viewer'; // Read-only access to aggregated data
 
 export interface OrganizationInvite {
   id: string;
@@ -160,15 +164,18 @@ export interface DistributionWithOrg {
 
 // Permission checking utilities
 export const ROLE_HIERARCHY: Record<UserRole, number> = {
-  'Viewer': 1,
-  'Responder': 2,
-  'Supervisor': 3,
-  'Manager': 4,
-  'Admin': 5,
-  'Owner': 6,
+  Viewer: 1,
+  Responder: 2,
+  Supervisor: 3,
+  Manager: 4,
+  Admin: 5,
+  Owner: 6,
 };
 
-export function hasPermission(userRole: UserRole, requiredRole: UserRole): boolean {
+export function hasPermission(
+  userRole: UserRole,
+  requiredRole: UserRole,
+): boolean {
   return ROLE_HIERARCHY[userRole] >= ROLE_HIERARCHY[requiredRole];
 }
 

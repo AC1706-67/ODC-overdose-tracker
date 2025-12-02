@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
 import { useOrg } from '@/src/context/OrgContext';
 import { canUseOutreach } from '@/src/lib/featureAccess';
 import { supabase } from '@/lib/supabase';
@@ -16,8 +22,10 @@ export default function OrgDebugScreen() {
 
   const loadDebugInfo = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       if (!user) {
         setDebugInfo({ error: 'Not authenticated' });
         return;
@@ -58,7 +66,10 @@ export default function OrgDebugScreen() {
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Organization Debug Info</Text>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backButton}
+        >
           <Text style={styles.backText}>← Back</Text>
         </TouchableOpacity>
       </View>
@@ -67,15 +78,20 @@ export default function OrgDebugScreen() {
         <Text style={styles.sectionTitle}>Context State</Text>
         <Text style={styles.label}>Loading:</Text>
         <Text style={styles.value}>{loading ? 'true' : 'false'}</Text>
-        
+
         <Text style={styles.label}>Active Org ID:</Text>
         <Text style={styles.value}>{activeOrgId || 'null'}</Text>
-        
+
         <Text style={styles.label}>Active Org:</Text>
         <Text style={styles.value}>{JSON.stringify(activeOrg, null, 2)}</Text>
-        
+
         <Text style={styles.label}>Outreach Enabled:</Text>
-        <Text style={[styles.value, outreachEnabled ? styles.success : styles.error]}>
+        <Text
+          style={[
+            styles.value,
+            outreachEnabled ? styles.success : styles.error,
+          ]}
+        >
           {outreachEnabled ? 'YES ✅' : 'NO ❌'}
         </Text>
       </View>
@@ -84,38 +100,56 @@ export default function OrgDebugScreen() {
         <>
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Current User</Text>
-            <Text style={styles.value}>{JSON.stringify(debugInfo.user, null, 2)}</Text>
+            <Text style={styles.value}>
+              {JSON.stringify(debugInfo.user, null, 2)}
+            </Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>User Organizations ({debugInfo.userOrgs?.length || 0})</Text>
+            <Text style={styles.sectionTitle}>
+              User Organizations ({debugInfo.userOrgs?.length || 0})
+            </Text>
             {debugInfo.userOrgsError && (
-              <Text style={styles.error}>Error: {JSON.stringify(debugInfo.userOrgsError)}</Text>
+              <Text style={styles.error}>
+                Error: {JSON.stringify(debugInfo.userOrgsError)}
+              </Text>
             )}
             {debugInfo.userOrgs?.length === 0 && (
-              <Text style={styles.warning}>⚠️ User has NO organization memberships!</Text>
+              <Text style={styles.warning}>
+                ⚠️ User has NO organization memberships!
+              </Text>
             )}
             {debugInfo.userOrgs?.map((uo: any, idx: number) => (
               <View key={idx} style={styles.orgCard}>
-                <Text style={styles.orgName}>{uo.organizations?.name || 'Unknown'}</Text>
+                <Text style={styles.orgName}>
+                  {uo.organizations?.name || 'Unknown'}
+                </Text>
                 <Text style={styles.detail}>ID: {uo.organization_id}</Text>
                 <Text style={styles.detail}>Role: {uo.role}</Text>
-                <Text style={styles.detail}>Active: {uo.is_active ? 'Yes' : 'No'}</Text>
+                <Text style={styles.detail}>
+                  Active: {uo.is_active ? 'Yes' : 'No'}
+                </Text>
               </View>
             ))}
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>All Organizations ({debugInfo.allOrgs?.length || 0})</Text>
+            <Text style={styles.sectionTitle}>
+              All Organizations ({debugInfo.allOrgs?.length || 0})
+            </Text>
             {debugInfo.allOrgsError && (
-              <Text style={styles.error}>Error: {JSON.stringify(debugInfo.allOrgsError)}</Text>
+              <Text style={styles.error}>
+                Error: {JSON.stringify(debugInfo.allOrgsError)}
+              </Text>
             )}
             {debugInfo.allOrgs?.map((org: any, idx: number) => (
               <View key={idx} style={styles.orgCard}>
                 <Text style={styles.orgName}>{org.name}</Text>
                 <Text style={styles.detail}>Slug: {org.slug}</Text>
                 <Text style={styles.detail}>ID: {org.id}</Text>
-                <Text style={styles.detail}>Active: {org.is_active ? 'Yes' : 'No'}</Text>
+                <Text style={styles.detail}>
+                  Active: {org.is_active ? 'Yes' : 'No'}
+                </Text>
               </View>
             ))}
           </View>
@@ -126,10 +160,13 @@ export default function OrgDebugScreen() {
               <Text style={styles.warning}>
                 ❌ User has no organization memberships.{'\n\n'}
                 Run this SQL in Supabase:{'\n\n'}
-                INSERT INTO user_organizations (user_id, organization_id, role, is_active){'\n'}
-                VALUES ('{debugInfo.user?.id}', 'org-id-here', 'Responder', true);
+                INSERT INTO user_organizations (user_id, organization_id, role,
+                is_active){'\n'}
+                VALUES ('{debugInfo.user?.id}', 'org-id-here', 'Responder',
+                true);
               </Text>
-            ) : debugInfo.userOrgs?.filter((uo: any) => uo.is_active).length === 0 ? (
+            ) : debugInfo.userOrgs?.filter((uo: any) => uo.is_active).length ===
+              0 ? (
               <Text style={styles.warning}>
                 ⚠️ User has organizations but none are active.{'\n\n'}
                 Run this SQL:{'\n\n'}

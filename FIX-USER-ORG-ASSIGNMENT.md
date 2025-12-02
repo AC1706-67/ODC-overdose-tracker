@@ -1,16 +1,18 @@
 # Fix User Organization Assignment
 
 ## Problem
+
 Your test user doesn't have an organization assigned in the `user_organizations` table, causing `activeOrg` to be null and the Outreach tab to not show.
 
 ## Solution Steps
 
 ### Step 1: Check Current Status
+
 Run this in Supabase SQL Editor to see which users have organizations:
 
 ```sql
 -- File: check-user-org-status.sql
-SELECT 
+SELECT
   p.email,
   p.id as user_id,
   o.name as org_name,
@@ -26,10 +28,11 @@ ORDER BY p.email;
 ### Step 2: Assign User to Organization
 
 **Option A: Assign ALL users without an org (Recommended)**
+
 ```sql
 -- File: assign-user-to-org.sql (OPTION 1)
 INSERT INTO user_organizations (user_id, organization_id, role, is_active)
-SELECT 
+SELECT
   p.id as user_id,
   'a5cc0f8b-ee15-48ba-a0b5-0ad7f2b4485f' as organization_id, -- Anonymous Haven AI
   'Responder' as role,
@@ -41,10 +44,11 @@ ON CONFLICT DO NOTHING;
 ```
 
 **Option B: Assign a specific user by email**
+
 ```sql
 -- File: assign-user-to-org.sql (OPTION 2)
 INSERT INTO user_organizations (user_id, organization_id, role, is_active)
-SELECT 
+SELECT
   p.id as user_id,
   'a5cc0f8b-ee15-48ba-a0b5-0ad7f2b4485f' as organization_id,
   'Admin' as role,  -- Change to 'Responder' or 'Viewer' as needed
@@ -55,8 +59,9 @@ ON CONFLICT DO NOTHING;
 ```
 
 ### Step 3: Verify Assignment
+
 ```sql
-SELECT 
+SELECT
   p.email,
   o.name as org_name,
   uo.role,
@@ -70,6 +75,7 @@ ORDER BY p.email;
 ## Code Changes Made
 
 ### 1. OrgContext Auto-Redirect to Onboarding
+
 Updated `src/context/OrgContext.tsx` to automatically redirect users without an organization to the onboarding flow:
 
 ```typescript
@@ -83,15 +89,18 @@ if (!membership?.organization_id) {
 ```
 
 ### 2. Onboarding Screens Set Active Org
+
 Updated both onboarding screens to set the active org after joining:
 
 **app/onboarding/select-org.tsx:**
+
 ```typescript
 // After joining, set active org
 await setActiveOrgId(orgId);
 ```
 
 **app/onboarding/enter-code.tsx:**
+
 ```typescript
 // After joining with code, set active org
 await setActiveOrgId(inviteCode.organization_id);
@@ -100,6 +109,7 @@ await setActiveOrgId(inviteCode.organization_id);
 ## Testing the Fix
 
 ### After Running SQL Assignment:
+
 1. **Log out** of the app completely
 2. **Log back in** with your test account
 3. The app should now:
@@ -108,6 +118,7 @@ await setActiveOrgId(inviteCode.organization_id);
    - Show the Outreach tab (if your org has `outreach_enabled = true`)
 
 ### If User Still Has No Org:
+
 1. The app will automatically redirect to `/onboarding`
 2. User can:
    - Enter an organization code
@@ -118,13 +129,15 @@ await setActiveOrgId(inviteCode.organization_id);
 ## Available Organizations
 
 Check which organizations exist:
+
 ```sql
-SELECT id, name, slug, is_active 
-FROM organizations 
+SELECT id, name, slug, is_active
+FROM organizations
 ORDER BY name;
 ```
 
 The default org used in the scripts:
+
 - **Name:** Anonymous Haven AI
 - **ID:** `a5cc0f8b-ee15-48ba-a0b5-0ad7f2b4485f`
 - **Slug:** `anonymous-haven-ai`

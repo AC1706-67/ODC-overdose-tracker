@@ -3,7 +3,7 @@ const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(
   process.env.EXPO_PUBLIC_SUPABASE_URL,
-  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
+  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
 );
 
 async function debugHealthIncidents() {
@@ -15,7 +15,7 @@ async function debugHealthIncidents() {
     .from('health_dashboard_v1')
     .select('*')
     .limit(5);
-  
+
   if (viewError) {
     console.log('❌ View error:', viewError.message);
   } else {
@@ -28,7 +28,7 @@ async function debugHealthIncidents() {
     .from('incidents')
     .select('*')
     .limit(5);
-  
+
   if (incError) {
     console.log('❌ Incidents error:', incError.message);
   } else {
@@ -43,7 +43,7 @@ async function debugHealthIncidents() {
   const { count, error: countError } = await supabase
     .from('incidents')
     .select('*', { count: 'exact', head: true });
-  
+
   if (countError) {
     console.log('❌ Count error:', countError.message);
   } else {
@@ -54,19 +54,24 @@ async function debugHealthIncidents() {
   console.log('\n4. Checking incidents from last 30 days...');
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-  
+
   const { data: recentIncidents, error: recentError } = await supabase
     .from('incidents')
     .select('*')
     .gte('incident_date', thirtyDaysAgo.toISOString())
     .limit(10);
-  
+
   if (recentError) {
     console.log('❌ Recent incidents error:', recentError.message);
   } else {
-    console.log(`✅ Found ${recentIncidents?.length || 0} incidents in last 30 days`);
+    console.log(
+      `✅ Found ${recentIncidents?.length || 0} incidents in last 30 days`,
+    );
     if (recentIncidents && recentIncidents.length > 0) {
-      console.log('Sample recent incident:', JSON.stringify(recentIncidents[0], null, 2));
+      console.log(
+        'Sample recent incident:',
+        JSON.stringify(recentIncidents[0], null, 2),
+      );
     }
   }
 
@@ -76,7 +81,7 @@ async function debugHealthIncidents() {
     .from('incidents')
     .select('*')
     .limit(1);
-  
+
   if (!structError && structure && structure.length > 0) {
     console.log('Table columns:', Object.keys(structure[0]));
   }

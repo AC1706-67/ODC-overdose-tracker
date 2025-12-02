@@ -6,19 +6,19 @@ export interface OrgDashboardKPIs {
   total_incidents: number;
   narcan_incidents: number;
   survival_rate: number;
-  
+
   // Card 2: Outreach Activities
   total_outreach: number;
   total_kits: number;
-  
+
   // Card 3: People Reached
   people_reached: number;
   avg_people_per_outreach: number;
-  
+
   // Card 4: Geographic Coverage
   unique_zip_codes: number;
   active_locations: number;
-  
+
   // Meta
   last_updated: string;
 }
@@ -75,7 +75,8 @@ export function useOrgDashboard(organizationId: string | null = null) {
             total_outreach: Number(kpiData.total_outreach) || 0,
             total_kits: Number(kpiData.total_kits) || 0,
             people_reached: Number(kpiData.people_reached) || 0,
-            avg_people_per_outreach: Number(kpiData.avg_people_per_outreach) || 0,
+            avg_people_per_outreach:
+              Number(kpiData.avg_people_per_outreach) || 0,
             unique_zip_codes: Number(kpiData.unique_zip_codes) || 0,
             active_locations: Number(kpiData.active_locations) || 0,
             last_updated: kpiData.last_updated || new Date().toISOString(),
@@ -99,9 +100,12 @@ export function useOrgDashboard(organizationId: string | null = null) {
       } catch (seriesErr) {
         console.warn('Time series data unavailable:', seriesErr);
       }
-
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Dashboard temporarily unavailable');
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Dashboard temporarily unavailable',
+      );
       console.error('Dashboard fetch error:', err);
     } finally {
       setLoading(false);
@@ -135,8 +139,10 @@ export function useOrgDashboardOptimized(organizationId: string | null = null) {
       setLoading(true);
       setError(null);
 
-      const { data: result, error: fetchError } = await supabase
-        .rpc('get_dashboard_data', { org_id: organizationId });
+      const { data: result, error: fetchError } = await supabase.rpc(
+        'get_dashboard_data',
+        { org_id: organizationId },
+      );
 
       if (fetchError) throw fetchError;
 
@@ -158,9 +164,10 @@ export function useOrgDashboardOptimized(organizationId: string | null = null) {
           timeSeries: row.timeseries_data || [],
         });
       }
-
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch dashboard data');
+      setError(
+        err instanceof Error ? err.message : 'Failed to fetch dashboard data',
+      );
       console.error('Dashboard fetch error:', err);
     } finally {
       setLoading(false);

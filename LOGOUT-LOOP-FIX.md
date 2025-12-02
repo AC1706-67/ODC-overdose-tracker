@@ -1,7 +1,9 @@
 # Logout Loop Fix - Complete
 
 ## Problem
+
 Users without an organization were being logged out in an infinite loop:
+
 1. User logs in successfully
 2. OrgContext loads and finds no organization
 3. OrgContext calls `router.replace('/onboarding')`
@@ -9,6 +11,7 @@ Users without an organization were being logged out in an infinite loop:
 5. User logs in again → repeat
 
 ## Root Cause
+
 **Mixing auth state with org state in navigation logic**
 
 The OrgContext was trying to handle navigation directly, and the root layout was treating "no org" as "not authenticated".
@@ -16,18 +19,22 @@ The OrgContext was trying to handle navigation directly, and the root layout was
 ## Solution
 
 ### 1. Added Status to OrgContext
+
 ```typescript
 export type OrgStatus = 'loading' | 'no-org' | 'ready' | 'error';
 ```
 
 **Status meanings:**
+
 - `loading` - Still checking if user has an org
 - `no-org` - User is authenticated but has no organization
 - `ready` - User has an active organization
 - `error` - Error loading organization data (network issue, etc.)
 
 ### 2. OrgContext No Longer Navigates
+
 **Before:**
+
 ```typescript
 if (!membership) {
   router.replace('/onboarding'); // ❌ Causes loop
@@ -35,6 +42,7 @@ if (!membership) {
 ```
 
 **After:**
+
 ```typescript
 if (!membership) {
   setStatus('no-org'); // ✅ Just set status
@@ -44,6 +52,7 @@ if (!membership) {
 ```
 
 ### 3. Centralized Navigation Logic
+
 Created `NavigationController` component in `app/_layout.tsx` that handles ALL routing:
 
 ```typescript
@@ -53,7 +62,11 @@ if (!session && !inAuth) {
 }
 
 // Logged in but no org → onboarding
-if (session && (orgStatus === 'no-org' || orgStatus === 'error') && !inOnboarding) {
+if (
+  session &&
+  (orgStatus === 'no-org' || orgStatus === 'error') &&
+  !inOnboarding
+) {
   router.replace('/onboarding');
 }
 
@@ -66,21 +79,25 @@ if (session && orgStatus === 'ready' && inOnboarding) {
 ## Key Principles
 
 ### ✅ Separation of Concerns
+
 - **Auth Context** - Handles login/logout state
 - **Org Context** - Handles organization loading state
 - **Navigation Controller** - Handles routing based on both states
 
 ### ✅ Status Over Actions
+
 - Contexts expose **status** (what state we're in)
 - Navigation controller takes **actions** (where to go)
 
 ### ✅ Single Source of Truth
+
 - Only `NavigationController` calls `router.replace()`
 - No navigation logic scattered across contexts
 
 ## Flow Diagrams
 
 ### New User Flow
+
 ```
 1. User signs up
    ↓
@@ -96,6 +113,7 @@ if (session && orgStatus === 'ready' && inOnboarding) {
 ```
 
 ### Existing User Flow
+
 ```
 1. User logs in
    ↓
@@ -109,6 +127,7 @@ if (session && orgStatus === 'ready' && inOnboarding) {
 ```
 
 ### Error Handling Flow
+
 ```
 1. User logs in
    ↓
@@ -124,6 +143,7 @@ if (session && orgStatus === 'ready' && inOnboarding) {
 ## Testing
 
 ### Test 1: New User Without Org
+
 1. Create new account
 2. Should go to onboarding screen
 3. Should NOT be logged out
@@ -131,11 +151,13 @@ if (session && orgStatus === 'ready' && inOnboarding) {
 5. Should go to main app
 
 ### Test 2: Existing User With Org
+
 1. Log in with existing account
 2. Should load org
 3. Should go directly to main app
 
 ### Test 3: Network Error
+
 1. Log in
 2. Disconnect network during org load
 3. Should go to onboarding (not logout)
@@ -145,12 +167,14 @@ if (session && orgStatus === 'ready' && inOnboarding) {
 ## Files Changed
 
 ### `src/context/OrgContext.tsx`
+
 - Added `OrgStatus` type
 - Added `status` to context
 - Removed all `router.replace()` calls
 - Set status instead of navigating
 
 ### `app/_layout.tsx`
+
 - Created `NavigationController` component
 - Centralized all navigation logic
 - Uses both `session` and `orgStatus` to decide routing
@@ -159,6 +183,7 @@ if (session && orgStatus === 'ready' && inOnboarding) {
 ## Debug Logging
 
 The NavigationController logs every routing decision:
+
 ```
 [Navigation] session: true, orgStatus: no-org, segments: login
 [Navigation] User needs org, redirecting to onboarding
@@ -169,15 +194,19 @@ Check console logs to see why navigation is happening.
 ## Common Issues
 
 ### Issue: Still getting logged out
+
 **Check:** Is the onboarding screen registered in the Stack?
+
 ```typescript
 <Stack.Screen name="onboarding" options={{ headerShown: false }} />
 ```
 
 ### Issue: Stuck on loading screen
+
 **Check:** Is OrgContext setting `loading: false` in all code paths?
 
 ### Issue: Goes to onboarding even with org
+
 **Check:** Is the org query returning data? Check console logs.
 
 ## Next Steps

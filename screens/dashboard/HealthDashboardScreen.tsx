@@ -8,7 +8,14 @@ import {
   Dimensions,
   TouchableOpacity,
 } from 'react-native';
-import { Heart, Users, CheckCircle, XCircle, MapPin, Calendar } from 'lucide-react-native';
+import {
+  Heart,
+  Users,
+  CheckCircle,
+  XCircle,
+  MapPin,
+  Calendar,
+} from 'lucide-react-native';
 import { supabase } from '@/lib/supabase';
 import LoadingSkeleton from '@/components/LoadingSkeleton';
 
@@ -38,39 +45,39 @@ function getFiscalYearStart(): Date {
   const now = new Date();
   const currentYear = now.getFullYear();
   const fiscalYearStart = new Date(currentYear, 9, 1); // October 1 (month is 0-indexed)
-  
+
   // If we're before October, use last year's fiscal year
   if (now < fiscalYearStart) {
     fiscalYearStart.setFullYear(currentYear - 1);
   }
-  
+
   return fiscalYearStart;
 }
 
 // Helper to get date range for time period
 function getDateRange(period: TimePeriod): Date | null {
   const now = new Date();
-  
+
   switch (period) {
     case '30d':
       const thirtyDaysAgo = new Date(now);
       thirtyDaysAgo.setDate(now.getDate() - 30);
       return thirtyDaysAgo;
-    
+
     case '90d':
       const ninetyDaysAgo = new Date(now);
       ninetyDaysAgo.setDate(now.getDate() - 90);
       return ninetyDaysAgo;
-    
+
     case 'ytd':
       return new Date(now.getFullYear(), 0, 1); // January 1
-    
+
     case 'fiscal':
       return getFiscalYearStart();
-    
+
     case 'all':
       return null; // No date filter
-    
+
     default:
       return null;
   }
@@ -100,12 +107,10 @@ export default function HealthDashboardScreen() {
       console.log('[HealthDashboard] Fetching data for period:', timePeriod);
 
       const startDate = getDateRange(timePeriod);
-      
+
       // Query incidents directly with date filter
-      let query = supabase
-        .from('incidents')
-        .select('*');
-      
+      let query = supabase.from('incidents').select('*');
+
       if (startDate) {
         query = query.gte('timestamp', startDate.toISOString());
       }
@@ -120,10 +125,18 @@ export default function HealthDashboardScreen() {
       if (incidents) {
         // Calculate metrics from incidents
         const totalIncidents = incidents.length;
-        const withNarcan = incidents.filter(i => i.narcan_used === true).length;
-        const survived = incidents.filter(i => i.survival === 'Survived').length;
-        const deceased = incidents.filter(i => i.survival === 'Deceased').length;
-        const uniqueZips = new Set(incidents.map(i => i.zip_code).filter(Boolean)).size;
+        const withNarcan = incidents.filter(
+          (i) => i.narcan_used === true,
+        ).length;
+        const survived = incidents.filter(
+          (i) => i.survival === 'Survived',
+        ).length;
+        const deceased = incidents.filter(
+          (i) => i.survival === 'Deceased',
+        ).length;
+        const uniqueZips = new Set(
+          incidents.map((i) => i.zip_code).filter(Boolean),
+        ).size;
 
         setData({
           total_incidents: totalIncidents,
@@ -142,7 +155,6 @@ export default function HealthDashboardScreen() {
           uniqueZips,
         });
       }
-      
     } catch (error) {
       console.error('[HealthDashboard] Fetch error:', error);
     } finally {
@@ -163,8 +175,8 @@ export default function HealthDashboardScreen() {
 
   return (
     <View style={styles.container}>
-      <ScrollView 
-        style={styles.scrollView} 
+      <ScrollView
+        style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -172,8 +184,8 @@ export default function HealthDashboardScreen() {
       >
         {/* Time Period Selector */}
         <View style={styles.periodSelector}>
-          <ScrollView 
-            horizontal 
+          <ScrollView
+            horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.periodScrollContent}
           >
@@ -189,7 +201,8 @@ export default function HealthDashboardScreen() {
                 <Text
                   style={[
                     styles.periodButtonText,
-                    timePeriod === period.value && styles.periodButtonTextActive,
+                    timePeriod === period.value &&
+                      styles.periodButtonTextActive,
                   ]}
                 >
                   {period.label}
@@ -204,7 +217,7 @@ export default function HealthDashboardScreen() {
           <View style={styles.periodInfoLeft}>
             <Calendar size={16} color="#6b7280" />
             <Text style={styles.periodText}>
-              {TIME_PERIODS.find(p => p.value === timePeriod)?.label}
+              {TIME_PERIODS.find((p) => p.value === timePeriod)?.label}
             </Text>
           </View>
           <Text style={styles.lastUpdated}>
@@ -220,9 +233,7 @@ export default function HealthDashboardScreen() {
               <Text style={styles.metricTitle}>Health Incidents</Text>
             </View>
             <Text style={styles.metricValue}>{data.total_incidents}</Text>
-            <Text style={styles.metricSubtext}>
-              Total reported incidents
-            </Text>
+            <Text style={styles.metricSubtext}>Total reported incidents</Text>
           </View>
 
           <View style={styles.metricCard}>
@@ -231,9 +242,7 @@ export default function HealthDashboardScreen() {
               <Text style={styles.metricTitle}>With Narcan</Text>
             </View>
             <Text style={styles.metricValue}>{data.with_narcan}</Text>
-            <Text style={styles.metricSubtext}>
-              Narcan administered
-            </Text>
+            <Text style={styles.metricSubtext}>Narcan administered</Text>
           </View>
 
           <View style={styles.metricCard}>
@@ -242,9 +251,7 @@ export default function HealthDashboardScreen() {
               <Text style={styles.metricTitle}>Survived</Text>
             </View>
             <Text style={styles.metricValue}>{data.survived}</Text>
-            <Text style={styles.metricSubtext}>
-              Positive outcomes
-            </Text>
+            <Text style={styles.metricSubtext}>Positive outcomes</Text>
           </View>
 
           <View style={styles.metricCard}>
@@ -253,9 +260,7 @@ export default function HealthDashboardScreen() {
               <Text style={styles.metricTitle}>Deceased</Text>
             </View>
             <Text style={styles.metricValue}>{data.deceased}</Text>
-            <Text style={styles.metricSubtext}>
-              Fatal outcomes
-            </Text>
+            <Text style={styles.metricSubtext}>Fatal outcomes</Text>
           </View>
 
           <View style={styles.metricCard}>
@@ -264,9 +269,7 @@ export default function HealthDashboardScreen() {
               <Text style={styles.metricTitle}>Geographic Coverage</Text>
             </View>
             <Text style={styles.metricValue}>{data.unique_zips}</Text>
-            <Text style={styles.metricSubtext}>
-              ZIP codes affected
-            </Text>
+            <Text style={styles.metricSubtext}>ZIP codes affected</Text>
           </View>
         </View>
 
@@ -277,19 +280,17 @@ export default function HealthDashboardScreen() {
             <View style={styles.summaryItem}>
               <Text style={styles.summaryLabel}>Survival Rate</Text>
               <Text style={styles.summaryValue}>
-                {data.total_incidents > 0 
+                {data.total_incidents > 0
                   ? `${Math.round((data.survived / data.total_incidents) * 100)}%`
-                  : '0%'
-                }
+                  : '0%'}
               </Text>
             </View>
             <View style={styles.summaryItem}>
               <Text style={styles.summaryLabel}>Narcan Usage</Text>
               <Text style={styles.summaryValue}>
-                {data.total_incidents > 0 
+                {data.total_incidents > 0
                   ? `${Math.round((data.with_narcan / data.total_incidents) * 100)}%`
-                  : '0%'
-                }
+                  : '0%'}
               </Text>
             </View>
           </View>

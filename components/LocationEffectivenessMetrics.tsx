@@ -1,14 +1,13 @@
 import React from 'react';
+import { View, Text, StyleSheet, FlatList } from 'react-native';
 import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  Dimensions,
-} from 'react-native';
-import { TrendingUp, Target, Users, Calendar, Award, AlertTriangle } from 'lucide-react-native';
-
-
+  TrendingUp,
+  Target,
+  Users,
+  Calendar,
+  Award,
+  AlertTriangle,
+} from 'lucide-react-native';
 
 interface LocationCoverage {
   location_id: string;
@@ -42,7 +41,9 @@ interface EffectivenessMetric {
   insights: string[];
 }
 
-export default function LocationEffectivenessMetrics({ locations }: LocationEffectivenessMetricsProps) {
+export default function LocationEffectivenessMetrics({
+  locations,
+}: LocationEffectivenessMetricsProps) {
   if (locations.length === 0) {
     return (
       <View style={styles.section}>
@@ -51,7 +52,8 @@ export default function LocationEffectivenessMetrics({ locations }: LocationEffe
           <Target size={48} color="#d1d5db" />
           <Text style={styles.emptyTitle}>No Effectiveness Data</Text>
           <Text style={styles.emptyText}>
-            Effectiveness metrics will appear here once location activity data is available.
+            Effectiveness metrics will appear here once location activity data
+            is available.
           </Text>
         </View>
       </View>
@@ -61,31 +63,35 @@ export default function LocationEffectivenessMetrics({ locations }: LocationEffe
   // Calculate effectiveness metrics for each location
   const calculateEffectivenessMetrics = (): EffectivenessMetric[] => {
     return locations
-      .filter(loc => loc.visits_count > 0) // Only locations with activity
-      .map(location => {
+      .filter((loc) => loc.visits_count > 0) // Only locations with activity
+      .map((location) => {
         // Basic efficiency metrics
-        const peoplePerVisit = location.total_people_reached / location.visits_count;
-        const kitsPerVisit = location.total_kits_distributed / location.visits_count;
-        const teamEfficiency = location.unique_team_members > 0 
-          ? location.total_people_reached / location.unique_team_members 
-          : 0;
-        
+        const peoplePerVisit =
+          location.total_people_reached / location.visits_count;
+        const kitsPerVisit =
+          location.total_kits_distributed / location.visits_count;
+        const teamEfficiency =
+          location.unique_team_members > 0
+            ? location.total_people_reached / location.unique_team_members
+            : 0;
+
         // Consistency score (active days vs total visits)
-        const consistencyScore = location.active_days > 0 
-          ? Math.min(location.visits_count / location.active_days, 3) / 3 * 100 
-          : 0;
+        const consistencyScore =
+          location.active_days > 0
+            ? (Math.min(location.visits_count / location.active_days, 3) / 3) *
+              100
+            : 0;
 
         // Overall effectiveness score (weighted average)
         const normalizedPeoplePerVisit = Math.min(peoplePerVisit / 10, 1) * 100; // Normalize to 0-100
         const normalizedKitsPerVisit = Math.min(kitsPerVisit / 5, 1) * 100; // Normalize to 0-100
         const normalizedTeamEfficiency = Math.min(teamEfficiency / 20, 1) * 100; // Normalize to 0-100
-        
-        const effectivenessScore = (
-          normalizedPeoplePerVisit * 0.4 + 
-          normalizedKitsPerVisit * 0.3 + 
-          normalizedTeamEfficiency * 0.2 + 
-          consistencyScore * 0.1
-        );
+
+        const effectivenessScore =
+          normalizedPeoplePerVisit * 0.4 +
+          normalizedKitsPerVisit * 0.3 +
+          normalizedTeamEfficiency * 0.2 +
+          consistencyScore * 0.1;
 
         // Categorize effectiveness
         let category: 'high' | 'medium' | 'low';
@@ -95,7 +101,7 @@ export default function LocationEffectivenessMetrics({ locations }: LocationEffe
 
         // Generate insights
         const insights: string[] = [];
-        
+
         if (peoplePerVisit >= 8) {
           insights.push('High people reach per visit');
         } else if (peoplePerVisit < 3) {
@@ -144,34 +150,59 @@ export default function LocationEffectivenessMetrics({ locations }: LocationEffe
   const effectivenessMetrics = calculateEffectivenessMetrics();
 
   // Summary statistics
-  const highPerformers = effectivenessMetrics.filter(m => m.category === 'high').length;
-  const mediumPerformers = effectivenessMetrics.filter(m => m.category === 'medium').length;
-  const lowPerformers = effectivenessMetrics.filter(m => m.category === 'low').length;
-  
-  const avgEffectiveness = effectivenessMetrics.length > 0 
-    ? Math.round(effectivenessMetrics.reduce((sum, m) => sum + m.effectiveness_score, 0) / effectivenessMetrics.length)
-    : 0;
+  const highPerformers = effectivenessMetrics.filter(
+    (m) => m.category === 'high',
+  ).length;
+  const mediumPerformers = effectivenessMetrics.filter(
+    (m) => m.category === 'medium',
+  ).length;
+  const lowPerformers = effectivenessMetrics.filter(
+    (m) => m.category === 'low',
+  ).length;
+
+  const avgEffectiveness =
+    effectivenessMetrics.length > 0
+      ? Math.round(
+          effectivenessMetrics.reduce(
+            (sum, m) => sum + m.effectiveness_score,
+            0,
+          ) / effectivenessMetrics.length,
+        )
+      : 0;
 
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case 'high': return '#059669';
-      case 'medium': return '#f59e0b';
-      case 'low': return '#ef4444';
-      default: return '#6b7280';
+      case 'high':
+        return '#059669';
+      case 'medium':
+        return '#f59e0b';
+      case 'low':
+        return '#ef4444';
+      default:
+        return '#6b7280';
     }
   };
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
-      case 'high': return <Award size={16} color="#059669" />;
-      case 'medium': return <TrendingUp size={16} color="#f59e0b" />;
-      case 'low': return <AlertTriangle size={16} color="#ef4444" />;
-      default: return <Target size={16} color="#6b7280" />;
+      case 'high':
+        return <Award size={16} color="#059669" />;
+      case 'medium':
+        return <TrendingUp size={16} color="#f59e0b" />;
+      case 'low':
+        return <AlertTriangle size={16} color="#ef4444" />;
+      default:
+        return <Target size={16} color="#6b7280" />;
     }
   };
 
   const renderMetricItem = ({ item }: { item: EffectivenessMetric }) => (
-    <View style={[styles.metricCard, { borderLeftColor: getCategoryColor(item.category) }]}>
+    <View
+      style={[
+        styles.metricCard,
+        { borderLeftColor: getCategoryColor(item.category) },
+      ]}
+    >
       <View style={styles.metricHeader}>
         <View style={styles.locationInfo}>
           <Text style={styles.locationName} numberOfLines={1}>
@@ -179,13 +210,23 @@ export default function LocationEffectivenessMetrics({ locations }: LocationEffe
           </Text>
           <View style={styles.categoryBadge}>
             {getCategoryIcon(item.category)}
-            <Text style={[styles.categoryText, { color: getCategoryColor(item.category) }]}>
+            <Text
+              style={[
+                styles.categoryText,
+                { color: getCategoryColor(item.category) },
+              ]}
+            >
               {item.category.toUpperCase()}
             </Text>
           </View>
         </View>
         <View style={styles.scoreContainer}>
-          <Text style={[styles.effectivenessScore, { color: getCategoryColor(item.category) }]}>
+          <Text
+            style={[
+              styles.effectivenessScore,
+              { color: getCategoryColor(item.category) },
+            ]}
+          >
             {item.effectiveness_score}%
           </Text>
         </View>
@@ -197,19 +238,19 @@ export default function LocationEffectivenessMetrics({ locations }: LocationEffe
           <Text style={styles.miniMetricValue}>{item.people_per_visit}</Text>
           <Text style={styles.miniMetricLabel}>People/Visit</Text>
         </View>
-        
+
         <View style={styles.miniMetric}>
           <Target size={14} color="#6b7280" />
           <Text style={styles.miniMetricValue}>{item.kits_per_visit}</Text>
           <Text style={styles.miniMetricLabel}>Kits/Visit</Text>
         </View>
-        
+
         <View style={styles.miniMetric}>
           <TrendingUp size={14} color="#6b7280" />
           <Text style={styles.miniMetricValue}>{item.team_efficiency}</Text>
           <Text style={styles.miniMetricLabel}>Team Eff.</Text>
         </View>
-        
+
         <View style={styles.miniMetric}>
           <Calendar size={14} color="#6b7280" />
           <Text style={styles.miniMetricValue}>{item.consistency_score}%</Text>
@@ -243,18 +284,26 @@ export default function LocationEffectivenessMetrics({ locations }: LocationEffe
           <Text style={styles.summaryValue}>{avgEffectiveness}%</Text>
           <Text style={styles.summaryLabel}>Avg Effectiveness</Text>
         </View>
-        
+
         <View style={styles.performanceBreakdown}>
           <View style={styles.performanceItem}>
-            <View style={[styles.performanceDot, { backgroundColor: '#059669' }]} />
+            <View
+              style={[styles.performanceDot, { backgroundColor: '#059669' }]}
+            />
             <Text style={styles.performanceText}>High: {highPerformers}</Text>
           </View>
           <View style={styles.performanceItem}>
-            <View style={[styles.performanceDot, { backgroundColor: '#f59e0b' }]} />
-            <Text style={styles.performanceText}>Medium: {mediumPerformers}</Text>
+            <View
+              style={[styles.performanceDot, { backgroundColor: '#f59e0b' }]}
+            />
+            <Text style={styles.performanceText}>
+              Medium: {mediumPerformers}
+            </Text>
           </View>
           <View style={styles.performanceItem}>
-            <View style={[styles.performanceDot, { backgroundColor: '#ef4444' }]} />
+            <View
+              style={[styles.performanceDot, { backgroundColor: '#ef4444' }]}
+            />
             <Text style={styles.performanceText}>Low: {lowPerformers}</Text>
           </View>
         </View>

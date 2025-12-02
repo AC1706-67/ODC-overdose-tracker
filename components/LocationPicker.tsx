@@ -30,11 +30,11 @@ interface LocationPickerProps {
   onLegacyLocationChange?: (text: string) => void;
 }
 
-export default function LocationPicker({ 
-  selectedLocation, 
-  onLocationChange, 
+export default function LocationPicker({
+  selectedLocation,
+  onLocationChange,
   legacyLocationText = '',
-  onLegacyLocationChange 
+  onLegacyLocationChange,
 }: LocationPickerProps) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [availableLocations, setAvailableLocations] = useState<Location[]>([]);
@@ -78,10 +78,10 @@ export default function LocationPicker({
 
     setLoading(true);
     setCreateError('');
-    
+
     try {
       const { data, error } = await supabase.rpc('create_location_simple', {
-        p_name_or_intersection: newLocationInput.trim()
+        p_name_or_intersection: newLocationInput.trim(),
       });
 
       if (error) {
@@ -99,19 +99,18 @@ export default function LocationPicker({
         city: data.city,
         state: data.state,
         location_type: data.location_type,
-        is_active: data.is_active
+        is_active: data.is_active,
       };
 
       // Add to available locations list
-      setAvailableLocations(prev => [...prev, newLocation]);
-      
+      setAvailableLocations((prev) => [...prev, newLocation]);
+
       // Auto-select the new location
       onLocationChange(newLocation);
-      
+
       // Close modal and reset form
       resetForm();
       setIsModalVisible(false);
-      
     } catch (error: any) {
       console.error('Error creating location:', error);
       setCreateError(error?.message || 'Failed to create location');
@@ -140,22 +139,25 @@ export default function LocationPicker({
     }
   };
 
-  const filteredLocations = availableLocations.filter(location =>
-    location.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (location.address && location.address.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    (location.city && location.city.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredLocations = availableLocations.filter(
+    (location) =>
+      location.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (location.address &&
+        location.address.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (location.city &&
+        location.city.toLowerCase().includes(searchQuery.toLowerCase())),
   );
 
   const locationTypes = [
     { value: 'intersection', label: 'Intersection' },
     { value: 'address', label: 'Address' },
-    { value: 'area', label: 'Area/Zone' }
+    { value: 'area', label: 'Area/Zone' },
   ] as const;
 
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Location</Text>
-      
+
       {/* Current Selection Display */}
       <View style={styles.selectionContainer}>
         {selectedLocation ? (
@@ -165,20 +167,31 @@ export default function LocationPicker({
               <View style={styles.locationDetails}>
                 <Text style={styles.locationName}>{selectedLocation.name}</Text>
                 {selectedLocation.address && (
-                  <Text style={styles.locationAddress}>{selectedLocation.address}</Text>
+                  <Text style={styles.locationAddress}>
+                    {selectedLocation.address}
+                  </Text>
                 )}
                 {selectedLocation.city && (
                   <Text style={styles.locationCity}>
-                    {selectedLocation.city}{selectedLocation.state && `, ${selectedLocation.state}`}
-                    {selectedLocation.zip_code && ` ${selectedLocation.zip_code}`}
+                    {selectedLocation.city}
+                    {selectedLocation.state && `, ${selectedLocation.state}`}
+                    {selectedLocation.zip_code &&
+                      ` ${selectedLocation.zip_code}`}
                   </Text>
                 )}
                 <Text style={styles.locationType}>
-                  {locationTypes.find(t => t.value === selectedLocation.location_type)?.label}
+                  {
+                    locationTypes.find(
+                      (t) => t.value === selectedLocation.location_type,
+                    )?.label
+                  }
                 </Text>
               </View>
             </View>
-            <TouchableOpacity onPress={clearLocation} style={styles.clearButton}>
+            <TouchableOpacity
+              onPress={clearLocation}
+              style={styles.clearButton}
+            >
               <X size={16} color="#dc2626" />
             </TouchableOpacity>
           </View>
@@ -210,9 +223,12 @@ export default function LocationPicker({
             {selectedLocation ? 'Change Location' : 'Select Location'}
           </Text>
         </TouchableOpacity>
-        
+
         <TouchableOpacity
-          style={[styles.manualButton, useManualEntry && styles.manualButtonActive]}
+          style={[
+            styles.manualButton,
+            useManualEntry && styles.manualButtonActive,
+          ]}
           onPress={() => {
             setUseManualEntry(!useManualEntry);
             if (!useManualEntry) {
@@ -222,7 +238,12 @@ export default function LocationPicker({
             }
           }}
         >
-          <Text style={[styles.manualButtonText, useManualEntry && styles.manualButtonTextActive]}>
+          <Text
+            style={[
+              styles.manualButtonText,
+              useManualEntry && styles.manualButtonTextActive,
+            ]}
+          >
             Manual Entry
           </Text>
         </TouchableOpacity>
@@ -272,7 +293,7 @@ export default function LocationPicker({
             ) : (
               <View style={styles.createForm}>
                 <Text style={styles.createFormTitle}>Create New Location</Text>
-                
+
                 <TextInput
                   style={styles.input}
                   placeholder="Enter location name or intersection"
@@ -283,11 +304,11 @@ export default function LocationPicker({
                   }}
                   autoFocus
                 />
-                
+
                 {createError ? (
                   <Text style={styles.errorText}>{createError}</Text>
                 ) : null}
-                
+
                 <View style={styles.createFormButtons}>
                   <TouchableOpacity
                     style={styles.cancelButton}
@@ -296,7 +317,10 @@ export default function LocationPicker({
                     <Text style={styles.cancelButtonText}>Cancel</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={[styles.createButton, !newLocationInput.trim() && styles.createButtonDisabled]}
+                    style={[
+                      styles.createButton,
+                      !newLocationInput.trim() && styles.createButtonDisabled,
+                    ]}
                     onPress={createNewLocation}
                     disabled={!newLocationInput.trim() || loading}
                   >
@@ -314,7 +338,9 @@ export default function LocationPicker({
               <Text style={styles.loadingText}>Loading...</Text>
             ) : filteredLocations.length === 0 ? (
               <Text style={styles.emptyText}>
-                {searchQuery ? 'No locations found matching your search' : 'No locations found'}
+                {searchQuery
+                  ? 'No locations found matching your search'
+                  : 'No locations found'}
               </Text>
             ) : (
               filteredLocations.map((location) => (
@@ -326,21 +352,32 @@ export default function LocationPicker({
                   <View style={styles.locationItemContent}>
                     <MapPin size={20} color="#6b7280" />
                     <View style={styles.locationItemDetails}>
-                      <Text style={styles.locationItemName}>{location.name}</Text>
+                      <Text style={styles.locationItemName}>
+                        {location.name}
+                      </Text>
                       {location.address && (
-                        <Text style={styles.locationItemAddress}>{location.address}</Text>
+                        <Text style={styles.locationItemAddress}>
+                          {location.address}
+                        </Text>
                       )}
                       <View style={styles.locationItemMeta}>
                         <Text style={styles.locationItemType}>
-                          {locationTypes.find(t => t.value === location.location_type)?.label}
+                          {
+                            locationTypes.find(
+                              (t) => t.value === location.location_type,
+                            )?.label
+                          }
                         </Text>
                         {location.city && (
                           <Text style={styles.locationItemCity}>
-                            • {location.city}{location.state && `, ${location.state}`}
+                            • {location.city}
+                            {location.state && `, ${location.state}`}
                           </Text>
                         )}
                         {location.zip_code && (
-                          <Text style={styles.locationItemZip}>• {location.zip_code}</Text>
+                          <Text style={styles.locationItemZip}>
+                            • {location.zip_code}
+                          </Text>
                         )}
                       </View>
                     </View>

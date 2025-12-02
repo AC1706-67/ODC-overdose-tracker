@@ -8,7 +8,7 @@ export default function LoadingSkeleton() {
     <View style={styles.container}>
       {/* Header Skeleton */}
       <View style={styles.headerSkeleton} />
-      
+
       {/* Metrics Grid Skeleton */}
       <View style={styles.metricsGrid}>
         {[1, 2, 3, 4].map((i) => (
@@ -19,7 +19,7 @@ export default function LoadingSkeleton() {
           </View>
         ))}
       </View>
-      
+
       {/* Chart Skeletons */}
       <View style={styles.chartSkeleton} />
       <View style={styles.chartSkeleton} />

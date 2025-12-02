@@ -3,19 +3,23 @@
 const { createClient } = require('@supabase/supabase-js');
 
 const config = {
-  supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://vitwypicporqpeefwsjs.supabase.co',
-  supabaseKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZpdHd5cGljcG9ycXBlZWZ3c2pzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1ODc0NTUsImV4cCI6MjA3NDE2MzQ1NX0.LZvBs3c5XIQPTdEDwkEEqZO0irjmR7WZnsSsyuZ7wcI'
+  supabaseUrl:
+    process.env.EXPO_PUBLIC_SUPABASE_URL ||
+    'https://vitwypicporqpeefwsjs.supabase.co',
+  supabaseKey:
+    process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ||
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZpdHd5cGljcG9ycXBlZWZ3c2pzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1ODc0NTUsImV4cCI6MjA3NDE2MzQ1NX0.LZvBs3c5XIQPTdEDwkEEqZO0irjmR7WZnsSsyuZ7wcI',
 };
 
 async function checkActualColumns() {
   console.log('🔍 Checking actual column names in your database...\n');
-  
+
   const supabase = createClient(config.supabaseUrl, config.supabaseKey);
-  
+
   // Check outreach_logs columns by getting a sample record
   console.log('📋 OUTREACH_LOGS TABLE COLUMNS:');
   console.log('================================');
-  
+
   const { data: outreachSample, error: outreachError } = await supabase
     .from('outreach_logs')
     .select('*')
@@ -25,7 +29,7 @@ async function checkActualColumns() {
     console.log('❌ Error:', outreachError.message);
   } else if (outreachSample && outreachSample.length > 0) {
     const columns = Object.keys(outreachSample[0]);
-    columns.forEach(col => {
+    columns.forEach((col) => {
       console.log(`✅ ${col}`);
     });
   } else {
@@ -35,7 +39,7 @@ async function checkActualColumns() {
   // Check team_members columns
   console.log('\n📋 TEAM_MEMBERS TABLE COLUMNS:');
   console.log('==============================');
-  
+
   const { data: teamSample, error: teamError } = await supabase
     .from('team_members')
     .select('*')
@@ -45,7 +49,7 @@ async function checkActualColumns() {
     console.log('❌ Error:', teamError.message);
   } else if (teamSample && teamSample.length > 0) {
     const columns = Object.keys(teamSample[0]);
-    columns.forEach(col => {
+    columns.forEach((col) => {
       console.log(`✅ ${col}`);
     });
   } else {
@@ -55,7 +59,7 @@ async function checkActualColumns() {
       .from('team_members')
       .select('*')
       .limit(0);
-    
+
     if (!schemaError) {
       console.log('✅ Table exists but is empty');
     }
@@ -64,9 +68,13 @@ async function checkActualColumns() {
   // Check analytics views
   console.log('\n📊 ANALYTICS VIEWS:');
   console.log('===================');
-  
-  const views = ['team_member_stats_v1', 'location_analytics_v1', 'activity_timeline_v1'];
-  
+
+  const views = [
+    'team_member_stats_v1',
+    'location_analytics_v1',
+    'activity_timeline_v1',
+  ];
+
   for (const view of views) {
     const { data: viewSample, error: viewError } = await supabase
       .from(view)
@@ -78,7 +86,7 @@ async function checkActualColumns() {
       console.log(`❌ Error: ${viewError.message}`);
     } else if (viewSample && viewSample.length > 0) {
       const columns = Object.keys(viewSample[0]);
-      columns.forEach(col => {
+      columns.forEach((col) => {
         console.log(`  ✅ ${col}`);
       });
     } else {
@@ -89,14 +97,14 @@ async function checkActualColumns() {
   // Test specific problematic columns
   console.log('\n🔍 TESTING SPECIFIC COLUMNS:');
   console.log('============================');
-  
+
   // Test outreach_date vs occurred_at
   console.log('\n📅 Date column test:');
   const { error: dateError1 } = await supabase
     .from('outreach_logs')
     .select('outreach_date')
     .limit(1);
-  
+
   const { error: dateError2 } = await supabase
     .from('outreach_logs')
     .select('occurred_at')

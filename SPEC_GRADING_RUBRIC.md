@@ -1,6 +1,7 @@
 # Spec Grading Rubric
 
 ## Purpose
+
 This rubric helps evaluate whether a feature/spec is truly "done" and production-ready. Use it for code reviews, QA, and self-assessment.
 
 ## Grading Scale
@@ -16,6 +17,7 @@ This rubric helps evaluate whether a feature/spec is truly "done" and production
 ## 1. Functionality (30 points)
 
 ### Core Requirements (15 points)
+
 - [ ] **Feature works as specified** (5 pts)
   - All acceptance criteria met
   - Happy path works perfectly
@@ -32,6 +34,7 @@ This rubric helps evaluate whether a feature/spec is truly "done" and production
   - Prevents invalid data
 
 ### User Experience (15 points)
+
 - [ ] **Intuitive UI** (5 pts)
   - Clear labels and instructions
   - Consistent with app design
@@ -47,13 +50,14 @@ This rubric helps evaluate whether a feature/spec is truly "done" and production
   - Success/error messages
   - Progress indicators
 
-**Functionality Score: ___ / 30**
+**Functionality Score: \_\_\_ / 30**
 
 ---
 
 ## 2. Code Quality (25 points)
 
 ### Structure (10 points)
+
 - [ ] **Clean code** (3 pts)
   - Readable variable names
   - Functions < 50 lines
@@ -70,6 +74,7 @@ This rubric helps evaluate whether a feature/spec is truly "done" and production
   - Imports organized
 
 ### Best Practices (15 points)
+
 - [ ] **Error handling** (5 pts)
   - Try-catch blocks
   - Error boundaries (React)
@@ -85,13 +90,14 @@ This rubric helps evaluate whether a feature/spec is truly "done" and production
   - Input sanitization
   - RLS policies applied
 
-**Code Quality Score: ___ / 25**
+**Code Quality Score: \_\_\_ / 25**
 
 ---
 
 ## 3. Testing & Reliability (20 points)
 
 ### Manual Testing (10 points)
+
 - [ ] **Happy path tested** (3 pts)
   - Feature works end-to-end
   - Tested on real device
@@ -108,6 +114,7 @@ This rubric helps evaluate whether a feature/spec is truly "done" and production
   - Responsive on different screens
 
 ### Automated Testing (10 points)
+
 - [ ] **Unit tests** (5 pts)
   - Critical functions tested
   - Edge cases covered
@@ -118,13 +125,14 @@ This rubric helps evaluate whether a feature/spec is truly "done" and production
   - Database operations tested
   - End-to-end flows tested
 
-**Testing Score: ___ / 20**
+**Testing Score: \_\_\_ / 20**
 
 ---
 
 ## 4. Documentation (15 points)
 
 ### Code Documentation (8 points)
+
 - [ ] **Comments** (3 pts)
   - Complex logic explained
   - Why, not what
@@ -141,6 +149,7 @@ This rubric helps evaluate whether a feature/spec is truly "done" and production
   - Examples provided
 
 ### User Documentation (7 points)
+
 - [ ] **User guide** (4 pts)
   - How to use feature
   - Screenshots/videos
@@ -151,13 +160,14 @@ This rubric helps evaluate whether a feature/spec is truly "done" and production
   - Request/response examples
   - Error codes explained
 
-**Documentation Score: ___ / 15**
+**Documentation Score: \_\_\_ / 15**
 
 ---
 
 ## 5. Database & Backend (10 points)
 
 ### Schema (5 points)
+
 - [ ] **Proper structure** (2 pts)
   - Normalized tables
   - Correct data types
@@ -174,6 +184,7 @@ This rubric helps evaluate whether a feature/spec is truly "done" and production
   - No slow queries
 
 ### Security (5 points)
+
 - [ ] **RLS policies** (3 pts)
   - Row-level security enabled
   - Policies tested
@@ -184,49 +195,55 @@ This rubric helps evaluate whether a feature/spec is truly "done" and production
   - created_at/updated_at set
   - Changes logged
 
-**Database Score: ___ / 10**
+**Database Score: \_\_\_ / 10**
 
 ---
 
-## Total Score: ___ / 100
+## Total Score: \_\_\_ / 100
 
 ### Grade Interpretation
 
-| Score | Grade | Status |
-|-------|-------|--------|
-| 90-100 | A | Excellent - Ship it! |
-| 80-89 | B | Good - Minor tweaks, then ship |
-| 70-79 | C | Acceptable - Needs improvements |
-| 60-69 | D | Needs Work - Major issues |
-| < 60 | F | Incomplete - Not ready |
+| Score  | Grade | Status                          |
+| ------ | ----- | ------------------------------- |
+| 90-100 | A     | Excellent - Ship it!            |
+| 80-89  | B     | Good - Minor tweaks, then ship  |
+| 70-79  | C     | Acceptable - Needs improvements |
+| 60-69  | D     | Needs Work - Major issues       |
+| < 60   | F     | Incomplete - Not ready          |
 
 ---
 
 ## Example: Grading the Signup Feature
 
 ### 1. Functionality: 28/30
+
 - ✅ Core Requirements: 14/15 (works great, minor validation improvement)
 - ✅ User Experience: 14/15 (good UX, could add password strength indicator)
 
 ### 2. Code Quality: 22/25
+
 - ✅ Structure: 9/10 (clean code, good types)
 - ✅ Best Practices: 13/15 (has error handling, needs more logging)
 
 ### 3. Testing: 15/20
+
 - ✅ Manual Testing: 9/10 (tested on device, works well)
 - ⚠️ Automated Testing: 6/10 (no unit tests yet)
 
 ### 4. Documentation: 10/15
+
 - ⚠️ Code Documentation: 5/8 (some comments, needs JSDoc)
 - ⚠️ User Documentation: 5/7 (basic docs, needs screenshots)
 
 ### 5. Database: 9/10
+
 - ✅ Schema: 5/5 (proper structure, migrations)
 - ✅ Security: 4/5 (RLS enabled, needs audit columns)
 
 **Total: 84/100 - Grade B (Good)**
 
 **Verdict**: Production-ready! Minor improvements recommended:
+
 - Add unit tests for validation logic
 - Add JSDoc to signup function
 - Add password strength indicator
@@ -254,6 +271,7 @@ Before marking a feature "done", ensure:
 ## Using This Rubric
 
 ### For New Features
+
 1. Review requirements against rubric
 2. Build feature
 3. Self-grade using rubric
@@ -262,6 +280,7 @@ Before marking a feature "done", ensure:
 6. Ship!
 
 ### For Code Reviews
+
 1. Reviewer uses rubric to evaluate
 2. Provide specific feedback per category
 3. Assign grade
@@ -269,6 +288,7 @@ Before marking a feature "done", ensure:
 5. Re-review until acceptable
 
 ### For QA Testing
+
 1. QA uses rubric for testing
 2. Focus on Functionality & Testing sections
 3. Document issues found
@@ -293,6 +313,7 @@ Before marking a feature "done", ensure:
 ## Continuous Improvement
 
 Track your grades over time:
+
 - **Sprint 1**: Average grade C (73%)
 - **Sprint 2**: Average grade B (82%)
 - **Sprint 3**: Average grade A (91%)

@@ -36,7 +36,9 @@ export function useDistributionStorage() {
       if (stored) {
         const parsedDistributions = JSON.parse(stored);
         setDistributions(parsedDistributions);
-        setPendingCount(parsedDistributions.filter((d: Distribution) => !d.synced).length);
+        setPendingCount(
+          parsedDistributions.filter((d: Distribution) => !d.synced).length,
+        );
       }
     } catch (error) {
       console.error('Error loading distributions:', error);
@@ -54,11 +56,14 @@ export function useDistributionStorage() {
 
     const updatedDistributions = [...distributions, newDistribution];
     setDistributions(updatedDistributions);
-    setPendingCount(updatedDistributions.filter(d => !d.synced).length);
+    setPendingCount(updatedDistributions.filter((d) => !d.synced).length);
 
     try {
-      await AsyncStorage.setItem(DISTRIBUTIONS_KEY, JSON.stringify(updatedDistributions));
-      
+      await AsyncStorage.setItem(
+        DISTRIBUTIONS_KEY,
+        JSON.stringify(updatedDistributions),
+      );
+
       // Try to sync immediately if online
       await syncDistribution(newDistribution);
     } catch (error) {
@@ -70,7 +75,7 @@ export function useDistributionStorage() {
   const syncDistribution = async (distribution: Distribution) => {
     try {
       // Submit to Supabase
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('distributions')
         .insert({
           zip_code: distribution.zip_code,
@@ -88,12 +93,17 @@ export function useDistributionStorage() {
       }
 
       // Mark as synced
-      const updatedDistributions = distributions.map(d =>
-        d.distribution_id === distribution.distribution_id ? { ...d, synced: true } : d
+      const updatedDistributions = distributions.map((d) =>
+        d.distribution_id === distribution.distribution_id
+          ? { ...d, synced: true }
+          : d,
       );
       setDistributions(updatedDistributions);
-      setPendingCount(updatedDistributions.filter(d => !d.synced).length);
-      await AsyncStorage.setItem(DISTRIBUTIONS_KEY, JSON.stringify(updatedDistributions));
+      setPendingCount(updatedDistributions.filter((d) => !d.synced).length);
+      await AsyncStorage.setItem(
+        DISTRIBUTIONS_KEY,
+        JSON.stringify(updatedDistributions),
+      );
     } catch (error) {
       console.error('Error syncing distribution:', error);
       // Distribution remains unsynced for retry later
@@ -101,8 +111,8 @@ export function useDistributionStorage() {
   };
 
   const syncPending = async () => {
-    const pendingDistributions = distributions.filter(d => !d.synced);
-    
+    const pendingDistributions = distributions.filter((d) => !d.synced);
+
     for (const distribution of pendingDistributions) {
       await syncDistribution(distribution);
     }
@@ -117,9 +127,9 @@ export function useDistributionStorage() {
 }
 
 function generateUUID(): string {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    const r = Math.random() * 16 | 0;
-    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
 }

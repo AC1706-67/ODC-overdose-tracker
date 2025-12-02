@@ -1,5 +1,5 @@
 {
-  "cli": { 
+  "cli": {
     "version": ">= 13.0.0",
     "appVersionSource": "remote"
   },
@@ -19,7 +19,7 @@
     "preview": {
       "developmentClient": false,
       "distribution": "internal",
-      "android": { 
+      "android": {
         "buildType": "apk",
         "image": "ubuntu-22.04-jdk-17-ndk-r26b",
         "withoutCredentials": false
@@ -50,7 +50,7 @@
     "production": {
       "developmentClient": false,
       "distribution": "store",
-      "android": { 
+      "android": {
         "buildType": "app-bundle",
         "image": "ubuntu-22.04-jdk-17-ndk-r26b",
         "withoutCredentials": false
@@ -62,7 +62,7 @@
       }
     }
   },
-  "submit": { 
-    "production": {} 
+  "submit": {
+    "production": {}
   }
 }

@@ -8,7 +8,7 @@ export type CreatedLocation = {
 
 export async function createLocation(
   orgSlug: string,
-  name: string
+  name: string,
 ): Promise<CreatedLocation> {
   const clean = name?.trim();
   if (!clean) throw new Error('Please enter a location name.');

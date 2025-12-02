@@ -1,5 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  TouchableOpacity,
+  SafeAreaView,
+  ScrollView,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import type { OrganizationType } from '@/types/organization';
@@ -31,7 +41,11 @@ export default function RequestOrgScreen() {
   const [showTypePicker, setShowTypePicker] = useState(false);
 
   const handleSubmit = async () => {
-    if (!formData.name.trim() || !formData.contactEmail.trim() || !formData.contactName.trim()) {
+    if (
+      !formData.name.trim() ||
+      !formData.contactEmail.trim() ||
+      !formData.contactName.trim()
+    ) {
       Alert.alert('Missing Information', 'Please fill in all required fields');
       return;
     }
@@ -52,7 +66,7 @@ export default function RequestOrgScreen() {
       Alert.alert(
         'Request Submitted!',
         'Your organization certification request has been submitted. You will be notified when it is reviewed.',
-        [{ text: 'OK', onPress: () => router.replace('/onboarding') }]
+        [{ text: 'OK', onPress: () => router.replace('/onboarding') }],
       );
     } catch (error: any) {
       console.error('Error:', error);
@@ -72,7 +86,10 @@ export default function RequestOrgScreen() {
         <View style={{ width: 24 }} />
       </View>
 
-      <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={styles.contentContainer}
+      >
         <View style={styles.iconContainer}>
           <Ionicons name="add-circle" size={48} color="#7c3aed" />
         </View>
@@ -154,7 +171,9 @@ export default function RequestOrgScreen() {
           style={styles.input}
           placeholder="Your full name"
           value={formData.contactName}
-          onChangeText={(text) => setFormData({ ...formData, contactName: text })}
+          onChangeText={(text) =>
+            setFormData({ ...formData, contactName: text })
+          }
           editable={!loading}
         />
 
@@ -163,7 +182,9 @@ export default function RequestOrgScreen() {
           style={styles.input}
           placeholder="contact@example.org"
           value={formData.contactEmail}
-          onChangeText={(text) => setFormData({ ...formData, contactEmail: text })}
+          onChangeText={(text) =>
+            setFormData({ ...formData, contactEmail: text })
+          }
           keyboardType="email-address"
           autoCapitalize="none"
           editable={!loading}
@@ -174,7 +195,9 @@ export default function RequestOrgScreen() {
           style={[styles.input, styles.textArea]}
           placeholder="Brief description of your organization"
           value={formData.description}
-          onChangeText={(text) => setFormData({ ...formData, description: text })}
+          onChangeText={(text) =>
+            setFormData({ ...formData, description: text })
+          }
           multiline
           numberOfLines={4}
           editable={!loading}

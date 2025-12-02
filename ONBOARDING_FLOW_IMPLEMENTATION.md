@@ -1,6 +1,7 @@
 # Organization Onboarding Flow Implementation
 
 ## Overview
+
 Implemented a comprehensive onboarding flow for new users to join organizations through multiple pathways.
 
 ## Database Schema Updates
@@ -8,6 +9,7 @@ Implemented a comprehensive onboarding flow for new users to join organizations 
 ### New Migration: `20251119_add_org_certification_and_codes.sql`
 
 #### Organizations Table - New Fields
+
 - `is_certified` (boolean): Whether the organization is certified
 - `status` (text): 'pending' | 'approved' | 'rejected' | 'suspended'
 - `created_by` (uuid): User who requested the organization
@@ -18,6 +20,7 @@ Implemented a comprehensive onboarding flow for new users to join organizations 
 - `certification_notes` (text): Admin notes about certification
 
 #### New Table: `organization_invite_codes`
+
 ```sql
 - id (uuid, PK)
 - organization_id (uuid, FK to organizations)
@@ -33,6 +36,7 @@ Implemented a comprehensive onboarding flow for new users to join organizations 
 ```
 
 #### New Function
+
 - `increment_invite_code_usage(code_text)`: Atomically increments usage counter
 
 ## Frontend Implementation
@@ -40,13 +44,16 @@ Implemented a comprehensive onboarding flow for new users to join organizations 
 ### Onboarding Screens
 
 #### 1. `/app/onboarding/index.tsx` - Main Onboarding Router
+
 Three options presented to users:
+
 - **Option A**: Enter organization code
 - **Option B**: Join certified organization
 - **Option C**: Request organization certification
 - **Skip**: Continue without joining (defaults to Anonymous Haven AI)
 
 #### 2. `/app/onboarding/enter-code.tsx` - Code Entry
+
 - User enters organization invite code (e.g., "RAEP2025")
 - Validates code:
   - Must be active
@@ -57,6 +64,7 @@ Three options presented to users:
 - Increments code usage counter
 
 #### 3. `/app/onboarding/select-org.tsx` - Browse Organizations
+
 - Lists all certified, approved, active organizations
 - Shows organization details:
   - Name
@@ -67,17 +75,20 @@ Three options presented to users:
 - Checks for existing membership
 
 #### 4. `/app/onboarding/request-org.tsx` - Request Certification
+
 Form fields:
-- Organization name *
-- Organization type * (dropdown)
+
+- Organization name \*
+- Organization type \* (dropdown)
 - City
 - State
 - Website
-- Contact name *
-- Contact email *
+- Contact name \*
+- Contact email \*
 - Description
 
 Creates organization with:
+
 - `status = 'pending'`
 - `is_certified = false`
 - `is_active = false`
@@ -88,6 +99,7 @@ Adds requester as pending Owner (activated when approved)
 ### Updated Types (`types/organization.ts`)
 
 Added:
+
 - `OrganizationStatus` type
 - `OrganizationInviteCode` interface
 - `OrganizationRequest` interface
@@ -107,6 +119,7 @@ Added:
 ### For Admins (Future)
 
 Admin panel to:
+
 1. View pending organization requests
 2. Review details
 3. Approve/reject with notes
@@ -120,17 +133,16 @@ Admin panel to:
 ### For Organization Admins
 
 Can create invite codes:
+
 ```typescript
-await supabase
-  .from('organization_invite_codes')
-  .insert({
-    organization_id: 'org-uuid',
-    code: 'MYORG2025',
-    description: 'My Organization 2025 Code',
-    role: 'Responder',
-    max_uses: 100, // or null for unlimited
-    expires_at: '2025-12-31', // or null for never
-  });
+await supabase.from('organization_invite_codes').insert({
+  organization_id: 'org-uuid',
+  code: 'MYORG2025',
+  description: 'My Organization 2025 Code',
+  role: 'Responder',
+  max_uses: 100, // or null for unlimited
+  expires_at: '2025-12-31', // or null for never
+});
 ```
 
 ## Migration Steps
@@ -144,13 +156,14 @@ await supabase
    - Migration is **idempotent** - safe to run multiple times
 
 2. **Verify migration success**:
+
    ```sql
    -- Check new table exists
    SELECT COUNT(*) FROM organization_invite_codes;
-   
+
    -- Check new columns added
    SELECT name, is_certified, status FROM organizations;
-   
+
    -- Check sample codes created
    SELECT code, description, is_active FROM organization_invite_codes;
    ```
@@ -158,7 +171,7 @@ await supabase
 3. **Create additional invite codes** (optional):
    ```sql
    INSERT INTO organization_invite_codes (organization_id, code, description, role)
-   VALUES 
+   VALUES
      ('your-org-uuid', 'MYORG2025', 'My Organization 2025', 'Responder')
    ON CONFLICT (code) DO NOTHING;
    ```
@@ -166,6 +179,7 @@ await supabase
 ### Migration Safety Features
 
 The migration includes:
+
 - ✅ Idempotent operations (safe to re-run)
 - ✅ Proper step ordering (functions → tables → constraints → indexes → triggers → data)
 - ✅ `IF NOT EXISTS` and `DROP IF EXISTS` clauses
@@ -177,11 +191,13 @@ The migration includes:
 ## Next Steps
 
 ### Immediate
+
 1. Apply database migration
 2. Test onboarding flow
 3. Create invite codes for existing organizations
 
 ### Future Enhancements
+
 1. **Admin Panel**: Build UI for reviewing pending organizations
 2. **Email Notifications**: Notify users when org is approved
 3. **Invite Code Management**: UI for org admins to create/manage codes
@@ -209,6 +225,7 @@ The migration includes:
 ## Migration Quality
 
 The migration follows PostgreSQL and Supabase best practices:
+
 - ✅ Fully idempotent (safe to re-run)
 - ✅ Proper step ordering (functions → tables → constraints → indexes → triggers → data)
 - ✅ Transaction-safe operations

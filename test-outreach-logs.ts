@@ -1,6 +1,6 @@
 /**
  * OUTREACH LOGS FUNCTIONAL TESTING
- * 
+ *
  * Tests CRUD operations and RLS enforcement for outreach_logs table
  * with multiple test users from different organizations.
  */
@@ -19,14 +19,14 @@ const TEST_USERS = {
     email: 'achavez@recoveryalliance.net',
     password: 'TestPassword123!', // UPDATE THIS
     label: 'RAEP User',
-    expectedOrg: 'recovery-alliance-el-paso'
+    expectedOrg: 'recovery-alliance-el-paso',
   },
   haven: {
     email: 'test@haven-ai.org',
     password: 'TestPassword123!', // UPDATE THIS
     label: 'Haven AI User',
-    expectedOrg: 'anonymous-haven-ai'
-  }
+    expectedOrg: 'anonymous-haven-ai',
+  },
 };
 
 interface TestResult {
@@ -50,7 +50,9 @@ class OutreachLogsTester {
     const icon = result.success ? '✅' : '❌';
     console.log(`${icon} ${result.operation}: ${result.message}`);
     if (result.error) {
-      console.log(`   Error: ${result.error.message || JSON.stringify(result.error)}`);
+      console.log(
+        `   Error: ${result.error.message || JSON.stringify(result.error)}`,
+      );
     }
     if (result.data) {
       console.log(`   Data:`, JSON.stringify(result.data, null, 2));
@@ -65,17 +67,18 @@ class OutreachLogsTester {
 
     try {
       // 1. Sign in
-      const { data: authData, error: authError } = await this.client.auth.signInWithPassword({
-        email: userConfig.email,
-        password: userConfig.password,
-      });
+      const { data: authData, error: authError } =
+        await this.client.auth.signInWithPassword({
+          email: userConfig.email,
+          password: userConfig.password,
+        });
 
       if (authError || !authData.user) {
         this.log({
           operation: 'Sign In',
           success: false,
           message: 'Authentication failed',
-          error: authError
+          error: authError,
         });
         return;
       }
@@ -84,7 +87,7 @@ class OutreachLogsTester {
         operation: 'Sign In',
         success: true,
         message: `Authenticated as ${authData.user.email}`,
-        data: { user_id: authData.user.id }
+        data: { user_id: authData.user.id },
       });
 
       const userId = authData.user.id;
@@ -92,7 +95,8 @@ class OutreachLogsTester {
       // 2. Get user's organization context
       const { data: memberships, error: memberError } = await this.client
         .from('user_organizations')
-        .select(`
+        .select(
+          `
           id,
           role,
           is_active,
@@ -103,7 +107,8 @@ class OutreachLogsTester {
             slug,
             outreach_enabled
           )
-        `)
+        `,
+        )
         .eq('user_id', userId)
         .eq('is_active', true);
 
@@ -112,7 +117,7 @@ class OutreachLogsTester {
           operation: 'Get Organization Context',
           success: false,
           message: 'Failed to fetch user organizations',
-          error: memberError
+          error: memberError,
         });
         return;
       }
@@ -121,7 +126,7 @@ class OutreachLogsTester {
         this.log({
           operation: 'Get Organization Context',
           success: false,
-          message: 'User has no active organization memberships'
+          message: 'User has no active organization memberships',
         });
         return;
       }
@@ -134,8 +139,8 @@ class OutreachLogsTester {
           org: m.organizations.name,
           slug: m.organizations.slug,
           role: m.role,
-          outreach_enabled: m.organizations.outreach_enabled
-        }))
+          outreach_enabled: m.organizations.outreach_enabled,
+        })),
       });
 
       const primaryOrg = memberships[0];
@@ -152,7 +157,7 @@ class OutreachLogsTester {
           operation: 'SELECT outreach_logs',
           success: false,
           message: 'Read denied by RLS',
-          error: selectError
+          error: selectError,
         });
       } else {
         this.log({
@@ -161,8 +166,10 @@ class OutreachLogsTester {
           message: `Read ${existingLogs?.length || 0} logs`,
           data: {
             count: existingLogs?.length,
-            org_ids: [...new Set(existingLogs?.map(l => l.organization_id) || [])]
-          }
+            org_ids: [
+              ...new Set(existingLogs?.map((l) => l.organization_id) || []),
+            ],
+          },
         });
       }
 
@@ -179,7 +186,7 @@ class OutreachLogsTester {
         trip_count: 1,
         males_reached: 1,
         females_reached: 1,
-        notes: `Test log from ${userConfig.label} at ${new Date().toISOString()}`
+        notes: `Test log from ${userConfig.label} at ${new Date().toISOString()}`,
       };
 
       const { data: insertedLog, error: insertError } = await this.client
@@ -193,7 +200,7 @@ class OutreachLogsTester {
           operation: 'INSERT outreach_logs',
           success: false,
           message: 'Insert denied by RLS',
-          error: insertError
+          error: insertError,
         });
         return; // Can't continue without a log to update/delete
       }
@@ -205,8 +212,8 @@ class OutreachLogsTester {
         data: {
           id: insertedLog.id,
           organization_id: insertedLog.organization_id,
-          user_id: insertedLog.user_id
-        }
+          user_id: insertedLog.user_id,
+        },
       });
 
       const logId = insertedLog.id;
@@ -216,7 +223,7 @@ class OutreachLogsTester {
         .from('outreach_logs')
         .update({
           notes: `${testLog.notes} (UPDATED)`,
-          people_reached: 3
+          people_reached: 3,
         })
         .eq('id', logId)
         .select()
@@ -227,7 +234,7 @@ class OutreachLogsTester {
           operation: 'UPDATE outreach_logs',
           success: false,
           message: 'Update denied by RLS',
-          error: updateError
+          error: updateError,
         });
       } else {
         this.log({
@@ -236,8 +243,8 @@ class OutreachLogsTester {
           message: `Updated log ID: ${logId}`,
           data: {
             people_reached: updatedLog.people_reached,
-            notes_updated: updatedLog.notes.includes('UPDATED')
-          }
+            notes_updated: updatedLog.notes.includes('UPDATED'),
+          },
         });
       }
 
@@ -252,13 +259,13 @@ class OutreachLogsTester {
           operation: 'DELETE outreach_logs',
           success: false,
           message: 'Delete denied (expected for non-admins)',
-          error: deleteError
+          error: deleteError,
         });
       } else {
         this.log({
           operation: 'DELETE outreach_logs',
           success: true,
-          message: `Deleted log ID: ${logId}`
+          message: `Deleted log ID: ${logId}`,
         });
       }
 
@@ -271,7 +278,7 @@ class OutreachLogsTester {
 
       if (allOrgs && allOrgs.length > 0) {
         const otherOrgId = allOrgs[0].id;
-        
+
         const { data: crossOrgLogs, error: crossOrgError } = await this.client
           .from('outreach_logs')
           .select('*')
@@ -283,13 +290,13 @@ class OutreachLogsTester {
             operation: 'Cross-Org Access Test',
             success: true,
             message: `✅ Cross-org access properly blocked`,
-            error: crossOrgError
+            error: crossOrgError,
           });
         } else if (!crossOrgLogs || crossOrgLogs.length === 0) {
           this.log({
             operation: 'Cross-Org Access Test',
             success: true,
-            message: `✅ Cross-org access filtered (no results returned)`
+            message: `✅ Cross-org access filtered (no results returned)`,
           });
         } else {
           this.log({
@@ -298,24 +305,23 @@ class OutreachLogsTester {
             message: `🚨 SECURITY ISSUE: User can see other org's data!`,
             data: {
               other_org_id: otherOrgId,
-              logs_seen: crossOrgLogs.length
-            }
+              logs_seen: crossOrgLogs.length,
+            },
           });
         }
       } else {
         this.log({
           operation: 'Cross-Org Access Test',
           success: true,
-          message: 'No other organizations to test with'
+          message: 'No other organizations to test with',
         });
       }
-
     } catch (error: any) {
       this.log({
         operation: 'Fatal Error',
         success: false,
         message: error.message,
-        error
+        error,
       });
     } finally {
       // Sign out
@@ -332,30 +338,31 @@ class OutreachLogsTester {
     for (const [key, userConfig] of Object.entries(TEST_USERS)) {
       await this.testUser(userConfig);
       // Wait between tests
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
 
     console.log('\n' + '='.repeat(60));
     console.log('📊 TEST SUMMARY');
     console.log('='.repeat(60));
-    
-    const passed = this.results.filter(r => r.success).length;
-    const failed = this.results.filter(r => !r.success).length;
-    
+
+    const passed = this.results.filter((r) => r.success).length;
+    const failed = this.results.filter((r) => !r.success).length;
+
     console.log(`\n✅ Passed: ${passed}`);
     console.log(`❌ Failed: ${failed}`);
     console.log(`📝 Total: ${this.results.length}\n`);
 
     // Show critical failures
-    const criticalFailures = this.results.filter(r => 
-      !r.success && 
-      !r.operation.includes('DELETE') && // DELETE failures are expected for non-admins
-      !r.operation.includes('Cross-Org') // Cross-org blocks are good
+    const criticalFailures = this.results.filter(
+      (r) =>
+        !r.success &&
+        !r.operation.includes('DELETE') && // DELETE failures are expected for non-admins
+        !r.operation.includes('Cross-Org'), // Cross-org blocks are good
     );
 
     if (criticalFailures.length > 0) {
       console.log('🚨 CRITICAL FAILURES:\n');
-      criticalFailures.forEach(f => {
+      criticalFailures.forEach((f) => {
         console.log(`   - ${f.operation}: ${f.message}`);
       });
       console.log('');

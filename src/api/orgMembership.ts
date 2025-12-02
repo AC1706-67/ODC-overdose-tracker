@@ -28,7 +28,8 @@ export async function getMyOrganizations(): Promise<OrgMembership[]> {
 
   const { data, error } = await supabase
     .from('user_organizations')
-    .select(`
+    .select(
+      `
       organization_id,
       role,
       is_active,
@@ -39,7 +40,8 @@ export async function getMyOrganizations(): Promise<OrgMembership[]> {
         is_certified,
         is_public
       )
-    `)
+    `,
+    )
     .eq('user_id', user.id)
     .eq('is_active', true);
 
@@ -49,7 +51,9 @@ export async function getMyOrganizations(): Promise<OrgMembership[]> {
   }
 
   // Filter out any memberships without organization data
-  return ((data ?? []) as any[]).filter(m => m.organizations) as OrgMembership[];
+  return ((data ?? []) as any[]).filter(
+    (m) => m.organizations,
+  ) as OrgMembership[];
 }
 
 /**
@@ -58,7 +62,9 @@ export async function getMyOrganizations(): Promise<OrgMembership[]> {
 export async function getJoinableCertifiedOrganizations() {
   const { data, error } = await supabase
     .from('organizations')
-    .select('id, name, slug, type, city, state, description, is_certified, is_public, is_demo_organization')
+    .select(
+      'id, name, slug, type, city, state, description, is_certified, is_public, is_demo_organization',
+    )
     .eq('is_certified', true)
     .eq('is_public', true)
     .eq('is_active', true)
@@ -77,7 +83,10 @@ export async function getJoinableCertifiedOrganizations() {
  * Join an organization directly (without invite code)
  * Used for public, certified organizations
  */
-export async function joinOrganization(orgId: string, role: string = 'Responder') {
+export async function joinOrganization(
+  orgId: string,
+  role: string = 'Responder',
+) {
   const {
     data: { user },
     error: userError,
@@ -116,14 +125,12 @@ export async function joinOrganization(orgId: string, role: string = 'Responder'
   }
 
   // Add membership
-  const { error } = await supabase
-    .from('user_organizations')
-    .insert({
-      user_id: user.id,
-      organization_id: orgId,
-      role,
-      is_active: true,
-    });
+  const { error } = await supabase.from('user_organizations').insert({
+    user_id: user.id,
+    organization_id: orgId,
+    role,
+    is_active: true,
+  });
 
   if (error) {
     console.error('Error joining organization', error);

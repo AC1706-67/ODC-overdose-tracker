@@ -3,6 +3,7 @@
 Based on comprehensive schema analysis, here's exactly what needs to be updated in your Supabase database:
 
 ## Current Status (After Analysis)
+
 ✅ organizations table - Complete
 ✅ team_members table - Missing 1 column
 ✅ locations table - Missing 3 columns  
@@ -11,6 +12,7 @@ Based on comprehensive schema analysis, here's exactly what needs to be updated 
 ✅ All analytics views exist and working
 
 ## Issues Found
+
 Only **2 minor column additions** needed:
 
 1. **team_members table**: Missing `role` column
@@ -25,22 +27,22 @@ Copy and paste this SQL into your **Supabase SQL Editor**:
 -- Based on schema analysis - only missing columns need to be added
 
 -- 1. Add missing column to team_members table
-ALTER TABLE public.team_members 
+ALTER TABLE public.team_members
 ADD COLUMN IF NOT EXISTS role text;
 
 -- 2. Add missing columns to locations table
-ALTER TABLE public.locations 
+ALTER TABLE public.locations
 ADD COLUMN IF NOT EXISTS normalized_name text GENERATED ALWAYS AS (lower(regexp_replace(name, '\\s+', ' ', 'g'))) STORED,
 ADD COLUMN IF NOT EXISTS line1 text,
 ADD COLUMN IF NOT EXISTS is_active boolean NOT NULL DEFAULT true;
 
 -- 3. Create indexes for the new columns
-CREATE UNIQUE INDEX IF NOT EXISTS locations_org_normalized_uidx 
+CREATE UNIQUE INDEX IF NOT EXISTS locations_org_normalized_uidx
 ON public.locations (COALESCE(organization_id, '00000000-0000-0000-0000-000000000001'::uuid), normalized_name);
 
 -- 4. Update any existing location records to have is_active = true if they don't already
-UPDATE public.locations 
-SET is_active = true 
+UPDATE public.locations
+SET is_active = true
 WHERE is_active IS NULL;
 ```
 
@@ -76,6 +78,6 @@ Once these updates are applied, you'll have:
 ## Current Schema Health: 95% Complete
 
 - **Tables**: 5/5 (100%) ✅
-- **Views**: 3/3 (100%) ✅  
+- **Views**: 3/3 (100%) ✅
 - **Missing**: Only 4 columns across 2 tables
 - **Status**: Ready for production after minor updates

@@ -3,29 +3,29 @@ const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(
   process.env.EXPO_PUBLIC_SUPABASE_URL,
-  process.env.EXPO_PUBLIC_SUPABASE_SERVICE_ROLE_KEY || process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
+  process.env.EXPO_PUBLIC_SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
 );
 
 async function checkHealthViewDefinition() {
   console.log('=== Checking health_dashboard_v1 View Definition ===\n');
 
   // Get the view definition
-  const { data, error } = await supabase
-    .rpc('exec_sql', {
-      query: `
+  const { data, error } = await supabase.rpc('exec_sql', {
+    query: `
         SELECT pg_get_viewdef('health_dashboard_v1'::regclass, true) as definition;
-      `
-    });
+      `,
+  });
 
   if (error) {
     console.log('Cannot get view definition directly, trying alternative...\n');
-    
+
     // Alternative: check information_schema
     const { data: viewInfo, error: viewError } = await supabase
       .from('information_schema.views')
       .select('*')
       .eq('table_name', 'health_dashboard_v1');
-    
+
     if (viewError) {
       console.log('❌ Error:', viewError.message);
     } else {
@@ -40,7 +40,7 @@ async function checkHealthViewDefinition() {
   const { data: viewData, error: viewDataError } = await supabase
     .from('health_dashboard_v1')
     .select('*');
-  
+
   if (viewDataError) {
     console.log('❌ Error:', viewDataError.message);
   } else {
@@ -53,13 +53,14 @@ async function checkHealthViewDefinition() {
     .from('incidents')
     .select('organization_id')
     .not('organization_id', 'is', null);
-  
+
   if (incError) {
     console.log('❌ Error:', incError.message);
   } else {
     const orgCounts = {};
-    incidentsByOrg.forEach(inc => {
-      orgCounts[inc.organization_id] = (orgCounts[inc.organization_id] || 0) + 1;
+    incidentsByOrg.forEach((inc) => {
+      orgCounts[inc.organization_id] =
+        (orgCounts[inc.organization_id] || 0) + 1;
     });
     console.log('Incidents by org:', orgCounts);
   }
@@ -69,13 +70,15 @@ async function checkHealthViewDefinition() {
   const { data: allInc, error: allIncError } = await supabase
     .from('incidents')
     .select('organization_id, incident_id');
-  
+
   if (allIncError) {
     console.log('❌ Error:', allIncError.message);
   } else {
     console.log(`Total incidents: ${allInc.length}`);
-    const nullCount = allInc.filter(i => i.organization_id === null).length;
-    const withOrgCount = allInc.filter(i => i.organization_id !== null).length;
+    const nullCount = allInc.filter((i) => i.organization_id === null).length;
+    const withOrgCount = allInc.filter(
+      (i) => i.organization_id !== null,
+    ).length;
     console.log(`- With null org_id: ${nullCount}`);
     console.log(`- With org_id: ${withOrgCount}`);
   }

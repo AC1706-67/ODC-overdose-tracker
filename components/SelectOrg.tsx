@@ -1,10 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ActivityIndicator,
+  StyleSheet,
+} from 'react-native';
 import { supabase } from '@/lib/supabase';
 import { useOrg } from '@/src/context/OrgContext';
 
 export default function SelectOrg() {
-  const { setActiveOrgId } = useOrg() as { setActiveOrgId: (id: string | null) => Promise<void> };
+  const { setActiveOrgId } = useOrg() as {
+    setActiveOrgId: (id: string | null) => Promise<void>;
+  };
   const [orgs, setOrgs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -14,7 +22,9 @@ export default function SelectOrg() {
 
   const loadOrganizations = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return;
 
       const { data, error } = await supabase
@@ -25,10 +35,10 @@ export default function SelectOrg() {
       if (!error && data) {
         const orgList = data.map((r: any) => ({
           id: r.organization_id,
-          name: r.organizations?.name || 'Organization'
+          name: r.organizations?.name || 'Organization',
         }));
         setOrgs(orgList);
-        
+
         // Auto-select if only one org
         if (orgList.length === 1) {
           await setActiveOrgId(orgList[0].id);
@@ -54,8 +64,10 @@ export default function SelectOrg() {
     return (
       <View style={styles.container}>
         <Text style={styles.title}>No Organizations</Text>
-        <Text style={styles.subtitle}>You're not a member of any organizations yet.</Text>
-        <TouchableOpacity 
+        <Text style={styles.subtitle}>
+          You're not a member of any organizations yet.
+        </Text>
+        <TouchableOpacity
           style={styles.button}
           onPress={() => setActiveOrgId(null)}
         >
@@ -77,7 +89,7 @@ export default function SelectOrg() {
           <Text style={styles.orgButtonText}>{org.name}</Text>
         </TouchableOpacity>
       ))}
-      <TouchableOpacity 
+      <TouchableOpacity
         style={[styles.button, styles.anonymousButton]}
         onPress={() => setActiveOrgId(null)}
       >

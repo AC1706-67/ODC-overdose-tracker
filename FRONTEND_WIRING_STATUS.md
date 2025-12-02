@@ -3,6 +3,7 @@
 ## ✅ What's Already Working
 
 ### 1. OrgContext (`src/context/OrgContext.tsx`)
+
 - ✅ **COMPLETE** - Loads user's organization on login
 - ✅ Auto-selects if user has only one org
 - ✅ Exposes `activeOrgId`, `activeOrg`, `loading`
@@ -10,6 +11,7 @@
 - ✅ Already wrapped in `app/_layout.tsx`
 
 ### 2. Outreach/Distribution Screen (`app/(tabs)/distribution.tsx`)
+
 - ✅ **PROPERLY WIRED** - Uses `useOrg()` hook
 - ✅ Gets `activeOrgId` from context
 - ✅ Passes `organization_id: activeOrgId` to Supabase inserts
@@ -17,6 +19,7 @@
 - ✅ Properly scoped to current organization
 
 ### 3. Dashboard Screens
+
 - ✅ **PROPERLY WIRED** - Uses organization context
 - ✅ Filters data by `organization_id`
 
@@ -25,43 +28,44 @@
 ## ❌ What Needs Fixing
 
 ### 1. Incidents Screen (`app/(tabs)/index.tsx`)
+
 **Problem**: Uses `useIncidentStorage` hook which hardcodes `organization_id: null`
 
 **Current Code** (hooks/useIncidentStorage.ts, line 95):
+
 ```typescript
-const { data, error } = await supabase
-  .from('incidents')
-  .insert({
-    zip_code: incident.zip_code,
-    gender: incident.gender,
-    approx_age: incident.approx_age,
-    narcan_used: incident.narcan_used,
-    survival: incident.survival,
-    organization_id: null, // ❌ WRONG! Bypasses RLS
-    client_id: clientId,
-  });
+const { data, error } = await supabase.from('incidents').insert({
+  zip_code: incident.zip_code,
+  gender: incident.gender,
+  approx_age: incident.approx_age,
+  narcan_used: incident.narcan_used,
+  survival: incident.survival,
+  organization_id: null, // ❌ WRONG! Bypasses RLS
+  client_id: clientId,
+});
 ```
 
 **What It Should Be**:
+
 ```typescript
 import { useOrg } from '@/src/context/OrgContext';
 
 // In the hook:
 const { activeOrgId } = useOrg();
-const { data: { user } } = await supabase.auth.getUser();
+const {
+  data: { user },
+} = await supabase.auth.getUser();
 
-const { data, error } = await supabase
-  .from('incidents')
-  .insert({
-    zip_code: incident.zip_code,
-    gender: incident.gender,
-    approx_age: incident.approx_age,
-    narcan_used: incident.narcan_used,
-    survival: incident.survival,
-    organization_id: activeOrgId, // ✅ Use current org
-    created_by: user?.id,          // ✅ Track who created it
-    client_id: clientId,
-  });
+const { data, error } = await supabase.from('incidents').insert({
+  zip_code: incident.zip_code,
+  gender: incident.gender,
+  approx_age: incident.approx_age,
+  narcan_used: incident.narcan_used,
+  survival: incident.survival,
+  organization_id: activeOrgId, // ✅ Use current org
+  created_by: user?.id, // ✅ Track who created it
+  client_id: clientId,
+});
 ```
 
 ---
@@ -73,30 +77,32 @@ const { data, error } = await supabase
 **File**: `hooks/useIncidentStorage.ts`
 
 **Add at top**:
+
 ```typescript
 import { useOrg } from '@/src/context/OrgContext';
 ```
 
 **Modify the hook**:
+
 ```typescript
 export function useIncidentStorage() {
   const { activeOrgId } = useOrg(); // ADD THIS
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [pendingCount, setPendingCount] = useState(0);
-  
+
   // ... rest of code
-  
+
   const syncIncident = async (incident: Incident) => {
     try {
       // Get current user
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       // Don't sync if no org or user
       if (!activeOrgId || !user) {
         console.warn('Cannot sync: missing org or user');
         return;
       }
-      
+
       const { data, error } = await supabase
         .from('incidents')
         .insert({
@@ -109,7 +115,7 @@ export function useIncidentStorage() {
           created_by: user.id,            // ✅ ADD
           client_id: clientId,
         });
-      
+
       // ... rest of sync logic
     }
   };
@@ -121,12 +127,13 @@ export function useIncidentStorage() {
 **File**: `app/(tabs)/index.tsx`
 
 **Add at top of component**:
+
 ```typescript
 import { useOrg } from '@/src/context/OrgContext';
 
 export default function IncidentScreen() {
   const { activeOrg, loading } = useOrg();
-  
+
   // Show loading state
   if (loading) {
     return (
@@ -135,7 +142,7 @@ export default function IncidentScreen() {
       </View>
     );
   }
-  
+
   // Show "no org" message
   if (!activeOrg) {
     return (
@@ -151,7 +158,7 @@ export default function IncidentScreen() {
       </View>
     );
   }
-  
+
   // ... rest of component
 }
 ```
@@ -161,6 +168,7 @@ export default function IncidentScreen() {
 ## 📋 Summary
 
 ### Already Done ✅
+
 1. OrgContext exists and works
 2. Outreach screen properly wired
 3. Dashboard screens properly wired
@@ -168,11 +176,13 @@ export default function IncidentScreen() {
 5. User authentication working
 
 ### Needs Fixing ❌
+
 1. **Incidents hook** - Change `organization_id: null` to `organization_id: activeOrgId`
 2. **Incidents hook** - Add `created_by: user.id`
 3. **Incidents screen** - Add guard for missing organization
 
 ### Estimated Time
+
 - **5 minutes** to fix the hook
 - **2 minutes** to add the guard
 - **Total: 7 minutes**
@@ -182,6 +192,7 @@ export default function IncidentScreen() {
 ## 🎯 Testing Checklist
 
 After fixes:
+
 - [ ] Log in as a user with an organization
 - [ ] Create an incident - should save with `organization_id`
 - [ ] Check Supabase - incident should have correct `organization_id` and `created_by`
@@ -194,12 +205,15 @@ After fixes:
 ## 🚀 Status Update
 
 ### ✅ Completed
+
 - **Incidents hook fixed** - Now uses `activeOrgId` and `created_by: currentUser.id`
 - **Outreach access simplified** - Shows for any org member, RLS handles security
 - **Backend RLS complete** - All policies cleaned up and org-based
 
 ### 📝 Outreach Access Control
+
 The Outreach feature now uses a simplified model:
+
 - **Frontend**: `canUseOutreach(org)` returns `true` if user has any active organization
 - **Backend**: RLS policies automatically isolate data by organization membership
 - **Security**: Database enforces access control, no hardcoded org checks needed

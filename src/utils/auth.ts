@@ -20,9 +20,9 @@ export interface ValidatedAuthContext {
 /**
  * Validate and require both userId and orgId
  * Throws an error if either is missing or invalid
- * 
+ *
  * Use this at the start of any function that requires authentication
- * 
+ *
  * @example
  * const { userId, orgId } = requireAuthAndOrg({ userId, orgId });
  * // Now userId and orgId are guaranteed to be valid strings
@@ -33,13 +33,13 @@ export function requireAuthAndOrg(context: AuthContext): ValidatedAuthContext {
   logger.assert(
     userId !== null && userId !== undefined,
     'Missing authenticated user ID',
-    { hasUserId: !!userId, hasOrgId: !!orgId }
+    { hasUserId: !!userId, hasOrgId: !!orgId },
   );
 
   logger.assert(
     typeof orgId === 'string' && isUUID(orgId),
     'Invalid or missing organization ID',
-    { orgId, isUUID: orgId ? isUUID(orgId) : false }
+    { orgId, isUUID: orgId ? isUUID(orgId) : false },
   );
 
   return {
@@ -50,7 +50,7 @@ export function requireAuthAndOrg(context: AuthContext): ValidatedAuthContext {
 
 /**
  * Validate userId only (for operations that don't require org context)
- * 
+ *
  * @example
  * const userId = requireAuth({ userId });
  */
@@ -59,7 +59,7 @@ export function requireAuth(context: { userId?: string | null }): string {
 
   logger.assert(
     userId !== null && userId !== undefined,
-    'Missing authenticated user ID'
+    'Missing authenticated user ID',
   );
 
   return userId as string;
@@ -67,7 +67,7 @@ export function requireAuth(context: { userId?: string | null }): string {
 
 /**
  * Validate orgId only
- * 
+ *
  * @example
  * const orgId = requireOrg({ orgId });
  */
@@ -77,7 +77,7 @@ export function requireOrg(context: { orgId?: string | null }): string {
   logger.assert(
     typeof orgId === 'string' && isUUID(orgId),
     'Invalid or missing organization ID',
-    { orgId }
+    { orgId },
   );
 
   return orgId as string;

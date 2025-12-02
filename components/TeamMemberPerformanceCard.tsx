@@ -1,10 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { UserCheck, Calendar, Users, TrendingUp } from 'lucide-react-native';
 
 interface TeamMemberPerformanceCardProps {
@@ -21,34 +16,33 @@ interface TeamMemberPerformanceCardProps {
   onPress?: () => void;
 }
 
-export default function TeamMemberPerformanceCard({ 
-  teamMember, 
-  onPress 
+export default function TeamMemberPerformanceCard({
+  teamMember,
+  onPress,
 }: TeamMemberPerformanceCardProps) {
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'No activity';
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
-      year: 'numeric'
+      year: 'numeric',
     });
   };
 
   const getActivityLevel = () => {
-    if (teamMember.activities_count >= 10) return { level: 'High', color: '#059669' };
-    if (teamMember.activities_count >= 5) return { level: 'Medium', color: '#f59e0b' };
-    if (teamMember.activities_count >= 1) return { level: 'Low', color: '#ef4444' };
+    if (teamMember.activities_count >= 10)
+      return { level: 'High', color: '#059669' };
+    if (teamMember.activities_count >= 5)
+      return { level: 'Medium', color: '#f59e0b' };
+    if (teamMember.activities_count >= 1)
+      return { level: 'Low', color: '#ef4444' };
     return { level: 'None', color: '#6b7280' };
   };
 
   const activityLevel = getActivityLevel();
 
   return (
-    <TouchableOpacity 
-      style={styles.card} 
-      onPress={onPress}
-      activeOpacity={0.7}
-    >
+    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.nameSection}>
@@ -57,7 +51,12 @@ export default function TeamMemberPerformanceCard({
             {teamMember.full_name}
           </Text>
         </View>
-        <View style={[styles.activityBadge, { backgroundColor: activityLevel.color }]}>
+        <View
+          style={[
+            styles.activityBadge,
+            { backgroundColor: activityLevel.color },
+          ]}
+        >
           <Text style={styles.activityBadgeText}>{activityLevel.level}</Text>
         </View>
       </View>
@@ -85,7 +84,9 @@ export default function TeamMemberPerformanceCard({
 
         <View style={styles.metric}>
           <Users size={16} color="#6b7280" />
-          <Text style={styles.metricValue}>{teamMember.total_people_reached}</Text>
+          <Text style={styles.metricValue}>
+            {teamMember.total_people_reached}
+          </Text>
           <Text style={styles.metricLabel}>People Reached</Text>
         </View>
       </View>

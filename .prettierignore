@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Expo
+.expo/
+.expo-shared/
+
+# Build outputs
+dist/
+build/
+*.apk
+*.aab
+
+# Android
+android/
+ios/
+
+# Build artifacts and logs
+build.json
+buildlog.txt
+
+# Generated files
+*.log
+*.tgz
+
+# Cache directories
+.cache/
+.gradle/
+.cxx/
+
+# Git
+.git/
+
+# IDE
+.vscode/
+.idea/
+
+# Misc
+coverage/
+.DS_Store
+*.pem

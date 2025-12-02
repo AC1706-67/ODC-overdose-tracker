@@ -1,6 +1,6 @@
 /**
  * Enhanced Outreach Analytics Type Definitions
- * 
+ *
  * Types for the new database schema supporting team member and location analytics
  */
 
@@ -53,11 +53,11 @@ export interface EnhancedOutreachLog {
   submitted_by?: string;
   created_at: string;
   updated_at: string;
-  
+
   // Legacy fields for migration compatibility
   legacy_location?: string;
   legacy_team_members?: string[];
-  
+
   // Joined data
   team_members?: TeamMember[];
   location?: Location;

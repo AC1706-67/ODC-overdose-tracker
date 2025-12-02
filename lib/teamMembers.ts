@@ -9,7 +9,7 @@ export type CreatedMember = {
 
 export async function createTeamMember(
   orgSlug: string,
-  fullName: string
+  fullName: string,
 ): Promise<CreatedMember> {
   const clean = fullName?.trim();
   if (!clean) throw new Error('Please enter a name.');

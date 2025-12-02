@@ -4,7 +4,15 @@
  */
 
 import { useState } from 'react';
-import { View, TextInput, Button, Alert, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import {
+  View,
+  TextInput,
+  Button,
+  Alert,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'expo-router';
 import { createLogger } from '@/src/utils/logger';
@@ -29,36 +37,33 @@ export default function Login() {
     }
 
     // Assert email format
-    logger.assert(
-      email.includes('@'),
-      'Invalid email format',
-      { email }
-    );
+    logger.assert(email.includes('@'), 'Invalid email format', { email });
 
     setLoading(true);
-    
+
     try {
       // Time the authentication request
       const { error } = await logger.time('Sign in with password', async () => {
         logger.api('POST', '/auth/signin', { email });
         return await supabase.auth.signInWithPassword({ email, password });
       });
-      
+
       setLoading(false);
-      
+
       if (error) {
         logger.error('Sign in failed', error, { email });
         Alert.alert('Sign in failed', error.message);
         return;
       }
-      
+
       logger.info('Sign in successful', { email });
       logger.navigation('Home', { from: 'login' });
       router.replace('/');
-      
     } catch (error) {
       setLoading(false);
-      logger.error('Unexpected error during sign in', error as Error, { email });
+      logger.error('Unexpected error during sign in', error as Error, {
+        email,
+      });
       Alert.alert('Error', 'An unexpected error occurred');
     }
   }
@@ -71,8 +76,10 @@ export default function Login() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Compassionate LOG</Text>
-      <Text style={styles.subtitle}>Recording acts of care and compassion - Sign in to continue</Text>
-      
+      <Text style={styles.subtitle}>
+        Recording acts of care and compassion - Sign in to continue
+      </Text>
+
       <TextInput
         placeholder="Email"
         autoCapitalize="none"
@@ -85,7 +92,7 @@ export default function Login() {
         style={styles.input}
         editable={!loading}
       />
-      
+
       <TextInput
         placeholder="Password"
         secureTextEntry
@@ -97,14 +104,14 @@ export default function Login() {
         style={styles.input}
         editable={!loading}
       />
-      
-      <Button 
-        title={loading ? "Signing in..." : "Sign in"} 
+
+      <Button
+        title={loading ? 'Signing in...' : 'Sign in'}
         onPress={signIn}
         disabled={loading}
       />
 
-      <TouchableOpacity 
+      <TouchableOpacity
         onPress={handleSignUpNavigation}
         style={styles.linkContainer}
         disabled={loading}

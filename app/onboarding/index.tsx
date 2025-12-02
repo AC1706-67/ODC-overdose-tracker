@@ -1,5 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  SafeAreaView,
+} from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useOrg } from '@/src/context/OrgContext';
@@ -42,7 +48,9 @@ export default function OnboardingScreen() {
             <Ionicons name="business" size={32} color="#059669" />
           </View>
           <View style={styles.optionText}>
-            <Text style={styles.optionTitle}>Join a certified organization</Text>
+            <Text style={styles.optionTitle}>
+              Join a certified organization
+            </Text>
             <Text style={styles.optionDescription}>
               Browse and join existing organizations
             </Text>
@@ -58,7 +66,9 @@ export default function OnboardingScreen() {
             <Ionicons name="add-circle" size={32} color="#7c3aed" />
           </View>
           <View style={styles.optionText}>
-            <Text style={styles.optionTitle}>Request organization certification</Text>
+            <Text style={styles.optionTitle}>
+              Request organization certification
+            </Text>
             <Text style={styles.optionDescription}>
               My organization is not listed
             </Text>
@@ -66,10 +76,7 @@ export default function OnboardingScreen() {
           <Ionicons name="chevron-forward" size={24} color="#9ca3af" />
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.skipButton}
-          onPress={handleSkip}
-        >
+        <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
           <Text style={styles.skipText}>Skip for now</Text>
         </TouchableOpacity>
       </View>

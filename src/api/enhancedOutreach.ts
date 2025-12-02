@@ -57,7 +57,9 @@ export interface EnhancedOutreachSubmission {
 /**
  * Submit an enhanced outreach log with team member and location associations
  */
-export async function submitEnhancedOutreach(submission: EnhancedOutreachSubmission) {
+export async function submitEnhancedOutreach(
+  submission: EnhancedOutreachSubmission,
+) {
   const { team_members, ...outreachData } = submission;
 
   // Insert the main outreach log
@@ -73,10 +75,10 @@ export async function submitEnhancedOutreach(submission: EnhancedOutreachSubmiss
 
   // Insert team member associations if any
   if (team_members && team_members.length > 0) {
-    const teamMemberAssociations = team_members.map(member => ({
+    const teamMemberAssociations = team_members.map((member) => ({
       outreach_log_id: outreachLog.id,
       team_member_id: member.team_member_id,
-      role_in_activity: member.role_in_activity || 'volunteer'
+      role_in_activity: member.role_in_activity || 'volunteer',
     }));
 
     const { error: teamMemberError } = await supabase
@@ -95,7 +97,9 @@ export async function submitEnhancedOutreach(submission: EnhancedOutreachSubmiss
 /**
  * Get team members for an organization
  */
-export async function getTeamMembers(organizationId: string): Promise<TeamMember[]> {
+export async function getTeamMembers(
+  organizationId: string,
+): Promise<TeamMember[]> {
   const { data, error } = await supabase
     .from('team_members')
     .select('*')
@@ -113,7 +117,9 @@ export async function getTeamMembers(organizationId: string): Promise<TeamMember
 /**
  * Create a new team member
  */
-export async function createTeamMember(teamMember: Omit<TeamMember, 'id' | 'created_at' | 'updated_at'>): Promise<TeamMember> {
+export async function createTeamMember(
+  teamMember: Omit<TeamMember, 'id' | 'created_at' | 'updated_at'>,
+): Promise<TeamMember> {
   const { data, error } = await supabase
     .from('team_members')
     .insert([teamMember])
@@ -147,7 +153,9 @@ export async function getLocations(): Promise<Location[]> {
 /**
  * Create a new location
  */
-export async function createLocation(location: Omit<Location, 'id' | 'created_at'>): Promise<Location> {
+export async function createLocation(
+  location: Omit<Location, 'id' | 'created_at'>,
+): Promise<Location> {
   const { data, error } = await supabase
     .from('locations')
     .insert([location])

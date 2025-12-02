@@ -7,6 +7,7 @@ The app now has a **true multi-tenant architecture** with database-level securit
 ## Architecture Principles
 
 ### 1. Simple Frontend Rule
+
 ```typescript
 // Show Outreach tab if user belongs to ANY organization
 const canSeeOutreach = !!org && !!org.id;
@@ -17,14 +18,16 @@ That's it. No role checks, no org slug matching, no hardcoded IDs.
 ### 2. Database Handles Everything
 
 **RLS Policies Enforce**:
+
 - ✅ Organization membership controls SELECT and INSERT
-- ✅ Creator/Admin roles control UPDATE and DELETE  
+- ✅ Creator/Admin roles control UPDATE and DELETE
 - ✅ Cross-organization access is impossible
 - ✅ Performance indexes added
 
 ### 3. Zero Frontend Filtering
 
 The frontend doesn't filter data by organization. It just queries:
+
 ```typescript
 const { data } = await supabase.from('outreach_logs').select('*');
 ```
@@ -34,6 +37,7 @@ RLS automatically returns only the user's organization data.
 ## What Changed
 
 ### Before ❌
+
 ```typescript
 // Hardcoded organization checks
 const RAEP_ID = '6e892800-0429-442f-bff8-417b4d4ec793';
@@ -48,6 +52,7 @@ function canUseOutreach(org) {
 ```
 
 ### After ✅
+
 ```typescript
 // Simple membership check
 function canUseOutreach(org) {
@@ -58,11 +63,13 @@ function canUseOutreach(org) {
 ## Security Model
 
 ### Frontend (UX Layer)
+
 - Shows/hides Outreach tab based on organization membership
 - No data filtering logic
 - No role-based UI restrictions (except for admin features)
 
 ### Backend (Security Layer)
+
 - RLS policies enforce all access control
 - Organization membership required for SELECT/INSERT
 - Creator or Admin role required for UPDATE/DELETE
@@ -80,6 +87,7 @@ function canUseOutreach(org) {
 ## Data Flow Example
 
 ### User A (Recovery Alliance)
+
 ```typescript
 // 1. User logs in
 // 2. OrgContext loads: { id: 'raep-uuid', name: 'Recovery Alliance' }
@@ -96,6 +104,7 @@ const { data } = await supabase.from('outreach_logs').select('*');
 ```
 
 ### User B (Anonymous Haven)
+
 ```typescript
 // 1. User logs in
 // 2. OrgContext loads: { id: 'haven-uuid', name: 'Anonymous Haven' }
@@ -106,6 +115,7 @@ const { data } = await supabase.from('outreach_logs').select('*');
 ```
 
 ### User C (No Organization)
+
 ```typescript
 // 1. User logs in
 // 2. OrgContext loads: null (no org membership)
@@ -116,6 +126,7 @@ const { data } = await supabase.from('outreach_logs').select('*');
 ## Cross-Organization Protection
 
 Even if User A tries to access User B's data:
+
 ```typescript
 // User A tries to query another org
 const { data } = await supabase
@@ -129,6 +140,7 @@ const { data } = await supabase
 ## Tables with RLS Protection
 
 All these tables are now properly isolated:
+
 - ✅ `incidents` - Organization-based access
 - ✅ `outreach_logs` - Organization-based access
 - ✅ `locations` - Organization-based access
@@ -151,12 +163,14 @@ All these tables are now properly isolated:
 ## Files Modified
 
 ### Core Changes
+
 - `src/lib/featureAccess.ts` - Simplified to membership check
 - `hooks/useIncidentStorage.ts` - Uses activeOrgId and currentUser
 - `OUTREACH_FEATURE_ACCESS.md` - Updated documentation
 - `FRONTEND_WIRING_STATUS.md` - Marked complete
 
 ### Backend (Already Done)
+
 - Supabase RLS policies cleaned up
 - Organization-based access enforced
 - Performance indexes added
@@ -165,11 +179,13 @@ All these tables are now properly isolated:
 ## Next Steps
 
 ### Immediate
+
 - [ ] Test end-to-end with multiple organizations
 - [ ] Verify distributions table follows same pattern
 - [ ] Apply onboarding migration for invite codes
 
 ### Future Enhancements
+
 - [ ] Admin panel for managing organizations
 - [ ] Organization switching UI (if user has multiple)
 - [ ] Organization analytics dashboard
@@ -187,6 +203,7 @@ All these tables are now properly isolated:
 ## Conclusion
 
 The multi-tenant architecture is **complete and production-ready**. The app now:
+
 - Shows features based on simple membership checks
 - Enforces security at the database level
 - Scales to unlimited organizations

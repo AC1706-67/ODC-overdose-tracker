@@ -3,6 +3,7 @@
 ## Why Logging Matters
 
 Good logging helps you:
+
 - **Debug faster** - See exactly what's happening
 - **Catch bugs early** - Assertions fail in development
 - **Monitor production** - Track errors in real apps
@@ -29,20 +30,24 @@ logger.error('Something is definitely wrong', error);
 ### Advanced Features
 
 #### 1. Assertions (Catch Bugs Early!)
+
 ```typescript
 const logger = createLogger('UserService');
 
 function updateUser(user: User) {
   // Assert preconditions
   logger.assert(user.id !== undefined, 'User must have an ID', { user });
-  logger.assert(user.email.includes('@'), 'Invalid email format', { email: user.email });
-  
+  logger.assert(user.email.includes('@'), 'Invalid email format', {
+    email: user.email,
+  });
+
   // If assertions pass, continue...
   logger.info('Updating user', { userId: user.id });
 }
 ```
 
 #### 2. Performance Timing
+
 ```typescript
 const logger = createLogger('DatabaseService');
 
@@ -57,16 +62,15 @@ async function fetchData() {
 ```
 
 #### 3. API Call Logging
+
 ```typescript
 const logger = createLogger('API');
 
 async function createIncident(data: IncidentData) {
   logger.api('POST', '/incidents', { data });
-  
-  const { data: result, error } = await supabase
-    .from('incidents')
-    .insert(data);
-  
+
+  const { data: result, error } = await supabase.from('incidents').insert(data);
+
   if (error) {
     logger.error('Failed to create incident', error);
   } else {
@@ -76,19 +80,21 @@ async function createIncident(data: IncidentData) {
 ```
 
 #### 4. User Action Tracking
+
 ```typescript
 const logger = createLogger('LoginScreen');
 
 function handleLogin() {
   logger.action('Login button clicked', { email: user.email });
-  
+
   // ... login logic
-  
+
   logger.action('Login successful', { userId: user.id });
 }
 ```
 
 #### 5. Navigation Logging
+
 ```typescript
 const logger = createLogger('Navigation');
 
@@ -103,22 +109,26 @@ function navigateToProfile(userId: string) {
 ### ✅ DO Log:
 
 1. **Critical Operations**
+
    ```typescript
    logger.info('Creating organization', { orgName });
    logger.info('User authenticated', { userId });
    ```
 
 2. **Error Conditions**
+
    ```typescript
    logger.error('Failed to load data', error, { userId, orgId });
    ```
 
 3. **State Changes**
+
    ```typescript
    logger.debug('Organization changed', { from: oldOrg, to: newOrg });
    ```
 
 4. **API Calls**
+
    ```typescript
    logger.api('GET', '/incidents', { filters });
    ```
@@ -131,31 +141,34 @@ function navigateToProfile(userId: string) {
 ### ❌ DON'T Log:
 
 1. **Sensitive Data**
+
    ```typescript
    // BAD
    logger.info('User logged in', { password: user.password });
-   
+
    // GOOD
    logger.info('User logged in', { userId: user.id });
    ```
 
 2. **Inside Tight Loops**
+
    ```typescript
    // BAD
-   items.forEach(item => {
+   items.forEach((item) => {
      logger.debug('Processing item', item); // Too verbose!
    });
-   
+
    // GOOD
    logger.debug('Processing items', { count: items.length });
    ```
 
 3. **Redundant Information**
+
    ```typescript
    // BAD
    logger.info('Starting function');
    logger.info('Function started');
-   
+
    // GOOD
    logger.debug('Processing user data', { userId });
    ```
@@ -163,11 +176,13 @@ function navigateToProfile(userId: string) {
 ## Example: Refactoring OrgContext with Better Logging
 
 **Before:**
+
 ```typescript
 console.log('[OrgContext] Loading org for user:', user.id);
 ```
 
 **After:**
+
 ```typescript
 import { createLogger } from '@/src/utils/logger';
 
@@ -194,12 +209,14 @@ const org = await logger.time('Load organization', async () => {
 ## Quick Migration Guide
 
 ### Step 1: Import the logger
+
 ```typescript
 import { createLogger } from '@/src/utils/logger';
 const logger = createLogger('YourComponent');
 ```
 
 ### Step 2: Replace console.log
+
 ```typescript
 // Before
 console.log('[MyComponent] User logged in:', user);
@@ -209,6 +226,7 @@ logger.info('User logged in', { userId: user.id, email: user.email });
 ```
 
 ### Step 3: Add assertions
+
 ```typescript
 // Add at the start of functions
 logger.assert(data !== null, 'Data cannot be null');
@@ -216,6 +234,7 @@ logger.assert(orgId !== undefined, 'Organization ID required');
 ```
 
 ### Step 4: Time critical operations
+
 ```typescript
 // Wrap slow operations
 const result = await logger.time('Fetch dashboard data', async () => {

@@ -46,7 +46,9 @@ export default function TeamMemberAnalytics() {
   const { activeOrgId, activeOrg } = useOrg();
   const [teamMembers, setTeamMembers] = useState<TeamMemberStats[]>([]);
   const [activities, setActivities] = useState<ActivityTimelineItem[]>([]);
-  const [selectedMember, setSelectedMember] = useState<TeamMemberStats | null>(null);
+  const [selectedMember, setSelectedMember] = useState<TeamMemberStats | null>(
+    null,
+  );
   const [viewMode, setViewMode] = useState<ViewMode>('overview');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -63,12 +65,15 @@ export default function TeamMemberAnalytics() {
       }
 
       const { data, error } = await query;
-      
+
       if (error) {
-        console.error('[TeamMemberAnalytics] Error fetching team stats:', error);
+        console.error(
+          '[TeamMemberAnalytics] Error fetching team stats:',
+          error,
+        );
         return;
       }
-      
+
       setTeamMembers(data || []);
     } catch (error) {
       console.error('[TeamMemberAnalytics] Fetch error:', error);
@@ -88,22 +93,23 @@ export default function TeamMemberAnalytics() {
       }
 
       const { data, error } = await query;
-      
+
       if (error) {
         console.error('[TeamMemberAnalytics] Error fetching timeline:', error);
         return;
       }
-      
+
       let filteredData = data || [];
-      
+
       // Filter by specific team member if provided
       if (teamMemberId && selectedMember) {
-        filteredData = filteredData.filter(activity => 
-          activity.team_members && 
-          activity.team_members.includes(selectedMember.full_name)
+        filteredData = filteredData.filter(
+          (activity) =>
+            activity.team_members &&
+            activity.team_members.includes(selectedMember.full_name),
         );
       }
-      
+
       setActivities(filteredData);
     } catch (error) {
       console.error('[TeamMemberAnalytics] Timeline fetch error:', error);
@@ -117,15 +123,17 @@ export default function TeamMemberAnalytics() {
       } else {
         setLoading(true);
       }
-      
+
       await Promise.all([
         fetchTeamMemberStats(),
-        fetchActivityTimeline(selectedMember?.team_member_id)
+        fetchActivityTimeline(selectedMember?.team_member_id),
       ]);
-      
     } catch (error) {
       console.error('[TeamMemberAnalytics] Refresh error:', error);
-      Alert.alert('Error', 'Failed to load team member data. Please try again.');
+      Alert.alert(
+        'Error',
+        'Failed to load team member data. Please try again.',
+      );
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -162,32 +170,65 @@ export default function TeamMemberAnalytics() {
 
   const renderViewModeSelector = () => (
     <View style={styles.viewModeSelector}>
-      <TouchableOpacity 
-        style={[styles.viewModeButton, viewMode === 'overview' && styles.viewModeButtonActive]}
+      <TouchableOpacity
+        style={[
+          styles.viewModeButton,
+          viewMode === 'overview' && styles.viewModeButtonActive,
+        ]}
         onPress={() => handleViewModeChange('overview')}
       >
-        <Users size={16} color={viewMode === 'overview' ? '#ffffff' : '#6b7280'} />
-        <Text style={[styles.viewModeText, viewMode === 'overview' && styles.viewModeTextActive]}>
+        <Users
+          size={16}
+          color={viewMode === 'overview' ? '#ffffff' : '#6b7280'}
+        />
+        <Text
+          style={[
+            styles.viewModeText,
+            viewMode === 'overview' && styles.viewModeTextActive,
+          ]}
+        >
           Overview
         </Text>
       </TouchableOpacity>
-      
-      <TouchableOpacity 
-        style={[styles.viewModeButton, viewMode === 'comparison' && styles.viewModeButtonActive]}
+
+      <TouchableOpacity
+        style={[
+          styles.viewModeButton,
+          viewMode === 'comparison' && styles.viewModeButtonActive,
+        ]}
         onPress={() => handleViewModeChange('comparison')}
       >
-        <BarChart3 size={16} color={viewMode === 'comparison' ? '#ffffff' : '#6b7280'} />
-        <Text style={[styles.viewModeText, viewMode === 'comparison' && styles.viewModeTextActive]}>
+        <BarChart3
+          size={16}
+          color={viewMode === 'comparison' ? '#ffffff' : '#6b7280'}
+        />
+        <Text
+          style={[
+            styles.viewModeText,
+            viewMode === 'comparison' && styles.viewModeTextActive,
+          ]}
+        >
           Compare
         </Text>
       </TouchableOpacity>
-      
-      <TouchableOpacity 
-        style={[styles.viewModeButton, viewMode === 'timeline' && styles.viewModeButtonActive]}
+
+      <TouchableOpacity
+        style={[
+          styles.viewModeButton,
+          viewMode === 'timeline' && styles.viewModeButtonActive,
+        ]}
         onPress={() => handleViewModeChange('timeline')}
       >
-        <Clock size={16} color={viewMode === 'timeline' ? '#ffffff' : '#6b7280'} />
-        <Text style={[styles.viewModeText, viewMode === 'timeline' && styles.viewModeTextActive]}>
+        <Clock
+          size={16}
+          color={viewMode === 'timeline' ? '#ffffff' : '#6b7280'}
+        />
+        <Text
+          style={[
+            styles.viewModeText,
+            viewMode === 'timeline' && styles.viewModeTextActive,
+          ]}
+        >
           Timeline
         </Text>
       </TouchableOpacity>
@@ -195,9 +236,11 @@ export default function TeamMemberAnalytics() {
   );
 
   const renderOverview = () => (
-    <ScrollView 
+    <ScrollView
       style={styles.content}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
       showsVerticalScrollIndicator={false}
     >
       {teamMembers.length > 0 ? (
@@ -212,7 +255,8 @@ export default function TeamMemberAnalytics() {
         <View style={styles.emptyState}>
           <Text style={styles.emptyTitle}>👥 No Team Members Found</Text>
           <Text style={styles.emptyText}>
-            Team member data will appear here once outreach activities are logged with the new enhanced schema.
+            Team member data will appear here once outreach activities are
+            logged with the new enhanced schema.
           </Text>
         </View>
       )}
@@ -223,28 +267,30 @@ export default function TeamMemberAnalytics() {
     if (!selectedMember) return null;
 
     return (
-      <ScrollView 
+      <ScrollView
         style={styles.content}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.individualHeader}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.backButton}
             onPress={() => handleViewModeChange('overview')}
           >
             <Text style={styles.backButtonText}>← Back to Overview</Text>
           </TouchableOpacity>
           <Text style={styles.individualTitle}>{selectedMember.full_name}</Text>
-          <Text style={styles.individualOrg}>{selectedMember.organization_name}</Text>
+          <Text style={styles.individualOrg}>
+            {selectedMember.organization_name}
+          </Text>
         </View>
 
-        <TeamMemberPerformanceCard
-          teamMember={selectedMember}
-        />
+        <TeamMemberPerformanceCard teamMember={selectedMember} />
 
         <View style={styles.individualActions}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.actionButton}
             onPress={() => handleViewModeChange('timeline')}
           >
@@ -257,36 +303,39 @@ export default function TeamMemberAnalytics() {
   };
 
   const renderComparison = () => (
-    <ScrollView 
+    <ScrollView
       style={styles.content}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
       showsVerticalScrollIndicator={false}
     >
-      <TeamMemberComparisonChart 
-        teamMembers={teamMembers}
-        loading={loading}
-      />
+      <TeamMemberComparisonChart teamMembers={teamMembers} loading={loading} />
     </ScrollView>
   );
 
   const renderTimeline = () => (
-    <ScrollView 
+    <ScrollView
       style={styles.content}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
       showsVerticalScrollIndicator={false}
     >
       {selectedMember && (
         <View style={styles.timelineHeader}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.backButton}
             onPress={() => handleViewModeChange('individual')}
           >
-            <Text style={styles.backButtonText}>← Back to {selectedMember.full_name}</Text>
+            <Text style={styles.backButtonText}>
+              ← Back to {selectedMember.full_name}
+            </Text>
           </TouchableOpacity>
         </View>
       )}
-      
-      <TeamMemberActivityTimeline 
+
+      <TeamMemberActivityTimeline
         activities={activities}
         teamMemberName={selectedMember?.full_name}
         loading={loading}
@@ -304,7 +353,9 @@ export default function TeamMemberAnalytics() {
       {/* Organization Context Banner */}
       <View style={styles.orgBanner}>
         <Text style={styles.orgLabel}>Organization:</Text>
-        <Text style={styles.orgName}>{activeOrg?.name || 'No Organization Selected'}</Text>
+        <Text style={styles.orgName}>
+          {activeOrg?.name || 'No Organization Selected'}
+        </Text>
       </View>
 
       {renderViewModeSelector()}

@@ -1,11 +1,13 @@
 # Migration Best Practices Applied
 
 ## Overview
+
 Refactored `20251119_add_org_certification_and_codes.sql` to follow PostgreSQL and Supabase best practices.
 
 ## Best Practices Implemented
 
 ### 1. ✅ Proper Ordering
+
 ```
 Step 1: Functions (dependencies first)
 Step 2: Table alterations
@@ -20,7 +22,9 @@ Step 10: Data inserts
 ```
 
 ### 2. ✅ Idempotency
+
 All operations can be safely re-run:
+
 - `CREATE OR REPLACE FUNCTION`
 - `CREATE TABLE IF NOT EXISTS`
 - `ADD COLUMN IF NOT EXISTS`
@@ -30,11 +34,12 @@ All operations can be safely re-run:
 - `WHERE is_certified IS NOT TRUE` for updates
 
 ### 3. ✅ Constraint Management
+
 ```sql
-DO $$ 
+DO $$
 BEGIN
   ALTER TABLE organizations DROP CONSTRAINT IF EXISTS organizations_status_check;
-  ALTER TABLE organizations ADD CONSTRAINT organizations_status_check 
+  ALTER TABLE organizations ADD CONSTRAINT organizations_status_check
     CHECK (status IN ('pending', 'approved', 'rejected', 'suspended'));
 EXCEPTION
   WHEN duplicate_object THEN NULL;
@@ -42,6 +47,7 @@ END $$;
 ```
 
 ### 4. ✅ Function Safety
+
 - Used `public.` schema prefix
 - `SECURITY DEFINER` for privileged operations
 - `STABLE` volatility category (reads data, doesn't modify)
@@ -49,11 +55,13 @@ END $$;
 - Comprehensive comments
 
 ### 5. ✅ Transaction Safety
+
 - No `CREATE INDEX CONCURRENTLY` (which can't run in transactions)
 - All operations are transaction-safe
 - Can be wrapped in `BEGIN...COMMIT` if needed
 
 ### 6. ✅ Error Handling
+
 ```sql
 EXCEPTION
   WHEN duplicate_object THEN NULL;
@@ -61,18 +69,22 @@ EXCEPTION
 ```
 
 ### 7. ✅ Data Safety
+
 - Conditional updates: `WHERE is_certified IS NOT TRUE`
 - Existence checks: `AND EXISTS (SELECT 1 FROM ...)`
 - Conflict resolution: `ON CONFLICT (code) DO NOTHING`
 
 ### 8. ✅ Documentation
+
 - Comprehensive header comment
 - Step-by-step comments
 - Inline explanations for complex logic
 - Clear section separators
 
 ### 9. ✅ Verification Script
+
 Created `verify-onboarding-migration.sql` to check:
+
 - Column existence
 - Table creation
 - RLS policies
@@ -85,6 +97,7 @@ Created `verify-onboarding-migration.sql` to check:
 ## Migration Execution
 
 ### Safe Execution
+
 ```sql
 -- Option 1: Run entire migration (idempotent)
 -- Copy/paste entire file into Supabase SQL Editor
@@ -99,13 +112,15 @@ COMMIT;
 ```
 
 ### Rollback Strategy
+
 If needed, rollback is straightforward:
+
 ```sql
 -- Drop new table
 DROP TABLE IF EXISTS organization_invite_codes CASCADE;
 
 -- Remove new columns
-ALTER TABLE organizations 
+ALTER TABLE organizations
   DROP COLUMN IF EXISTS is_certified,
   DROP COLUMN IF EXISTS status,
   DROP COLUMN IF EXISTS created_by,
@@ -122,6 +137,7 @@ DROP FUNCTION IF EXISTS public.increment_invite_code_usage(text);
 ## Comparison: Before vs After
 
 ### Before
+
 - ❌ Constraints inline with CREATE TABLE (not idempotent)
 - ❌ No function existence check
 - ❌ Policies not dropped before creation
@@ -130,6 +146,7 @@ DROP FUNCTION IF EXISTS public.increment_invite_code_usage(text);
 - ❌ Less comprehensive documentation
 
 ### After
+
 - ✅ Constraints added separately with error handling
 - ✅ Function created/replaced first
 - ✅ Policies dropped before creation

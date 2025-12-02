@@ -32,7 +32,10 @@ interface TeamMemberPickerProps {
   onMembersChange: (members: SelectedTeamMember[]) => void;
 }
 
-export default function TeamMemberPicker({ selectedMembers, onMembersChange }: TeamMemberPickerProps) {
+export default function TeamMemberPicker({
+  selectedMembers,
+  onMembersChange,
+}: TeamMemberPickerProps) {
   const { activeOrgId } = useOrg();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [availableMembers, setAvailableMembers] = useState<TeamMember[]>([]);
@@ -51,7 +54,7 @@ export default function TeamMemberPicker({ selectedMembers, onMembersChange }: T
 
   const loadTeamMembers = async () => {
     if (!activeOrgId) return;
-    
+
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -91,7 +94,7 @@ export default function TeamMemberPicker({ selectedMembers, onMembersChange }: T
         p_full_name: newMemberName.trim(),
         p_email: newMemberEmail.trim() || null,
         p_role: newMemberRole.trim() || null,
-        p_org_slug: orgData.slug
+        p_org_slug: orgData.slug,
       });
 
       if (error) {
@@ -107,35 +110,41 @@ export default function TeamMemberPicker({ selectedMembers, onMembersChange }: T
         email: data.email,
         phone: undefined, // phone is not handled by the function
         role: data.role,
-        is_active: data.is_active
+        is_active: data.is_active,
       };
 
       // Check if this member already exists in our list (update scenario)
-      const existingMemberIndex = availableMembers.findIndex(m => m.id === newMember.id);
-      
+      const existingMemberIndex = availableMembers.findIndex(
+        (m) => m.id === newMember.id,
+      );
+
       if (existingMemberIndex >= 0) {
         // Update existing member
-        setAvailableMembers(prev => 
-          prev.map(member => member.id === newMember.id ? newMember : member)
+        setAvailableMembers((prev) =>
+          prev.map((member) =>
+            member.id === newMember.id ? newMember : member,
+          ),
         );
       } else {
         // Add new member
-        setAvailableMembers(prev => [...prev, newMember]);
+        setAvailableMembers((prev) => [...prev, newMember]);
       }
-      
+
       // Auto-select the new/updated member
       const selectedMember: SelectedTeamMember = {
         ...newMember,
-        role_in_activity: 'volunteer'
+        role_in_activity: 'volunteer',
       };
-      
+
       // Check if already selected, if so update, otherwise add
-      const isAlreadySelected = selectedMembers.some(m => m.id === newMember.id);
+      const isAlreadySelected = selectedMembers.some(
+        (m) => m.id === newMember.id,
+      );
       if (isAlreadySelected) {
         onMembersChange(
-          selectedMembers.map(member =>
-            member.id === newMember.id ? selectedMember : member
-          )
+          selectedMembers.map((member) =>
+            member.id === newMember.id ? selectedMember : member,
+          ),
         );
       } else {
         onMembersChange([...selectedMembers, selectedMember]);
@@ -146,12 +155,13 @@ export default function TeamMemberPicker({ selectedMembers, onMembersChange }: T
       setNewMemberEmail('');
       setNewMemberRole('');
       setIsCreatingNew(false);
-      
+
       const actionText = existingMemberIndex >= 0 ? 'updated' : 'created';
       Alert.alert('Success', `Team member ${actionText} and added to outreach`);
     } catch (error) {
       console.error('Error creating team member:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to create team member';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to create team member';
       Alert.alert('Error', errorMessage);
     } finally {
       setLoading(false);
@@ -159,14 +169,14 @@ export default function TeamMemberPicker({ selectedMembers, onMembersChange }: T
   };
 
   const toggleMemberSelection = (member: TeamMember) => {
-    const isSelected = selectedMembers.some(m => m.id === member.id);
-    
+    const isSelected = selectedMembers.some((m) => m.id === member.id);
+
     if (isSelected) {
-      onMembersChange(selectedMembers.filter(m => m.id !== member.id));
+      onMembersChange(selectedMembers.filter((m) => m.id !== member.id));
     } else {
       const selectedMember: SelectedTeamMember = {
         ...member,
-        role_in_activity: 'volunteer'
+        role_in_activity: 'volunteer',
       };
       onMembersChange([...selectedMembers, selectedMember]);
     }
@@ -174,20 +184,18 @@ export default function TeamMemberPicker({ selectedMembers, onMembersChange }: T
 
   const updateMemberRole = (memberId: string, role: string) => {
     onMembersChange(
-      selectedMembers.map(member =>
-        member.id === memberId
-          ? { ...member, role_in_activity: role }
-          : member
-      )
+      selectedMembers.map((member) =>
+        member.id === memberId ? { ...member, role_in_activity: role } : member,
+      ),
     );
   };
 
   const removeMember = (memberId: string) => {
-    onMembersChange(selectedMembers.filter(m => m.id !== memberId));
+    onMembersChange(selectedMembers.filter((m) => m.id !== memberId));
   };
 
-  const filteredMembers = availableMembers.filter(member =>
-    member.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredMembers = availableMembers.filter((member) =>
+    member.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const roleOptions = ['lead', 'volunteer', 'coordinator', 'supervisor'];
@@ -195,7 +203,7 @@ export default function TeamMemberPicker({ selectedMembers, onMembersChange }: T
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Team Members</Text>
-      
+
       {/* Selected Members Display */}
       <View style={styles.selectedContainer}>
         {selectedMembers.length === 0 ? (
@@ -207,7 +215,9 @@ export default function TeamMemberPicker({ selectedMembers, onMembersChange }: T
                 <User size={16} color="#059669" />
                 <Text style={styles.memberName}>{member.name}</Text>
                 {member.role_in_activity && (
-                  <Text style={styles.memberRole}>({member.role_in_activity})</Text>
+                  <Text style={styles.memberRole}>
+                    ({member.role_in_activity})
+                  </Text>
                 )}
               </View>
               <TouchableOpacity
@@ -271,7 +281,9 @@ export default function TeamMemberPicker({ selectedMembers, onMembersChange }: T
               </TouchableOpacity>
             ) : (
               <View style={styles.createForm}>
-                <Text style={styles.createFormTitle}>Create New Team Member</Text>
+                <Text style={styles.createFormTitle}>
+                  Create New Team Member
+                </Text>
                 <TextInput
                   style={styles.input}
                   placeholder="Full Name *"
@@ -304,7 +316,10 @@ export default function TeamMemberPicker({ selectedMembers, onMembersChange }: T
                     <Text style={styles.cancelButtonText}>Cancel</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={[styles.createButton, !newMemberName.trim() && styles.createButtonDisabled]}
+                    style={[
+                      styles.createButton,
+                      !newMemberName.trim() && styles.createButtonDisabled,
+                    ]}
                     onPress={createNewMember}
                     disabled={!newMemberName.trim() || loading}
                   >
@@ -322,31 +337,46 @@ export default function TeamMemberPicker({ selectedMembers, onMembersChange }: T
               <Text style={styles.loadingText}>Loading...</Text>
             ) : filteredMembers.length === 0 ? (
               <Text style={styles.emptyText}>
-                {searchQuery ? 'No members found matching your search' : 'No team members found'}
+                {searchQuery
+                  ? 'No members found matching your search'
+                  : 'No team members found'}
               </Text>
             ) : (
               filteredMembers.map((member) => {
-                const isSelected = selectedMembers.some(m => m.id === member.id);
+                const isSelected = selectedMembers.some(
+                  (m) => m.id === member.id,
+                );
                 return (
                   <TouchableOpacity
                     key={member.id}
-                    style={[styles.memberItem, isSelected && styles.memberItemSelected]}
+                    style={[
+                      styles.memberItem,
+                      isSelected && styles.memberItemSelected,
+                    ]}
                     onPress={() => toggleMemberSelection(member)}
                   >
                     <View style={styles.memberItemContent}>
-                      <User size={20} color={isSelected ? "#059669" : "#6b7280"} />
+                      <User
+                        size={20}
+                        color={isSelected ? '#059669' : '#6b7280'}
+                      />
                       <View style={styles.memberDetails}>
-                        <Text style={[styles.memberItemName, isSelected && styles.memberItemNameSelected]}>
+                        <Text
+                          style={[
+                            styles.memberItemName,
+                            isSelected && styles.memberItemNameSelected,
+                          ]}
+                        >
                           {member.name}
                         </Text>
                         {member.role && (
-                          <Text style={styles.memberItemRole}>{member.role}</Text>
+                          <Text style={styles.memberItemRole}>
+                            {member.role}
+                          </Text>
                         )}
                       </View>
                     </View>
-                    {isSelected && (
-                      <Check size={20} color="#059669" />
-                    )}
+                    {isSelected && <Check size={20} color="#059669" />}
                   </TouchableOpacity>
                 );
               })
@@ -359,7 +389,10 @@ export default function TeamMemberPicker({ selectedMembers, onMembersChange }: T
               <Text style={styles.selectedSectionTitle}>
                 Selected Members ({selectedMembers.length})
               </Text>
-              <ScrollView style={styles.selectedList} showsVerticalScrollIndicator={false}>
+              <ScrollView
+                style={styles.selectedList}
+                showsVerticalScrollIndicator={false}
+              >
                 {selectedMembers.map((member) => (
                   <View key={member.id} style={styles.selectedMemberRow}>
                     <Text style={styles.selectedMemberName}>{member.name}</Text>
@@ -369,14 +402,18 @@ export default function TeamMemberPicker({ selectedMembers, onMembersChange }: T
                           key={role}
                           style={[
                             styles.roleOption,
-                            member.role_in_activity === role && styles.roleOptionSelected
+                            member.role_in_activity === role &&
+                              styles.roleOptionSelected,
                           ]}
                           onPress={() => updateMemberRole(member.id, role)}
                         >
-                          <Text style={[
-                            styles.roleOptionText,
-                            member.role_in_activity === role && styles.roleOptionTextSelected
-                          ]}>
+                          <Text
+                            style={[
+                              styles.roleOptionText,
+                              member.role_in_activity === role &&
+                                styles.roleOptionTextSelected,
+                            ]}
+                          >
                             {role}
                           </Text>
                         </TouchableOpacity>
@@ -398,8 +435,8 @@ export default function TeamMemberPicker({ selectedMembers, onMembersChange }: T
       </Modal>
     </View>
   );
-}const
- styles = StyleSheet.create({
+}
+const styles = StyleSheet.create({
   container: {
     marginBottom: 24,
   },

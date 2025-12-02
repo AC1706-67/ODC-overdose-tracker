@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, FlatList, StyleSheet, RefreshControl } from 'react-native';
+import {
+  View,
+  Text,
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  RefreshControl,
+} from 'react-native';
 import { supabase } from '@/lib/supabase';
 import { useOrg } from '@/src/context/OrgContext';
 import { Package } from 'lucide-react-native';
@@ -26,7 +33,7 @@ export default function OutreachHistoryScreen() {
 
   const loadLogs = async (isRefreshing = false) => {
     if (!activeOrgId) return;
-    
+
     if (isRefreshing) {
       setRefreshing(true);
     } else {
@@ -37,7 +44,9 @@ export default function OutreachHistoryScreen() {
     try {
       const { data, error } = await supabase
         .from('outreach_logs')
-        .select('id, created_at, outreach_date, zip_code, legacy_location, kit_types, num_kits, people_reached, males_reached, females_reached')
+        .select(
+          'id, created_at, outreach_date, zip_code, legacy_location, kit_types, num_kits, people_reached, males_reached, females_reached',
+        )
         .eq('organization_id', activeOrgId)
         .order('outreach_date', { ascending: false })
         .order('created_at', { ascending: false })
@@ -107,7 +116,8 @@ export default function OutreachHistoryScreen() {
           <Package size={48} color="#d1d5db" />
           <Text style={styles.emptyTitle}>No Outreach Logs Yet</Text>
           <Text style={styles.emptyText}>
-            No outreach activities have been recorded for {activeOrg?.name || 'this organization'}.
+            No outreach activities have been recorded for{' '}
+            {activeOrg?.name || 'this organization'}.
           </Text>
         </View>
       </View>
@@ -142,7 +152,8 @@ export default function OutreachHistoryScreen() {
             </View>
             <View style={styles.logDetails}>
               <Text style={styles.logLocation}>
-                {item.legacy_location || 'Location not specified'} • ZIP {item.zip_code || 'N/A'}
+                {item.legacy_location || 'Location not specified'} • ZIP{' '}
+                {item.zip_code || 'N/A'}
               </Text>
               {item.kit_types && item.kit_types.length > 0 && (
                 <Text style={styles.logKitTypes}>

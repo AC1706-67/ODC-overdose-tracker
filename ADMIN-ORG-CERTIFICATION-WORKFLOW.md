@@ -1,21 +1,25 @@
 # Organization Certification & Invite Code Management
 
 ## Overview
+
 This document explains how to manage organization certifications and invite codes as an admin.
 
 ## Current System
 
 ### 1. Organization Certification Requests
+
 When someone clicks "Request Organization Certification" in the app, a record is created in:
+
 - Table: `organization_certification_requests`
 - Status: `pending` (default)
 
 ### 2. Admin Review Process (Manual - In Supabase Dashboard)
 
 **Step 1: View Pending Requests**
+
 ```sql
 -- See all pending certification requests
-SELECT 
+SELECT
   id,
   organization_name,
   organization_type,
@@ -31,10 +35,11 @@ ORDER BY created_at DESC;
 ```
 
 **Step 2: Approve an Organization**
+
 ```sql
 -- 1. Update the request status
 UPDATE organization_certification_requests
-SET 
+SET
   status = 'approved',
   reviewed_at = NOW(),
   reviewed_by = 'YOUR_USER_ID_HERE'
@@ -91,9 +96,10 @@ VALUES (
 ```
 
 **Step 3: Reject a Request**
+
 ```sql
 UPDATE organization_certification_requests
-SET 
+SET
   status = 'rejected',
   reviewed_at = NOW(),
   reviewed_by = 'YOUR_USER_ID_HERE',
@@ -104,6 +110,7 @@ WHERE id = 'REQUEST_ID_HERE';
 ### 3. Generate Invite Codes for Existing Organizations
 
 **Create a new invite code:**
+
 ```sql
 INSERT INTO organization_invite_codes (
   organization_id,
@@ -126,8 +133,9 @@ VALUES (
 ```
 
 **View all codes for an organization:**
+
 ```sql
-SELECT 
+SELECT
   code,
   role,
   is_active,
@@ -141,6 +149,7 @@ ORDER BY created_at DESC;
 ```
 
 **Deactivate an old code:**
+
 ```sql
 UPDATE organization_invite_codes
 SET is_active = false
@@ -152,7 +161,7 @@ WHERE code = 'OLDCODE2024';
 ```sql
 -- Certify Recovery Alliance of El Paso
 UPDATE organizations
-SET 
+SET
   is_certified = true,
   is_public = true,
   is_active = true,
@@ -176,7 +185,7 @@ VALUES (
 );
 
 -- View the code
-SELECT 
+SELECT
   o.name,
   ic.code,
   ic.role,
@@ -190,17 +199,20 @@ WHERE o.slug = 'recovery-alliance-el-paso';
 ## Future Enhancements (Not Built Yet)
 
 ### Admin Dashboard (Would Need to Build)
+
 - Web interface to view/approve/reject requests
 - Auto-generate invite codes on approval
 - Email notifications to organizations
 - Bulk code generation
 
 ### Email Notifications (Would Need to Build)
+
 - Send email when request is approved
 - Include invite code in email
 - Send to contact_email from request
 
 ### Automated Approval (Would Need to Build)
+
 - Auto-approve certain organization types
 - Auto-generate codes on approval
 - Trigger email automatically
@@ -230,7 +242,7 @@ Run this in Supabase SQL Editor:
 ```sql
 -- 1. Certify RAEP
 UPDATE organizations
-SET 
+SET
   is_certified = true,
   is_public = true,
   is_active = true,
@@ -245,7 +257,7 @@ INSERT INTO organization_invite_codes (
   expires_at,
   is_active
 )
-SELECT 
+SELECT
   id,
   'RAEP2025',
   'Responder',
@@ -256,7 +268,7 @@ WHERE slug = 'recovery-alliance-el-paso'
 ON CONFLICT (code) DO NOTHING;
 
 -- 3. Verify
-SELECT 
+SELECT
   o.name,
   o.is_certified,
   o.is_public,

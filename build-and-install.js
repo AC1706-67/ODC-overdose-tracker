@@ -11,10 +11,10 @@ function fail(message) {
 
 function runCommand(command, options = {}) {
   try {
-    return execSync(command, { 
-      encoding: 'utf8', 
+    return execSync(command, {
+      encoding: 'utf8',
       stdio: options.silent ? 'pipe' : 'inherit',
-      ...options 
+      ...options,
     });
   } catch (error) {
     if (!options.allowFailure) {
@@ -35,7 +35,9 @@ if (!fs.existsSync('android')) {
 // Check if AndroidManifest.xml exists
 const manifestPath = 'android/app/src/main/AndroidManifest.xml';
 if (!fs.existsSync(manifestPath)) {
-  fail('AndroidManifest.xml missing. Please run: npx expo prebuild --platform android');
+  fail(
+    'AndroidManifest.xml missing. Please run: npx expo prebuild --platform android',
+  );
 }
 
 // Read package name from manifest
@@ -61,8 +63,11 @@ if (!manifest.includes('android.intent.category.LAUNCHER')) {
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>`;
-  
-  const updatedManifest = manifest.replace('</application>', `${activityBlock}\n  </application>`);
+
+  const updatedManifest = manifest.replace(
+    '</application>',
+    `${activityBlock}\n  </application>`,
+  );
   fs.writeFileSync(manifestPath, updatedManifest);
 }
 
@@ -71,7 +76,7 @@ const apkPath = 'android/app/build/outputs/apk/debug/app-debug.apk';
 if (!fs.existsSync(apkPath)) {
   console.log('Building debug APK...');
   process.chdir('android');
-  
+
   // Clean and build
   if (process.platform === 'win32') {
     runCommand('.\\gradlew.bat clean');
@@ -80,7 +85,7 @@ if (!fs.existsSync(apkPath)) {
     runCommand('./gradlew clean');
     runCommand('./gradlew assembleDebug');
   }
-  
+
   process.chdir('..');
 }
 
@@ -94,5 +99,7 @@ console.log(`Package name: ${packageName}`);
 console.log('\nTo install on your device:');
 console.log('1. Connect your phone via USB');
 console.log('2. Enable USB debugging in Developer Options');
-console.log('3. Run: adb install -r android/app/build/outputs/apk/debug/app-debug.apk');
+console.log(
+  '3. Run: adb install -r android/app/build/outputs/apk/debug/app-debug.apk',
+);
 console.log('\nOr copy the APK to your phone and install manually.');

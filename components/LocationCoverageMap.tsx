@@ -1,14 +1,6 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  Dimensions,
-} from 'react-native';
+import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { MapPin, Navigation, Users, Calendar } from 'lucide-react-native';
-
-
 
 interface LocationCoverage {
   location_id: string;
@@ -30,18 +22,28 @@ interface LocationCoverageMapProps {
   locations: LocationCoverage[];
 }
 
-export default function LocationCoverageMap({ locations }: LocationCoverageMapProps) {
+export default function LocationCoverageMap({
+  locations,
+}: LocationCoverageMapProps) {
   // Sort locations by activity level for better visualization
-  const sortedLocations = [...locations].sort((a, b) => b.visits_count - a.visits_count);
-  
+  const sortedLocations = [...locations].sort(
+    (a, b) => b.visits_count - a.visits_count,
+  );
+
   // Get top 10 locations for the map view
   const topLocations = sortedLocations.slice(0, 10);
 
-  const renderLocationItem = ({ item, index }: { item: LocationCoverage; index: number }) => {
+  const renderLocationItem = ({
+    item,
+    index,
+  }: {
+    item: LocationCoverage;
+    index: number;
+  }) => {
     // Calculate activity intensity for visual representation
-    const maxVisits = Math.max(...topLocations.map(loc => loc.visits_count));
-    const intensity = maxVisits > 0 ? (item.visits_count / maxVisits) : 0;
-    
+    const maxVisits = Math.max(...topLocations.map((loc) => loc.visits_count));
+    const intensity = maxVisits > 0 ? item.visits_count / maxVisits : 0;
+
     // Color intensity based on activity level
     const getIntensityColor = (intensity: number) => {
       if (intensity >= 0.8) return '#dc2626'; // High activity - red
@@ -58,7 +60,7 @@ export default function LocationCoverageMap({ locations }: LocationCoverageMapPr
         <View style={styles.locationRank}>
           <Text style={styles.rankNumber}>#{index + 1}</Text>
         </View>
-        
+
         <View style={styles.locationContent}>
           <View style={styles.locationHeader}>
             <Navigation size={16} color={intensityColor} />
@@ -66,29 +68,38 @@ export default function LocationCoverageMap({ locations }: LocationCoverageMapPr
               {item.location_label}
             </Text>
           </View>
-          
+
           <View style={styles.locationDetails}>
             {item.city && item.state && (
               <Text style={styles.locationAddress} numberOfLines={1}>
                 {item.city}, {item.state} {item.zip_code}
               </Text>
             )}
-            
+
             <View style={styles.activityMetrics}>
               <View style={styles.metric}>
                 <Calendar size={12} color="#6b7280" />
-                <Text style={styles.metricText}>{item.visits_count} visits</Text>
+                <Text style={styles.metricText}>
+                  {item.visits_count} visits
+                </Text>
               </View>
-              
+
               <View style={styles.metric}>
                 <Users size={12} color="#6b7280" />
-                <Text style={styles.metricText}>{item.total_people_reached} reached</Text>
+                <Text style={styles.metricText}>
+                  {item.total_people_reached} reached
+                </Text>
               </View>
             </View>
           </View>
         </View>
-        
-        <View style={[styles.activityIndicator, { backgroundColor: intensityColor }]}>
+
+        <View
+          style={[
+            styles.activityIndicator,
+            { backgroundColor: intensityColor },
+          ]}
+        >
           <Text style={styles.activityLevel}>
             {Math.round(intensity * 100)}%
           </Text>
@@ -105,7 +116,8 @@ export default function LocationCoverageMap({ locations }: LocationCoverageMapPr
           <MapPin size={48} color="#d1d5db" />
           <Text style={styles.emptyTitle}>No Location Data</Text>
           <Text style={styles.emptyText}>
-            Location coverage will be displayed here once outreach activities are logged.
+            Location coverage will be displayed here once outreach activities
+            are logged.
           </Text>
         </View>
       </View>
@@ -126,23 +138,33 @@ export default function LocationCoverageMap({ locations }: LocationCoverageMapPr
         <Text style={styles.legendTitle}>Activity Level:</Text>
         <View style={styles.legendItems}>
           <View style={styles.legendItem}>
-            <View style={[styles.legendColor, { backgroundColor: '#dc2626' }]} />
+            <View
+              style={[styles.legendColor, { backgroundColor: '#dc2626' }]}
+            />
             <Text style={styles.legendText}>High (80-100%)</Text>
           </View>
           <View style={styles.legendItem}>
-            <View style={[styles.legendColor, { backgroundColor: '#ea580c' }]} />
+            <View
+              style={[styles.legendColor, { backgroundColor: '#ea580c' }]}
+            />
             <Text style={styles.legendText}>Med-High (60-80%)</Text>
           </View>
           <View style={styles.legendItem}>
-            <View style={[styles.legendColor, { backgroundColor: '#d97706' }]} />
+            <View
+              style={[styles.legendColor, { backgroundColor: '#d97706' }]}
+            />
             <Text style={styles.legendText}>Medium (40-60%)</Text>
           </View>
           <View style={styles.legendItem}>
-            <View style={[styles.legendColor, { backgroundColor: '#65a30d' }]} />
+            <View
+              style={[styles.legendColor, { backgroundColor: '#65a30d' }]}
+            />
             <Text style={styles.legendText}>Med-Low (20-40%)</Text>
           </View>
           <View style={styles.legendItem}>
-            <View style={[styles.legendColor, { backgroundColor: '#16a34a' }]} />
+            <View
+              style={[styles.legendColor, { backgroundColor: '#16a34a' }]}
+            />
             <Text style={styles.legendText}>Low (0-20%)</Text>
           </View>
         </View>

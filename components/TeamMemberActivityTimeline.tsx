@@ -1,14 +1,6 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Dimensions,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Calendar, MapPin, Users, Package } from 'lucide-react-native';
-
-const { width } = Dimensions.get('window');
 
 interface ActivityTimelineItem {
   outreach_log_id: string;
@@ -29,10 +21,10 @@ interface TeamMemberActivityTimelineProps {
   loading?: boolean;
 }
 
-export default function TeamMemberActivityTimeline({ 
-  activities, 
+export default function TeamMemberActivityTimeline({
+  activities,
   teamMemberName,
-  loading = false 
+  loading = false,
 }: TeamMemberActivityTimelineProps) {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -92,10 +84,7 @@ export default function TeamMemberActivityTimeline({
         </Text>
       </View>
 
-      <ScrollView 
-        style={styles.timeline}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView style={styles.timeline} showsVerticalScrollIndicator={false}>
         {activities.map((activity, index) => {
           const dateInfo = formatDate(activity.created_at);
           const isLast = index === activities.length - 1;

@@ -16,18 +16,22 @@ interface DiagnosticsScreenProps {
   onClose: () => void;
 }
 
-export default function DiagnosticsScreen({ visible, onClose }: DiagnosticsScreenProps) {
+export default function DiagnosticsScreen({
+  visible,
+  onClose,
+}: DiagnosticsScreenProps) {
   const diagnostics = {
     'Build Type': __DEV__ ? 'Debug' : 'Release',
     'OTA Updates': 'Disabled (Expo Updates)',
     'React Native': require('react-native').version || 'Unknown',
     'New Architecture': 'Disabled (Classic Bridge)',
-    'Hermes': 'Enabled',
+    Hermes: 'Enabled',
     'Expo SDK': Constants.expoVersion || 'Unknown',
-    'Platform': Constants.platform?.ios ? 'iOS' : 'Android',
-    'Device': Constants.deviceName || 'Unknown',
+    Platform: Constants.platform?.ios ? 'iOS' : 'Android',
+    Device: Constants.deviceName || 'Unknown',
     'App Version': Constants.nativeAppVersion || '1.0.0',
-    'Bundle ID': Constants.easConfig?.projectId || 'com.anonymous.boltexponativewind',
+    'Bundle ID':
+      Constants.easConfig?.projectId || 'com.anonymous.boltexponativewind',
   };
 
   return (
@@ -72,11 +76,15 @@ export default function DiagnosticsScreen({ visible, onClose }: DiagnosticsScree
               </View>
               <View style={styles.statusRow}>
                 <View style={[styles.statusDot, styles.statusSuccess]} />
-                <Text style={styles.statusText}>Classic Bridge Architecture</Text>
+                <Text style={styles.statusText}>
+                  Classic Bridge Architecture
+                </Text>
               </View>
               <View style={styles.statusRow}>
                 <View style={[styles.statusDot, styles.statusSuccess]} />
-                <Text style={styles.statusText}>Single React Native Version</Text>
+                <Text style={styles.statusText}>
+                  Single React Native Version
+                </Text>
               </View>
             </View>
           </View>
@@ -84,10 +92,9 @@ export default function DiagnosticsScreen({ visible, onClose }: DiagnosticsScree
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Notes</Text>
             <Text style={styles.noteText}>
-              • OTA updates are disabled to prevent network errors{'\n'}
-              • App uses embedded JavaScript bundle{'\n'}
-              • Classic bridge architecture for stability{'\n'}
-              • No remote update checks on startup
+              • OTA updates are disabled to prevent network errors{'\n'}• App
+              uses embedded JavaScript bundle{'\n'}• Classic bridge architecture
+              for stability{'\n'}• No remote update checks on startup
             </Text>
           </View>
         </ScrollView>

@@ -8,7 +8,15 @@ import {
   Dimensions,
   TouchableOpacity,
 } from 'react-native';
-import { Package, Users, MapPin, BarChart3, Clock, UserCheck, Navigation } from 'lucide-react-native';
+import {
+  Package,
+  Users,
+  MapPin,
+  BarChart3,
+  Clock,
+  UserCheck,
+  Navigation,
+} from 'lucide-react-native';
 import { useOrg } from '@/src/context/OrgContext';
 import { fetchDashboardDirect } from '@/src/api/dashboard';
 import { supabase } from '@/lib/supabase';
@@ -42,20 +50,24 @@ interface ActivityTimeline {
 
 export default function OutreachDashboardScreen() {
   const { activeOrgId, activeOrg } = useOrg();
-  const [cards, setCards] = useState({ 
-    outreach_activities: 0, 
-    kits_distributed: 0, 
-    people_reached: 0, 
+  const [cards, setCards] = useState({
+    outreach_activities: 0,
+    kits_distributed: 0,
+    people_reached: 0,
     males_reached: 0,
     females_reached: 0,
-    active_locations: 0 
+    active_locations: 0,
   });
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [locations, setLocations] = useState<LocationCoverage[]>([]);
-  const [recentActivities, setRecentActivities] = useState<ActivityTimeline[]>([]);
+  const [recentActivities, setRecentActivities] = useState<ActivityTimeline[]>(
+    [],
+  );
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [activeSection, setActiveSection] = useState<'overview' | 'team' | 'locations' | 'analytics'>('overview');
+  const [activeSection, setActiveSection] = useState<
+    'overview' | 'team' | 'locations' | 'analytics'
+  >('overview');
 
   const refresh = async (isRefreshing = false) => {
     if (activeOrgId === undefined) return;
@@ -65,18 +77,17 @@ export default function OutreachDashboardScreen() {
       } else {
         setLoading(true);
       }
-      
+
       // Fetch original dashboard data
       const res = await fetchDashboardDirect(activeOrgId);
       setCards(res);
-      
+
       // Fetch enhanced analytics data
       await Promise.all([
         fetchTeamPerformance(),
         fetchLocationCoverage(),
-        fetchRecentActivities()
+        fetchRecentActivities(),
       ]);
-      
     } catch (error) {
       console.error('[OutreachDashboard] Error:', error);
     } finally {
@@ -98,12 +109,12 @@ export default function OutreachDashboardScreen() {
       }
 
       const { data, error } = await query;
-      
+
       if (error) {
         console.error('[TeamPerformance] Error:', error);
         return;
       }
-      
+
       setTeamMembers(data || []);
     } catch (error) {
       console.error('[TeamPerformance] Fetch error:', error);
@@ -123,12 +134,12 @@ export default function OutreachDashboardScreen() {
       }
 
       const { data, error } = await query;
-      
+
       if (error) {
         console.error('[LocationCoverage] Error:', error);
         return;
       }
-      
+
       setLocations(data || []);
     } catch (error) {
       console.error('[LocationCoverage] Fetch error:', error);
@@ -148,12 +159,12 @@ export default function OutreachDashboardScreen() {
       }
 
       const { data, error } = await query;
-      
+
       if (error) {
         console.error('[ActivityTimeline] Error:', error);
         return;
       }
-      
+
       setRecentActivities(data || []);
     } catch (error) {
       console.error('[ActivityTimeline] Fetch error:', error);
@@ -202,9 +213,7 @@ export default function OutreachDashboardScreen() {
             <Text style={styles.metricTitle}>Geographic Coverage</Text>
           </View>
           <Text style={styles.metricValue}>{cards.active_locations}</Text>
-          <Text style={styles.metricSubtext}>
-            active locations
-          </Text>
+          <Text style={styles.metricSubtext}>active locations</Text>
         </View>
       </View>
 
@@ -249,8 +258,8 @@ export default function OutreachDashboardScreen() {
 
   return (
     <View style={styles.container}>
-      <ScrollView 
-        style={styles.scrollView} 
+      <ScrollView
+        style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -259,7 +268,9 @@ export default function OutreachDashboardScreen() {
         {/* Organization Context Banner */}
         <View style={styles.orgBanner}>
           <Text style={styles.orgLabel}>Organization:</Text>
-          <Text style={styles.orgName}>{activeOrg?.name || 'No Organization Selected'}</Text>
+          <Text style={styles.orgName}>
+            {activeOrg?.name || 'No Organization Selected'}
+          </Text>
         </View>
 
         {/* Time Period Info */}
@@ -272,42 +283,86 @@ export default function OutreachDashboardScreen() {
 
         {/* Section Navigation */}
         <View style={styles.sectionNav}>
-          <TouchableOpacity 
-            style={[styles.navButton, activeSection === 'overview' && styles.navButtonActive]}
+          <TouchableOpacity
+            style={[
+              styles.navButton,
+              activeSection === 'overview' && styles.navButtonActive,
+            ]}
             onPress={() => setActiveSection('overview')}
           >
-            <BarChart3 size={16} color={activeSection === 'overview' ? '#ffffff' : '#6b7280'} />
-            <Text style={[styles.navButtonText, activeSection === 'overview' && styles.navButtonTextActive]}>
+            <BarChart3
+              size={16}
+              color={activeSection === 'overview' ? '#ffffff' : '#6b7280'}
+            />
+            <Text
+              style={[
+                styles.navButtonText,
+                activeSection === 'overview' && styles.navButtonTextActive,
+              ]}
+            >
               Overview
             </Text>
           </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={[styles.navButton, activeSection === 'team' && styles.navButtonActive]}
+
+          <TouchableOpacity
+            style={[
+              styles.navButton,
+              activeSection === 'team' && styles.navButtonActive,
+            ]}
             onPress={() => setActiveSection('team')}
           >
-            <Users size={16} color={activeSection === 'team' ? '#ffffff' : '#6b7280'} />
-            <Text style={[styles.navButtonText, activeSection === 'team' && styles.navButtonTextActive]}>
+            <Users
+              size={16}
+              color={activeSection === 'team' ? '#ffffff' : '#6b7280'}
+            />
+            <Text
+              style={[
+                styles.navButtonText,
+                activeSection === 'team' && styles.navButtonTextActive,
+              ]}
+            >
               Team
             </Text>
           </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={[styles.navButton, activeSection === 'locations' && styles.navButtonActive]}
+
+          <TouchableOpacity
+            style={[
+              styles.navButton,
+              activeSection === 'locations' && styles.navButtonActive,
+            ]}
             onPress={() => setActiveSection('locations')}
           >
-            <MapPin size={16} color={activeSection === 'locations' ? '#ffffff' : '#6b7280'} />
-            <Text style={[styles.navButtonText, activeSection === 'locations' && styles.navButtonTextActive]}>
+            <MapPin
+              size={16}
+              color={activeSection === 'locations' ? '#ffffff' : '#6b7280'}
+            />
+            <Text
+              style={[
+                styles.navButtonText,
+                activeSection === 'locations' && styles.navButtonTextActive,
+              ]}
+            >
               Locations
             </Text>
           </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={[styles.navButton, activeSection === 'analytics' && styles.navButtonActive]}
+
+          <TouchableOpacity
+            style={[
+              styles.navButton,
+              activeSection === 'analytics' && styles.navButtonActive,
+            ]}
             onPress={() => setActiveSection('analytics')}
           >
-            <BarChart3 size={16} color={activeSection === 'analytics' ? '#ffffff' : '#6b7280'} />
-            <Text style={[styles.navButtonText, activeSection === 'analytics' && styles.navButtonTextActive]}>
+            <BarChart3
+              size={16}
+              color={activeSection === 'analytics' ? '#ffffff' : '#6b7280'}
+            />
+            <Text
+              style={[
+                styles.navButtonText,
+                activeSection === 'analytics' && styles.navButtonTextActive,
+              ]}
+            >
               Analytics
             </Text>
           </TouchableOpacity>

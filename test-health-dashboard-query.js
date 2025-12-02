@@ -3,7 +3,7 @@ const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(
   process.env.EXPO_PUBLIC_SUPABASE_URL,
-  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
+  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
 );
 
 async function testHealthDashboardQuery() {
@@ -16,7 +16,7 @@ async function testHealthDashboardQuery() {
     .select('*')
     .is('organization_id', null)
     .limit(1);
-  
+
   if (nullOrgError) {
     console.log('❌ Error:', nullOrgError.message);
   } else {
@@ -28,7 +28,7 @@ async function testHealthDashboardQuery() {
   const { data: allData, error: allError } = await supabase
     .from('health_dashboard_v1')
     .select('*');
-  
+
   if (allError) {
     console.log('❌ Error:', allError.message);
   } else {
@@ -41,24 +41,27 @@ async function testHealthDashboardQuery() {
   const { data: policies, error: policyError } = await supabase
     .rpc('pg_policies')
     .eq('tablename', 'health_dashboard_v1');
-  
+
   if (policyError) {
     console.log('Note: Cannot check policies (expected with anon key)');
   }
 
   // Test 4: Try authenticated query (if we have a user)
   console.log('\n4. Testing with authentication...');
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
   if (user) {
     console.log(`✅ Authenticated as: ${user.email}`);
-    
+
     const { data: authData, error: authQueryError } = await supabase
       .from('health_dashboard_v1')
       .select('*')
       .is('organization_id', null)
       .limit(1);
-    
+
     if (authQueryError) {
       console.log('❌ Auth query error:', authQueryError.message);
     } else {

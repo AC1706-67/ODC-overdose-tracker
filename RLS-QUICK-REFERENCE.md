@@ -3,12 +3,14 @@
 ## 🚀 Deploy Steps
 
 ### 1. Run Migration
+
 ```sql
 -- In Supabase SQL Editor, run:
 supabase/migrations/20251126_harmonize_rls_and_prep_zip_sharing.sql
 ```
 
 ### 2. Verify
+
 ```sql
 -- Run verification script:
 verify-rls-harmonization.sql
@@ -17,6 +19,7 @@ verify-rls-harmonization.sql
 ```
 
 ### 3. Test
+
 - Create new user → auto-joins demo org
 - Demo org shows purple "Demo" badge
 - Users only see their org's data
@@ -26,6 +29,7 @@ verify-rls-harmonization.sql
 ## 📊 What Changed
 
 ### Database
+
 - ✅ All RLS policies harmonized to per-org pattern
 - ✅ Added `share_incidents_zip_only` column (default: false)
 - ✅ Added `is_demo_organization` column
@@ -33,6 +37,7 @@ verify-rls-harmonization.sql
 - ✅ Created `incident_zip_aggregate` view (not active)
 
 ### Frontend
+
 - ✅ Demo orgs show badge and explanation
 - ✅ Dashboard filters by organization_id
 - ✅ All queries respect org boundaries
@@ -42,6 +47,7 @@ verify-rls-harmonization.sql
 ## 🔒 RLS Pattern (All Tables)
 
 ### SELECT
+
 ```sql
 EXISTS (
   SELECT 1 FROM user_organizations
@@ -52,6 +58,7 @@ EXISTS (
 ```
 
 ### INSERT
+
 ```sql
 EXISTS (
   SELECT 1 FROM user_organizations
@@ -62,12 +69,14 @@ EXISTS (
 ```
 
 ### UPDATE
+
 ```sql
 created_by = auth.uid()  -- OR --
 EXISTS (SELECT 1 FROM user_organizations WHERE ...)
 ```
 
 ### DELETE
+
 ```sql
 EXISTS (
   SELECT 1 FROM user_organizations
@@ -82,12 +91,12 @@ EXISTS (
 
 ## 🎯 Current Behavior
 
-| Feature | Status | Notes |
-|---------|--------|-------|
-| Per-org isolation | ✅ Active | Users only see their org's data |
-| Demo organization | ✅ Active | Auto-assigned to new users |
-| ZIP sharing | ❌ Not active | Prepared but disabled (default: false) |
-| Cross-org analytics | ❌ Not active | View exists but not exposed |
+| Feature             | Status        | Notes                                  |
+| ------------------- | ------------- | -------------------------------------- |
+| Per-org isolation   | ✅ Active     | Users only see their org's data        |
+| Demo organization   | ✅ Active     | Auto-assigned to new users             |
+| ZIP sharing         | ❌ Not active | Prepared but disabled (default: false) |
+| Cross-org analytics | ❌ Not active | View exists but not exposed            |
 
 ---
 
@@ -96,6 +105,7 @@ EXISTS (
 When ready to enable anonymous ZIP-level sharing:
 
 ### 1. Enable for specific org
+
 ```sql
 UPDATE organizations
 SET share_incidents_zip_only = true
@@ -103,6 +113,7 @@ WHERE id = '<org_id>';
 ```
 
 ### 2. Query aggregated data (backend only)
+
 ```typescript
 // Service role client only
 const { data } = await supabase
@@ -120,6 +131,7 @@ const { data } = await supabase
 ## 🐛 Troubleshooting
 
 ### Users can't see their data
+
 ```sql
 -- Check user's org membership
 SELECT * FROM user_organizations
@@ -129,6 +141,7 @@ WHERE user_id = '<user_id>';
 ```
 
 ### Demo org not appearing
+
 ```sql
 -- Check demo org exists
 SELECT * FROM organizations
@@ -138,6 +151,7 @@ WHERE is_demo_organization = true;
 ```
 
 ### RLS policies not working
+
 ```sql
 -- Check RLS is enabled
 SELECT tablename, rowsecurity
@@ -152,19 +166,20 @@ WHERE schemaname = 'public'
 
 ## 📁 Key Files
 
-| File | Purpose |
-|------|---------|
-| `supabase/migrations/20251126_harmonize_rls_and_prep_zip_sharing.sql` | Main migration |
-| `RLS-EXECUTIVE-SUMMARY.md` | Executive overview |
-| `RLS-HARMONIZATION-SUMMARY.md` | Technical details |
-| `verify-rls-harmonization.sql` | Verification script |
-| `inspect-current-rls.sql` | Pre-migration inspection |
+| File                                                                  | Purpose                  |
+| --------------------------------------------------------------------- | ------------------------ |
+| `supabase/migrations/20251126_harmonize_rls_and_prep_zip_sharing.sql` | Main migration           |
+| `RLS-EXECUTIVE-SUMMARY.md`                                            | Executive overview       |
+| `RLS-HARMONIZATION-SUMMARY.md`                                        | Technical details        |
+| `verify-rls-harmonization.sql`                                        | Verification script      |
+| `inspect-current-rls.sql`                                             | Pre-migration inspection |
 
 ---
 
 ## ✅ Success Checklist
 
 After deployment:
+
 - [ ] Migration ran successfully
 - [ ] Verification script shows all ✅ PASS
 - [ ] Demo org exists and is active

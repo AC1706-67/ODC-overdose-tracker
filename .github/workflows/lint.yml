@@ -1,0 +1,45 @@
+name: Lint and Type Check
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  lint-and-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Run ESLint
+        run: |
+          npm run lint
+
+      - name: Run Prettier check
+        run: |
+          npx prettier --check "**/*.{js,jsx,ts,tsx,json,md,yml,yaml}" --ignore-path .prettierignore
+
+      - name: TypeScript type-check
+        run: |
+          npx tsc --noEmit

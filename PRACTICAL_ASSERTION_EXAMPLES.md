@@ -5,6 +5,7 @@
 **You don't "run" assertions separately.** They execute automatically when your code runs during development.
 
 Think of them like this:
+
 - ✅ **Development**: Assertions throw errors if conditions fail → You catch bugs early
 - ✅ **Production**: Assertions are silent (or logged) → No performance impact
 
@@ -26,48 +27,38 @@ const logger = createLogger('IncidentForm');
 async function handleSubmitIncident() {
   const { activeOrg } = useOrg();
   const { user } = useAuth();
-  
+
   // 1. Validate auth context FIRST
   const { userId, orgId } = requireAuthAndOrg({
     userId: user?.id,
     orgId: activeOrg?.id,
   });
   // ☝️ This throws if userId or orgId is missing!
-  
+
   // 2. Validate form data
-  logger.assert(
-    isNonEmptyString(zipCode),
-    'Zip code is required',
-    { zipCode }
-  );
-  
-  logger.assert(
-    isZipCode(zipCode),
-    'Zip code must be 5 digits',
-    { zipCode }
-  );
-  
+  logger.assert(isNonEmptyString(zipCode), 'Zip code is required', { zipCode });
+
+  logger.assert(isZipCode(zipCode), 'Zip code must be 5 digits', { zipCode });
+
   logger.assert(
     outcome === 'survived' || outcome === 'deceased',
     'Invalid outcome value',
-    { outcome }
+    { outcome },
   );
-  
+
   // 3. Now safe to submit
-  const { data, error } = await supabase
-    .from('incidents')
-    .insert({
-      organization_id: orgId,
-      created_by: userId,
-      zip_code: zipCode,
-      outcome,
-      incident_date: new Date().toISOString(),
-    });
-  
+  const { data, error } = await supabase.from('incidents').insert({
+    organization_id: orgId,
+    created_by: userId,
+    zip_code: zipCode,
+    outcome,
+    incident_date: new Date().toISOString(),
+  });
+
   // 4. Validate response
   logger.assert(!error, 'Failed to create incident', { error });
   logger.assert(data?.id, 'Incident ID not returned');
-  
+
   logger.info('Incident created successfully', { id: data.id });
 }
 ```
@@ -90,44 +81,40 @@ const logger = createLogger('OutreachForm');
 async function handleSubmitOutreach() {
   const { activeOrg } = useOrg();
   const { user } = useAuth();
-  
+
   // 1. Auth check
   const { userId, orgId } = requireAuthAndOrg({
     userId: user?.id,
     orgId: activeOrg?.id,
   });
-  
+
   // 2. Validate inputs
-  logger.assert(
-    isZipCode(zipCode.trim()),
-    'Invalid zip code format',
-    { zipCode }
-  );
-  
+  logger.assert(isZipCode(zipCode.trim()), 'Invalid zip code format', {
+    zipCode,
+  });
+
   logger.assert(
     isNonNegativeInteger(kitCount),
     'Kit count must be a non-negative number',
-    { kitCount }
+    { kitCount },
   );
-  
+
   logger.assert(
     isNonNegativeInteger(peopleReached),
     'People reached must be a non-negative number',
-    { peopleReached }
+    { peopleReached },
   );
-  
+
   // 3. Submit
-  const { data, error } = await supabase
-    .from('outreach_logs')
-    .insert({
-      organization_id: orgId,
-      created_by: userId,
-      zip_code: zipCode.trim(),
-      num_kits: kitCount,
-      people_reached: peopleReached,
-      outreach_date: new Date().toISOString(),
-    });
-  
+  const { data, error } = await supabase.from('outreach_logs').insert({
+    organization_id: orgId,
+    created_by: userId,
+    zip_code: zipCode.trim(),
+    num_kits: kitCount,
+    people_reached: peopleReached,
+    outreach_date: new Date().toISOString(),
+  });
+
   logger.assert(!error, 'Failed to create outreach log', { error });
   logger.info('Outreach log created', { id: data?.id });
 }
@@ -151,23 +138,23 @@ export function useDashboardData() {
   const { activeOrg } = useOrg();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  
+
   useEffect(() => {
     async function fetchData() {
       try {
         // Validate org context before querying
         const orgId = requireOrg({ orgId: activeOrg?.id });
-        
+
         logger.info('Fetching dashboard data', { orgId });
-        
+
         const { data: incidents, error } = await supabase
           .from('incidents')
           .select('*')
           .eq('organization_id', orgId);
-        
+
         logger.assert(!error, 'Failed to fetch incidents', { error });
         logger.assert(Array.isArray(incidents), 'Incidents is not an array');
-        
+
         setData(incidents);
       } catch (error) {
         logger.error('Dashboard data fetch failed', error as Error);
@@ -175,12 +162,12 @@ export function useDashboardData() {
         setLoading(false);
       }
     }
-    
+
     if (activeOrg) {
       fetchData();
     }
   }, [activeOrg]);
-  
+
   return { data, loading };
 }
 ```
@@ -203,44 +190,44 @@ const logger = createLogger('SettingsScreen');
 
 const loadUserProfile = async () => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     // ADD THIS: Validate user before proceeding
     const userId = requireAuth({ userId: user?.id });
-    
+
     logger.info('Loading user profile', { userId });
-    
+
     const { data: membership, error } = await supabase
       .from('user_organizations')
-      .select(`
+      .select(
+        `
         role,
         organizations (name)
-      `)
+      `,
+      )
       .eq('user_id', userId)
       .eq('is_active', true)
       .maybeSingle();
-    
+
     if (error || !membership) {
       logger.warn('No membership found, using defaults');
       setUserRole('Peer');
       setOrgName('Recovery Alliance of El Paso');
       return;
     }
-    
+
     // ADD THIS: Validate membership structure
-    logger.assert(
-      membership.role !== undefined,
-      'Membership missing role'
-    );
-    
-    const formattedRole = membership.role 
+    logger.assert(membership.role !== undefined, 'Membership missing role');
+
+    const formattedRole = membership.role
       ? membership.role.charAt(0).toUpperCase() + membership.role.slice(1)
       : 'Peer';
     setUserRole(formattedRole);
-    
+
     const orgData = membership.organizations as any;
     setOrgName(orgData?.name || 'Recovery Alliance of El Paso');
-    
   } catch (error) {
     logger.error('Failed to load user profile', error as Error);
     setUserRole('Peer');
@@ -256,6 +243,7 @@ const loadUserProfile = async () => {
 ## 🔧 Step-by-Step: Adding Assertions to Existing Code
 
 ### Step 1: Import the utilities
+
 ```typescript
 import { createLogger } from '@/src/utils/logger';
 import { requireAuthAndOrg } from '@/src/utils/auth';
@@ -263,24 +251,27 @@ import { isZipCode, isNonEmptyString } from '@/src/utils/validation';
 ```
 
 ### Step 2: Create a logger
+
 ```typescript
 const logger = createLogger('YourComponent');
 ```
 
 ### Step 3: Add assertions at function start
+
 ```typescript
 async function yourFunction() {
   // Validate context
   const { userId, orgId } = requireAuthAndOrg({ userId, orgId });
-  
+
   // Validate inputs
   logger.assert(data !== null, 'Data is required');
-  
+
   // Do work...
 }
 ```
 
 ### Step 4: Test it!
+
 - Run your app in development
 - Try to trigger the function with invalid data
 - The assertion should throw an error with a clear message
@@ -290,16 +281,19 @@ async function yourFunction() {
 ## 📱 Where to Add Assertions in Your App
 
 ### Priority 1: Data Submission (HIGH IMPACT)
+
 - [ ] `app/(tabs)/index.tsx` - Incident form submission
 - [ ] `app/(tabs)/distribution.tsx` - Outreach form submission
 - [ ] Any other forms that write to database
 
 ### Priority 2: Data Loading (MEDIUM IMPACT)
+
 - [ ] `hooks/useDashboardData.ts` - Dashboard data fetching
 - [ ] `hooks/useOrgDashboard.ts` - Org dashboard data
 - [ ] `src/context/OrgContext.tsx` - Organization loading
 
 ### Priority 3: Authentication (HIGH IMPACT)
+
 - [ ] `app/login.tsx` - Login validation
 - [ ] `app/signup.tsx` - Signup validation
 - [ ] `app/_layout.tsx` - Auth routing
@@ -309,19 +303,19 @@ async function yourFunction() {
 ## 🎬 Example: Adding to Incident Form (Step by Step)
 
 ### Before (No Assertions)
+
 ```typescript
 async function submitIncident() {
-  const { data } = await supabase
-    .from('incidents')
-    .insert({
-      organization_id: activeOrg.id, // 💥 Might be undefined!
-      created_by: user.id,            // 💥 Might be undefined!
-      zip_code: zipCode,              // 💥 Might be invalid!
-    });
+  const { data } = await supabase.from('incidents').insert({
+    organization_id: activeOrg.id, // 💥 Might be undefined!
+    created_by: user.id, // 💥 Might be undefined!
+    zip_code: zipCode, // 💥 Might be invalid!
+  });
 }
 ```
 
 ### After (With Assertions)
+
 ```typescript
 import { createLogger } from '@/src/utils/logger';
 import { requireAuthAndOrg } from '@/src/utils/auth';
@@ -335,23 +329,21 @@ async function submitIncident() {
     userId: user?.id,
     orgId: activeOrg?.id,
   });
-  
+
   // 2. Validate input (throws if invalid)
   logger.assert(isZipCode(zipCode), 'Invalid zip code', { zipCode });
-  
+
   // 3. Now safe to submit
-  const { data, error } = await supabase
-    .from('incidents')
-    .insert({
-      organization_id: orgId,  // ✅ Guaranteed valid
-      created_by: userId,       // ✅ Guaranteed valid
-      zip_code: zipCode,        // ✅ Guaranteed valid
-    });
-  
+  const { data, error } = await supabase.from('incidents').insert({
+    organization_id: orgId, // ✅ Guaranteed valid
+    created_by: userId, // ✅ Guaranteed valid
+    zip_code: zipCode, // ✅ Guaranteed valid
+  });
+
   // 4. Validate response
   logger.assert(!error, 'Failed to create incident', { error });
   logger.assert(data?.id, 'No incident ID returned');
-  
+
   return data;
 }
 ```

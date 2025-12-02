@@ -3,49 +3,59 @@
 ## Current State (Based on Your Analysis)
 
 ### ✅ Already Exists:
+
 - `created_by` column on all tables (incidents, outreach_logs, distributions)
 - `created_at` column on all tables
 - `organization_id` column on all tables
 - RLS is enabled on all tables
 
 ### ❌ Missing:
+
 - `updated_at` column on all tables
 - Triggers to auto-update `updated_at` on row changes
 
 ## Setup Instructions
 
 ### Step 1: Verify Current State
+
 Run `verify-audit-columns.sql` in Supabase SQL Editor to see exactly what you have.
 
 ### Step 2: Add Missing Columns and Triggers
+
 Run `add-missing-updated-at.sql` in Supabase SQL Editor.
 
 This will:
+
 - Add `updated_at` column to incidents, outreach_logs, distributions
 - Create the `update_updated_at_column()` function
 - Create triggers to auto-update `updated_at` on every UPDATE
 
 ### Step 3: Apply RLS Policies
+
 Run `setup-org-based-rls.sql` to create organization-based access control.
 
 ## What Each Column Does
 
 ### `created_by` (UUID)
+
 - **Purpose**: Tracks WHO created the record
 - **Set by**: `auth.uid()` default or app code
 - **Never changes**: Set once on INSERT
 
 ### `created_at` (TIMESTAMPTZ)
+
 - **Purpose**: Tracks WHEN the record was created
 - **Set by**: `NOW()` default
 - **Never changes**: Set once on INSERT
 
 ### `updated_at` (TIMESTAMPTZ)
+
 - **Purpose**: Tracks WHEN the record was last modified
 - **Set by**: Trigger function on UPDATE
 - **Auto-updates**: Every time the row is updated
 
 ### `organization_id` (UUID)
+
 - **Purpose**: Tracks WHICH organization owns the record
 - **Set by**: App code on INSERT
 - **Used for**: RLS policies to isolate org data

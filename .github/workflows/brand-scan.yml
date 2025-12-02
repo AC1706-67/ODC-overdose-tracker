@@ -12,17 +12,17 @@ jobs:
       fail-fast: false
       matrix:
         node: [18, 20]
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+
       - name: Use Node ${{ matrix.node }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
           cache: 'npm'
-      
+
       - name: Print env + repo state
         run: |
           echo "Node:" $(node -v)
@@ -31,24 +31,24 @@ jobs:
           ls -la
           test -f package.json && jq '.scripts' package.json || true
           test -f package-lock.json && echo "lockfile present ✅" || echo "⚠️ NO package-lock.json"
-      
+
       - name: Install deps (verbose)
         run: |
           # Ensure devDependencies are included
           unset NODE_ENV
           npm ci --loglevel verbose || npm i --loglevel verbose
-      
+
       - name: Verify scan script exists
         run: |
           node -e "const p=require('./package.json'); if(!p.scripts||!p.scripts['scan:brand']) { console.error('Missing \"scan:brand\" script'); process.exit(2) }"
-      
+
       - name: Run brand scan
         id: runscan
-        continue-on-error: true  # Warn but don't fail (set to false for strict mode)
+        continue-on-error: true # Warn but don't fail (set to false for strict mode)
         run: |
           npm run -s scan:brand | tee scan-output.txt || true
           echo "exit_code=$?" >> $GITHUB_OUTPUT
-      
+
       - name: Upload scan output (always)
         if: always()
         uses: actions/upload-artifact@v4

@@ -1,10 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Dimensions,
-} from 'react-native';
+import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import { BarChart, PieChart } from 'react-native-chart-kit';
 import { BarChart3 } from 'lucide-react-native';
 
@@ -30,7 +25,9 @@ interface LocationActivityChartProps {
   locations: LocationCoverage[];
 }
 
-export default function LocationActivityChart({ locations }: LocationActivityChartProps) {
+export default function LocationActivityChart({
+  locations,
+}: LocationActivityChartProps) {
   if (locations.length === 0) {
     return (
       <View style={styles.section}>
@@ -69,31 +66,38 @@ export default function LocationActivityChart({ locations }: LocationActivityCha
 
   // Bar chart data for visit frequency
   const visitFrequencyData = {
-    labels: sortedLocations.map(loc => {
+    labels: sortedLocations.map((loc) => {
       // Truncate long location names
       const name = loc.location_label;
       return name.length > 12 ? name.substring(0, 12) + '...' : name;
     }),
     datasets: [
       {
-        data: sortedLocations.map(loc => loc.visits_count),
+        data: sortedLocations.map((loc) => loc.visits_count),
       },
     ],
   };
 
   // Pie chart data for people reached distribution
   const colors = [
-    '#7c3aed', '#3b82f6', '#059669', '#f59e0b', 
-    '#ef4444', '#8b5cf6', '#10b981', '#f97316'
+    '#7c3aed',
+    '#3b82f6',
+    '#059669',
+    '#f59e0b',
+    '#ef4444',
+    '#8b5cf6',
+    '#10b981',
+    '#f97316',
   ];
-  
+
   const peopleReachedData = sortedLocations
-    .filter(loc => loc.total_people_reached > 0)
+    .filter((loc) => loc.total_people_reached > 0)
     .slice(0, 6) // Top 6 for pie chart readability
     .map((loc, index) => ({
-      name: loc.location_label.length > 15 
-        ? loc.location_label.substring(0, 15) + '...' 
-        : loc.location_label,
+      name:
+        loc.location_label.length > 15
+          ? loc.location_label.substring(0, 15) + '...'
+          : loc.location_label,
       population: loc.total_people_reached,
       color: colors[index % colors.length],
       legendFontColor: '#374151',
@@ -101,19 +105,24 @@ export default function LocationActivityChart({ locations }: LocationActivityCha
     }));
 
   // Location type distribution
-  const locationTypeStats = locations.reduce((acc, loc) => {
-    const type = loc.location_type || 'area';
-    acc[type] = (acc[type] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const locationTypeStats = locations.reduce(
+    (acc, loc) => {
+      const type = loc.location_type || 'area';
+      acc[type] = (acc[type] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
 
-  const locationTypeData = Object.entries(locationTypeStats).map(([type, count], index) => ({
-    name: type.charAt(0).toUpperCase() + type.slice(1),
-    population: count,
-    color: colors[index % colors.length],
-    legendFontColor: '#374151',
-    legendFontSize: 12,
-  }));
+  const locationTypeData = Object.entries(locationTypeStats).map(
+    ([type, count], index) => ({
+      name: type.charAt(0).toUpperCase() + type.slice(1),
+      population: count,
+      color: colors[index % colors.length],
+      legendFontColor: '#374151',
+      legendFontSize: 12,
+    }),
+  );
 
   return (
     <View style={styles.section}>
@@ -127,7 +136,8 @@ export default function LocationActivityChart({ locations }: LocationActivityCha
         <View style={styles.chartContainer}>
           <Text style={styles.chartTitle}>Visit Frequency by Location</Text>
           <Text style={styles.chartSubtitle}>
-            Number of outreach activities per location (top {sortedLocations.length})
+            Number of outreach activities per location (top{' '}
+            {sortedLocations.length})
           </Text>
           <BarChart
             data={visitFrequencyData}
@@ -194,28 +204,50 @@ export default function LocationActivityChart({ locations }: LocationActivityCha
         <View style={styles.statsGrid}>
           <View style={styles.statItem}>
             <Text style={styles.statValue}>
-              {Math.round(locations.reduce((sum, loc) => sum + loc.visits_count, 0) / locations.length * 10) / 10}
+              {Math.round(
+                (locations.reduce((sum, loc) => sum + loc.visits_count, 0) /
+                  locations.length) *
+                  10,
+              ) / 10}
             </Text>
             <Text style={styles.statLabel}>Avg Visits/Location</Text>
           </View>
-          
+
           <View style={styles.statItem}>
             <Text style={styles.statValue}>
-              {Math.round(locations.reduce((sum, loc) => sum + loc.total_people_reached, 0) / locations.length * 10) / 10}
+              {Math.round(
+                (locations.reduce(
+                  (sum, loc) => sum + loc.total_people_reached,
+                  0,
+                ) /
+                  locations.length) *
+                  10,
+              ) / 10}
             </Text>
             <Text style={styles.statLabel}>Avg People/Location</Text>
           </View>
-          
+
           <View style={styles.statItem}>
             <Text style={styles.statValue}>
-              {Math.round(locations.reduce((sum, loc) => sum + loc.unique_team_members, 0) / locations.length * 10) / 10}
+              {Math.round(
+                (locations.reduce(
+                  (sum, loc) => sum + loc.unique_team_members,
+                  0,
+                ) /
+                  locations.length) *
+                  10,
+              ) / 10}
             </Text>
             <Text style={styles.statLabel}>Avg Team/Location</Text>
           </View>
-          
+
           <View style={styles.statItem}>
             <Text style={styles.statValue}>
-              {Math.round(locations.reduce((sum, loc) => sum + loc.active_days, 0) / locations.length * 10) / 10}
+              {Math.round(
+                (locations.reduce((sum, loc) => sum + loc.active_days, 0) /
+                  locations.length) *
+                  10,
+              ) / 10}
             </Text>
             <Text style={styles.statLabel}>Avg Active Days</Text>
           </View>

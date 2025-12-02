@@ -1,5 +1,14 @@
 import { useState } from 'react';
-import { View, TextInput, Button, Alert, Text, StyleSheet, TouchableOpacity, Pressable } from 'react-native';
+import {
+  View,
+  TextInput,
+  Button,
+  Alert,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Pressable,
+} from 'react-native';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'expo-router';
 
@@ -29,48 +38,49 @@ export default function SignUp() {
     }
 
     if (!agreedToTerms) {
-      Alert.alert('Error', 'You must agree to the Terms of Service and Privacy Policy');
+      Alert.alert(
+        'Error',
+        'You must agree to the Terms of Service and Privacy Policy',
+      );
       return;
     }
 
     setLoading(true);
     const now = new Date().toISOString();
-    const { error } = await supabase.auth.signUp({ 
-      email, 
+    const { error } = await supabase.auth.signUp({
+      email,
       password,
       options: {
         data: {
           terms_accepted_at: now,
           privacy_accepted_at: now,
           accepted_version: '1.0',
-        }
-      }
+        },
+      },
     });
     setLoading(false);
-    
+
     if (error) {
       Alert.alert('Sign up failed', error.message);
       return;
     }
-    
+
     // Success
-    Alert.alert(
-      'Success',
-      'Account created! You can now sign in.',
-      [
-        {
-          text: 'OK',
-          onPress: () => router.back(),
-        },
-      ]
-    );
+    Alert.alert('Success', 'Account created! You can now sign in.', [
+      {
+        text: 'OK',
+        onPress: () => router.back(),
+      },
+    ]);
   }
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Create Account</Text>
-      <Text style={styles.subtitle}>Join Compassionate LOG to start recording acts of care</Text>
-      
+      <Text style={styles.subtitle}>
+        Join Compassionate LOG to start recording acts of care
+      </Text>
+
       <TextInput
         placeholder="Email"
         autoCapitalize="none"
@@ -80,7 +90,7 @@ export default function SignUp() {
         style={styles.input}
         editable={!loading}
       />
-      
+
       <TextInput
         placeholder="Password (min 6 characters)"
         secureTextEntry
@@ -89,7 +99,7 @@ export default function SignUp() {
         style={styles.input}
         editable={!loading}
       />
-      
+
       <TextInput
         placeholder="Confirm Password"
         secureTextEntry
@@ -99,24 +109,23 @@ export default function SignUp() {
         editable={!loading}
       />
 
-      <Pressable 
+      <Pressable
         style={styles.checkboxContainer}
         onPress={() => setAgreedToTerms(!agreedToTerms)}
         disabled={loading}
       >
-        <View style={[styles.checkbox, agreedToTerms && styles.checkboxChecked]}>
+        <View
+          style={[styles.checkbox, agreedToTerms && styles.checkboxChecked]}
+        >
           {agreedToTerms && <Text style={styles.checkmark}>✓</Text>}
         </View>
         <Text style={styles.checkboxLabel}>
           I agree to the{' '}
-          <Text 
-            style={styles.link}
-            onPress={() => router.push('/legal/terms')}
-          >
+          <Text style={styles.link} onPress={() => router.push('/legal/terms')}>
             Terms of Service
-          </Text>
-          {' '}and{' '}
-          <Text 
+          </Text>{' '}
+          and{' '}
+          <Text
             style={styles.link}
             onPress={() => router.push('/legal/privacy')}
           >
@@ -124,14 +133,14 @@ export default function SignUp() {
           </Text>
         </Text>
       </Pressable>
-      
-      <Button 
-        title={loading ? "Creating account..." : "Sign Up"} 
+
+      <Button
+        title={loading ? 'Creating account...' : 'Sign Up'}
         onPress={signUp}
         disabled={loading || !agreedToTerms}
       />
 
-      <TouchableOpacity 
+      <TouchableOpacity
         onPress={() => router.back()}
         style={styles.linkContainer}
         disabled={loading}

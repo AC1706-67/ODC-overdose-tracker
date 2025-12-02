@@ -3,12 +3,12 @@ const { createClient } = require('@supabase/supabase-js');
 // Initialize Supabase client
 const supabase = createClient(
   process.env.SUPABASE_URL || 'https://your-project.supabase.co',
-  process.env.SUPABASE_ANON_KEY || 'your-anon-key'
+  process.env.SUPABASE_ANON_KEY || 'your-anon-key',
 );
 
 async function checkTeamMembersSchema() {
   console.log('🔍 Checking team_members table schema...');
-  
+
   try {
     // Check team_members table structure
     const { data: teamMembersColumns, error: tmError } = await supabase
@@ -24,8 +24,10 @@ async function checkTeamMembersSchema() {
     }
 
     console.log('\n📋 team_members table columns:');
-    teamMembersColumns.forEach(col => {
-      console.log(`  - ${col.column_name}: ${col.data_type} ${col.is_nullable === 'NO' ? '(NOT NULL)' : '(nullable)'}`);
+    teamMembersColumns.forEach((col) => {
+      console.log(
+        `  - ${col.column_name}: ${col.data_type} ${col.is_nullable === 'NO' ? '(NOT NULL)' : '(nullable)'}`,
+      );
     });
 
     // Check organizations table structure
@@ -42,22 +44,33 @@ async function checkTeamMembersSchema() {
     }
 
     console.log('\n📋 organizations table columns:');
-    orgColumns.forEach(col => {
-      console.log(`  - ${col.column_name}: ${col.data_type} ${col.is_nullable === 'NO' ? '(NOT NULL)' : '(nullable)'}`);
+    orgColumns.forEach((col) => {
+      console.log(
+        `  - ${col.column_name}: ${col.data_type} ${col.is_nullable === 'NO' ? '(NOT NULL)' : '(nullable)'}`,
+      );
     });
 
     // Check if organizations table has slug column
-    const hasSlug = orgColumns.some(col => col.column_name === 'slug');
+    const hasSlug = orgColumns.some((col) => col.column_name === 'slug');
     console.log(`\n✅ Organizations table has slug column: ${hasSlug}`);
 
     // Check if team_members has expected columns
-    const expectedColumns = ['id', 'name', 'organization_id', 'email', 'role', 'is_active'];
-    const missingColumns = expectedColumns.filter(col => 
-      !teamMembersColumns.some(dbCol => dbCol.column_name === col)
+    const expectedColumns = [
+      'id',
+      'name',
+      'organization_id',
+      'email',
+      'role',
+      'is_active',
+    ];
+    const missingColumns = expectedColumns.filter(
+      (col) => !teamMembersColumns.some((dbCol) => dbCol.column_name === col),
     );
 
     if (missingColumns.length > 0) {
-      console.log(`\n⚠️  Missing columns in team_members: ${missingColumns.join(', ')}`);
+      console.log(
+        `\n⚠️  Missing columns in team_members: ${missingColumns.join(', ')}`,
+      );
     } else {
       console.log('\n✅ All expected columns present in team_members table');
     }
@@ -70,14 +83,16 @@ async function checkTeamMembersSchema() {
       .single();
 
     if (sampleError) {
-      console.log('\n⚠️  No organizations found or error:', sampleError.message);
+      console.log(
+        '\n⚠️  No organizations found or error:',
+        sampleError.message,
+      );
     } else {
       console.log('\n📋 Sample organization:');
       console.log(`  - ID: ${sampleOrg.id}`);
       console.log(`  - Name: ${sampleOrg.name}`);
       console.log(`  - Slug: ${sampleOrg.slug}`);
     }
-
   } catch (error) {
     console.error('❌ Error:', error.message);
   }

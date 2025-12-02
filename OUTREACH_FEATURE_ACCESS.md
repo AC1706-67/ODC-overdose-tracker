@@ -48,28 +48,30 @@ const outreachEnabled = !loading && canUseOutreach(activeOrg);
 Database-level Row Level Security ensures proper data isolation:
 
 **SELECT Policy**: Users can only see outreach logs from their own organization
+
 ```sql
 -- Users can read logs from their organization
 CREATE POLICY "Users can view org outreach logs"
   ON outreach_logs FOR SELECT
   USING (
     organization_id IN (
-      SELECT organization_id 
-      FROM user_organizations 
+      SELECT organization_id
+      FROM user_organizations
       WHERE user_id = auth.uid() AND is_active = true
     )
   );
 ```
 
 **INSERT Policy**: Users can create logs for their organization
+
 ```sql
 -- Users can create logs for their organization
 CREATE POLICY "Users can create org outreach logs"
   ON outreach_logs FOR INSERT
   WITH CHECK (
     organization_id IN (
-      SELECT organization_id 
-      FROM user_organizations 
+      SELECT organization_id
+      FROM user_organizations
       WHERE user_id = auth.uid() AND is_active = true
     )
   );
@@ -116,6 +118,7 @@ const { data } = await supabase.from('outreach_logs').select('*');
 ### No Cross-Organization Access
 
 Even if User A tries to query User B's organization:
+
 ```typescript
 const { data } = await supabase
   .from('outreach_logs')
@@ -128,26 +131,29 @@ const { data } = await supabase
 ## Testing Access Control
 
 ### Test 1: Verify Tab Visibility
+
 ```typescript
 // User with organization → Should see Outreach tab
 // User without organization → Should NOT see Outreach tab
 ```
 
 ### Test 2: Verify Data Isolation
+
 ```sql
 -- As User A (Org 1)
 SELECT COUNT(*) FROM outreach_logs; -- Returns Org 1 count
 
--- As User B (Org 2)  
+-- As User B (Org 2)
 SELECT COUNT(*) FROM outreach_logs; -- Returns Org 2 count (different)
 ```
 
 ### Test 3: Verify Write Protection
+
 ```typescript
 // Try to create log for different organization
 await supabase.from('outreach_logs').insert({
   organization_id: 'other-org-id', // Not user's org
-  location: 'Test'
+  location: 'Test',
 });
 // Result: Error - RLS policy violation
 ```
@@ -155,6 +161,7 @@ await supabase.from('outreach_logs').insert({
 ## Migration Notes
 
 The RLS policies have been cleaned up to:
+
 - Remove legacy organization-specific checks
 - Use pure organization membership for access control
 - Support any number of organizations automatically

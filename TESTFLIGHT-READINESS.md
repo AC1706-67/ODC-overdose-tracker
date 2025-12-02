@@ -20,6 +20,7 @@ npx tsx scripts/end-to-end-checklist-test.ts
 ```
 
 **What it tests:**
+
 - ✅ Authentication (login/logout)
 - ✅ Organization membership loading
 - ✅ Outreach logs CRUD operations
@@ -28,6 +29,7 @@ npx tsx scripts/end-to-end-checklist-test.ts
 - ✅ Cross-org isolation
 
 **Expected output:**
+
 ```
 🚀 TESTFLIGHT READINESS CHECK
 ============================================================
@@ -92,12 +94,14 @@ npx expo-doctor
 **Issues Found:**
 
 #### Issue 1: Native Config Properties
+
 - **Problem:** Project has native folders (android/ios) but also has config in app.json
 - **Impact:** Some properties won't sync in EAS Build
 - **Fix:** This is expected for projects with custom native code. Properties like `scheme`, `orientation`, `icon` are managed in native folders.
 - **Action:** ✅ No action needed (expected configuration)
 
 #### Issue 2: Package Versions
+
 - **Problem:** Some packages need updates for best compatibility
 - **Packages to update:**
   - `expo@54.0.23` → `~54.0.25`
@@ -192,21 +196,25 @@ For EAS Build, add them to `eas.json`:
 ### Test Script Fails
 
 **LOGIN_FAILED:**
+
 - Check TEST_EMAIL and TEST_PASSWORD are correct
 - Verify user exists in Supabase Auth
 - Check Supabase URL and anon key in `.env`
 
 **ORG_MEMBERSHIP_FAILED:**
+
 - User needs to be assigned to an organization
 - Run: `SELECT * FROM user_organizations WHERE user_id = 'USER_ID';`
 - If empty, assign user to org in Supabase dashboard
 
 **OUTREACH_INSERT_FAILED / INCIDENT_INSERT_FAILED:**
+
 - Check RLS policies are in place
 - Verify organization has `outreach_enabled = true`
 - Check user has active membership
 
 **RLS_ISOLATION_FAILED:**
+
 - This is a security issue - user can see other org's data
 - Re-run RLS policy creation scripts
 - Verify policies in Supabase dashboard
@@ -214,6 +222,7 @@ For EAS Build, add them to `eas.json`:
 ### Build Fails
 
 **Dependency Issues:**
+
 ```bash
 # Clear cache and reinstall
 rm -rf node_modules
@@ -222,6 +231,7 @@ npx expo install --fix
 ```
 
 **Native Build Issues:**
+
 ```bash
 # Clean iOS build
 cd ios

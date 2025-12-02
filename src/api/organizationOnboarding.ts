@@ -15,7 +15,9 @@ export type CertificationFormValues = {
  * Submit an organization certification request
  * Creates org (if needed) and certification request
  */
-export async function submitCertificationRequest(values: CertificationFormValues) {
+export async function submitCertificationRequest(
+  values: CertificationFormValues,
+) {
   try {
     const {
       organizationName,
@@ -106,7 +108,9 @@ export async function submitCertificationRequest(values: CertificationFormValues
   } catch (error: any) {
     console.error('submitCertificationRequest error', error);
     // TEMP: surface the real message while debugging
-    throw new Error(error?.message || 'Unknown error submitting certification request');
+    throw new Error(
+      error?.message || 'Unknown error submitting certification request',
+    );
   }
 }
 
@@ -144,7 +148,9 @@ export async function joinOrganizationWithCode(rawCode: string) {
   // 1) Look up invite code
   const { data: invite, error: inviteError } = await supabase
     .from('organization_invite_codes')
-    .select('id, organization_id, expires_at, is_active, max_uses, current_uses, role')
+    .select(
+      'id, organization_id, expires_at, is_active, max_uses, current_uses, role',
+    )
     .eq('code', code)
     .maybeSingle();
 
@@ -154,7 +160,9 @@ export async function joinOrganizationWithCode(rawCode: string) {
   }
 
   if (!invite) {
-    throw new Error('This code is not valid. Please check with your organization administrator.');
+    throw new Error(
+      'This code is not valid. Please check with your organization administrator.',
+    );
   }
 
   if (!invite.is_active) {
@@ -196,7 +204,10 @@ export async function joinOrganizationWithCode(rawCode: string) {
   if (membershipError && membershipError.code !== '23505') {
     // 23505 = unique_violation
     console.error('Membership insert error', membershipError);
-    throw new Error(membershipError.message || 'Failed to join organization. Please try again.');
+    throw new Error(
+      membershipError.message ||
+        'Failed to join organization. Please try again.',
+    );
   }
 
   // 4) Increment code usage (if RPC exists)
@@ -223,7 +234,9 @@ export async function loadCertifiedOrganizations() {
 
   if (error) {
     console.error('Certified orgs load error', error);
-    throw new Error('Something went wrong loading organizations. Please try again.');
+    throw new Error(
+      'Something went wrong loading organizations. Please try again.',
+    );
   }
 
   return data ?? [];

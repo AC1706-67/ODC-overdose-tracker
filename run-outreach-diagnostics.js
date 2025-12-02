@@ -7,7 +7,7 @@ require('dotenv').config();
 
 const supabase = createClient(
   process.env.EXPO_PUBLIC_SUPABASE_URL,
-  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
+  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
 );
 
 async function runDiagnostics() {
@@ -42,7 +42,7 @@ async function runDiagnostics() {
     console.error('❌ Error fetching policies:', polError.message);
   } else {
     if (policies && policies.length > 0) {
-      policies.forEach(p => {
+      policies.forEach((p) => {
         console.log(`Policy: ${p.policyname}`);
         console.log(`  Command: ${p.cmd}`);
         console.log(`  Roles: ${p.roles}`);
@@ -65,19 +65,19 @@ async function runDiagnostics() {
     console.error('❌ Error counting logs:', countError.message);
   } else {
     const grouped = {};
-    orgCounts?.forEach(log => {
+    orgCounts?.forEach((log) => {
       const orgId = log.organization_id;
       if (!grouped[orgId]) {
         grouped[orgId] = {
           org_id: orgId,
           org_name: log.organizations?.name || 'Unknown',
           org_slug: log.organizations?.slug || 'N/A',
-          count: 0
+          count: 0,
         };
       }
       grouped[orgId].count++;
     });
-    
+
     const summary = Object.values(grouped).sort((a, b) => b.count - a.count);
     console.table(summary);
     console.log(`Total logs across all orgs: ${orgCounts?.length || 0}`);

@@ -5,6 +5,7 @@ A React Native mobile application that helps communities record acts of care and
 ## Features
 
 ### Multi-Organization Support
+
 - Join multiple organizations with invite codes
 - Switch between organizations seamlessly
 - Organization-specific data isolation
@@ -12,6 +13,7 @@ A React Native mobile application that helps communities record acts of care and
 - Request new organization certification
 
 ### Authentication & Onboarding
+
 - Secure email/password authentication with Supabase
 - Terms of Service and Privacy Policy acceptance tracking
 - Guided onboarding flow for new users
@@ -19,6 +21,7 @@ A React Native mobile application that helps communities record acts of care and
 - Role-based access control (Admin, Coordinator, Responder)
 
 ### Incident Reporting
+
 - Compassionate health incident logging
 - Anonymous data collection (ZIP code, demographics, outcomes)
 - Offline-first with automatic sync
@@ -26,6 +29,7 @@ A React Native mobile application that helps communities record acts of care and
 - Organization-scoped data access
 
 ### Outreach & Distribution Tracking
+
 - Enhanced outreach logging with team member tracking
 - Location-based analytics and coverage mapping
 - Kit distribution tracking (Narcan, harm reduction supplies)
@@ -33,6 +37,7 @@ A React Native mobile application that helps communities record acts of care and
 - ZIP code-based geographic analysis
 
 ### Analytics Dashboards
+
 - **Health Dashboard**: Real-time incident statistics and trends
 - **Outreach Dashboard**: Distribution patterns and effectiveness
 - **Team Analytics**: Member performance and activity timelines
@@ -41,6 +46,7 @@ A React Native mobile application that helps communities record acts of care and
 - Demographic insights for public health planning
 
 ### Offline Capabilities
+
 - Works without internet connection
 - Local data storage with automatic sync
 - Pending submission indicators
@@ -69,7 +75,8 @@ A React Native mobile application that helps communities record acts of care and
 ### For Developers
 
 ### Prerequisites
-- Node.js 18+ 
+
+- Node.js 18+
 - npm or yarn
 - Expo CLI (`npm install -g expo-cli`)
 - EAS CLI (`npm install -g eas-cli`)
@@ -80,17 +87,20 @@ A React Native mobile application that helps communities record acts of care and
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/AC1706-67/Compassionate-LOG.git
    cd Compassionate-LOG
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Set up environment variables**
+
    ```bash
    cp .env.example .env
    # Edit .env with your Supabase credentials
@@ -102,6 +112,7 @@ A React Native mobile application that helps communities record acts of care and
    - Run migrations from `supabase/migrations/` in order
 
 5. **Start development server**
+
    ```bash
    npx expo start
    ```
@@ -114,6 +125,7 @@ A React Native mobile application that helps communities record acts of care and
 ### Environment Variables
 
 Create a `.env` file with:
+
 ```env
 EXPO_PUBLIC_SUPABASE_URL=your_supabase_project_url
 EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
@@ -124,6 +136,7 @@ Get these from your Supabase project settings → API.
 ## Building & Deployment
 
 ### Android APK
+
 ```bash
 # Preview build (APK for testing)
 npx eas build --platform android --profile preview
@@ -136,6 +149,7 @@ npx eas build --platform android --profile store
 ```
 
 ### iOS TestFlight
+
 ```bash
 # Development build (simulator)
 npx eas build --platform ios --profile development
@@ -199,6 +213,7 @@ Compassionate-LOG/
 ## Database Schema
 
 ### Core Tables
+
 - **profiles**: User profiles with terms acceptance tracking
 - **organizations**: Organization registry with certification status
 - **user_organizations**: Multi-org membership with roles
@@ -206,16 +221,19 @@ Compassionate-LOG/
 - **organization_certification_requests**: New org certification workflow
 
 ### Data Tables
+
 - **incidents**: Health incident records (org-scoped)
 - **outreach_logs**: Enhanced outreach tracking with team members and locations
 - **distributions**: Kit distribution logs (legacy, migrated to outreach_logs)
 
 ### Analytics Views
+
 - **health_dashboard_view**: Aggregated health metrics by organization
 - **team_member_analytics**: Team performance metrics
 - **location_analytics**: Geographic coverage analysis
 
 ### Key Features
+
 - **Row Level Security (RLS)**: Organization-scoped data isolation
 - **Multi-tenancy**: Complete data separation between organizations
 - **Audit Trails**: Created/updated timestamps on all tables
@@ -237,6 +255,7 @@ Compassionate-LOG/
 ## Testing
 
 ### Code Quality
+
 ```bash
 # Run ESLint
 npx eslint src app components hooks types
@@ -246,6 +265,7 @@ npx tsc --noEmit
 ```
 
 ### Manual Testing Checklist
+
 - [ ] Authentication flow (signup, login, logout)
 - [ ] Terms acceptance at signup
 - [ ] Onboarding flow (select org, enter code, request certification)
@@ -257,6 +277,7 @@ npx tsc --noEmit
 - [ ] Database connection validation
 
 ### Device Testing
+
 ```bash
 # Install on connected Android device
 adb install -r path/to/your.apk
@@ -269,6 +290,7 @@ adb logcat | grep -i "compassionate"
 ```
 
 ### Database Verification
+
 ```bash
 # Run verification scripts in Supabase SQL Editor
 # See: verify-legal-acceptance.sql
@@ -291,12 +313,14 @@ adb logcat | grep -i "compassionate"
 ## Recent Updates
 
 ### Legal & Compliance
+
 - Terms of Service and Privacy Policy acceptance at signup
 - Consent screen for existing users
 - Version tracking for policy updates
 - Audit trail for legal compliance
 
 ### Multi-Organization Features
+
 - Join multiple organizations with invite codes
 - Switch between organizations seamlessly
 - Organization-specific data isolation with RLS
@@ -304,6 +328,7 @@ adb logcat | grep -i "compassionate"
 - New organization certification request workflow
 
 ### Enhanced Analytics
+
 - Team member performance tracking
 - Location-based coverage analysis
 - Geographic hotspot identification
@@ -311,6 +336,7 @@ adb logcat | grep -i "compassionate"
 - Improved data visualization with charts
 
 ### Code Quality
+
 - ESLint configuration with zero warnings
 - TypeScript strict mode compliance
 - Removed all unused variables and imports
@@ -328,6 +354,7 @@ adb logcat | grep -i "compassionate"
 ## Contributing
 
 This is a healthcare application for public health purposes. Contributions should focus on:
+
 - Data accuracy and validation
 - User experience improvements
 - Security enhancements
@@ -336,6 +363,7 @@ This is a healthcare application for public health purposes. Contributions shoul
 - Code quality and maintainability
 
 ### Development Guidelines
+
 - Follow TypeScript strict mode
 - Maintain ESLint compliance (zero warnings)
 - Write descriptive commit messages

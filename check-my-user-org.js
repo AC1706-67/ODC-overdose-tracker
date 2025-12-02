@@ -3,7 +3,7 @@ const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(
   process.env.EXPO_PUBLIC_SUPABASE_URL,
-  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
+  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
 );
 
 async function checkUserOrg() {
@@ -29,7 +29,8 @@ async function checkUserOrg() {
     // Check their organization memberships
     const { data: memberships, error: membershipError } = await supabase
       .from('user_organizations')
-      .select(`
+      .select(
+        `
         id,
         organization_id,
         role,
@@ -40,7 +41,8 @@ async function checkUserOrg() {
           slug,
           is_active
         )
-      `)
+      `,
+      )
       .eq('user_id', profile.id);
 
     if (membershipError) {
@@ -53,7 +55,7 @@ async function checkUserOrg() {
       console.log('   → Need to run ensure-user-has-org.sql');
     } else {
       console.log(`   ✅ ${memberships.length} organization(s):`);
-      memberships.forEach(m => {
+      memberships.forEach((m) => {
         const org = m.organizations;
         console.log(`      - ${org.name} (${org.slug})`);
         console.log(`        Role: ${m.role}, Active: ${m.is_active}`);
@@ -74,7 +76,7 @@ async function checkUserOrg() {
     return;
   }
 
-  orgs.forEach(org => {
+  orgs.forEach((org) => {
     console.log(`${org.is_active ? '✅' : '❌'} ${org.name} (${org.slug})`);
     console.log(`   ID: ${org.id}`);
   });

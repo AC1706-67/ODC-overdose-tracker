@@ -8,7 +8,15 @@ import {
   Switch,
   Alert,
 } from 'react-native';
-import { Settings, User, Shield, Database, LogOut, Info, ChevronRight } from 'lucide-react-native';
+import {
+  Settings,
+  User,
+  Shield,
+  Database,
+  LogOut,
+  Info,
+  ChevronRight,
+} from 'lucide-react-native';
 import { supabase } from '@/lib/supabase';
 import { useRouter, Link } from 'expo-router';
 import { AuthTest } from '@/components/AuthTest';
@@ -35,18 +43,22 @@ export default function SettingsScreen() {
 
   const loadUserProfile = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return;
 
       // Get user's organization membership
       const { data: membership, error } = await supabase
         .from('user_organizations')
-        .select(`
+        .select(
+          `
           role,
           organizations (
             name
           )
-        `)
+        `,
+        )
         .eq('user_id', user.id)
         .eq('is_active', true)
         .maybeSingle();
@@ -59,11 +71,11 @@ export default function SettingsScreen() {
       }
 
       // Format role: capitalize first letter
-      const formattedRole = membership.role 
+      const formattedRole = membership.role
         ? membership.role.charAt(0).toUpperCase() + membership.role.slice(1)
         : 'Peer';
       setUserRole(formattedRole);
-      
+
       // Get organization name from nested select
       const orgData = membership.organizations as any;
       setOrgName(orgData?.name || 'Recovery Alliance of El Paso');
@@ -77,45 +89,48 @@ export default function SettingsScreen() {
   const handleClearData = () => {
     Alert.alert(
       'Clear Local Data',
-      'This will remove all locally stored incidents and distributions that haven\'t been synced. Are you sure?',
+      "This will remove all locally stored incidents and distributions that haven't been synced. Are you sure?",
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Clear', style: 'destructive', onPress: () => {
-          // Clear local storage logic would go here
-          Alert.alert('Success', 'Local data cleared.');
-        }},
-      ]
+        {
+          text: 'Clear',
+          style: 'destructive',
+          onPress: () => {
+            // Clear local storage logic would go here
+            Alert.alert('Success', 'Local data cleared.');
+          },
+        },
+      ],
     );
   };
 
   const handleExportData = () => {
-    Alert.alert('Export Data', 'Data export functionality will be implemented.');
+    Alert.alert(
+      'Export Data',
+      'Data export functionality will be implemented.',
+    );
   };
 
   const router = useRouter();
 
   const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Logout', 
-          style: 'destructive', 
-          onPress: async () => {
-            await supabase.auth.signOut();
-            router.replace('/login');
-          }
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Logout',
+        style: 'destructive',
+        onPress: async () => {
+          await supabase.auth.signOut();
+          router.replace('/login');
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleVersionTap = () => {
     const newCount = tapCount + 1;
     setTapCount(newCount);
-    
+
     if (newCount >= 7) {
       // Only show diagnostics in development or when explicitly enabled
       if (__DEV__ || process.env.EXPO_PUBLIC_SHOW_DIAGNOSTICS === 'true') {
@@ -123,13 +138,16 @@ export default function SettingsScreen() {
       }
       setTapCount(0);
     }
-    
+
     // Reset counter after 3 seconds
     setTimeout(() => setTapCount(0), 3000);
   };
   return (
     <View style={styles.container}>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.header}>
           <View style={styles.titleRow}>
             <Settings size={24} color="#6b7280" />
@@ -159,7 +177,7 @@ export default function SettingsScreen() {
             <Shield size={20} color="#059669" />
             <Text style={styles.sectionTitle}>App Settings</Text>
           </View>
-          
+
           <View style={styles.settingItem}>
             <Text style={styles.settingLabel}>Push Notifications</Text>
             <Switch
@@ -197,15 +215,23 @@ export default function SettingsScreen() {
             <Database size={20} color="#7c3aed" />
             <Text style={styles.sectionTitle}>Data Management</Text>
           </View>
-          
-          <TouchableOpacity style={styles.settingItem} onPress={handleExportData}>
+
+          <TouchableOpacity
+            style={styles.settingItem}
+            onPress={handleExportData}
+          >
             <Text style={styles.settingLabel}>Export Data</Text>
             <Text style={styles.settingAction}>Export</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.settingItem} onPress={handleClearData}>
+          <TouchableOpacity
+            style={styles.settingItem}
+            onPress={handleClearData}
+          >
             <Text style={styles.settingLabel}>Clear Local Data</Text>
-            <Text style={[styles.settingAction, styles.dangerAction]}>Clear</Text>
+            <Text style={[styles.settingAction, styles.dangerAction]}>
+              Clear
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -215,8 +241,11 @@ export default function SettingsScreen() {
             <Info size={20} color="#6b7280" />
             <Text style={styles.sectionTitle}>About</Text>
           </View>
-          
-          <TouchableOpacity style={styles.settingItem} onPress={handleVersionTap}>
+
+          <TouchableOpacity
+            style={styles.settingItem}
+            onPress={handleVersionTap}
+          >
             <Text style={styles.settingLabel}>Version</Text>
             <Text style={styles.settingValue}>1.0.0</Text>
           </TouchableOpacity>
@@ -256,11 +285,11 @@ export default function SettingsScreen() {
           </Text>
         </View>
       </ScrollView>
-      
+
       {showDiagnostics && DiagnosticsScreen && (
-        <DiagnosticsScreen 
-          visible={showDiagnostics} 
-          onClose={() => setShowDiagnostics(false)} 
+        <DiagnosticsScreen
+          visible={showDiagnostics}
+          onClose={() => setShowDiagnostics(false)}
         />
       )}
     </View>

@@ -1,10 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, FlatList, ActivityIndicator, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  SafeAreaView,
+  FlatList,
+  ActivityIndicator,
+  Alert,
+} from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
 import { useOrg } from '@/src/context/OrgContext';
-import { getJoinableCertifiedOrganizations, joinOrganization, getMyOrganizations } from '@/src/api/orgMembership';
+import {
+  getJoinableCertifiedOrganizations,
+  joinOrganization,
+  getMyOrganizations,
+} from '@/src/api/orgMembership';
 
 type CertifiedOrg = {
   id: string;
@@ -33,14 +46,18 @@ export default function SelectOrgScreen() {
       // Load both joinable orgs and user's current memberships
       const [orgs, myOrgs] = await Promise.all([
         getJoinableCertifiedOrganizations(),
-        getMyOrganizations()
+        getMyOrganizations(),
       ]);
-      
+
       setOrganizations(orgs);
-      setMyOrgIds(new Set(myOrgs.map(m => m.organization_id)));
+      setMyOrgIds(new Set(myOrgs.map((m) => m.organization_id)));
     } catch (error: any) {
       console.error('Error loading organizations:', error);
-      Alert.alert('Error', error.message || 'Something went wrong loading organizations. Please try again.');
+      Alert.alert(
+        'Error',
+        error.message ||
+          'Something went wrong loading organizations. Please try again.',
+      );
     } finally {
       setLoading(false);
     }
@@ -50,30 +67,32 @@ export default function SelectOrgScreen() {
     setJoining(orgId);
     try {
       const isMember = myOrgIds.has(orgId);
-      
+
       if (isMember) {
         // User is already a member, just set as active org
-        console.log('[SelectOrg] User is already a member, setting as active org');
+        console.log(
+          '[SelectOrg] User is already a member, setting as active org',
+        );
         await setActiveOrgId(orgId);
-        
+
         Alert.alert('Success!', `Switched to ${orgName}`, [
-          { text: 'OK', onPress: () => router.replace('/(tabs)') }
+          { text: 'OK', onPress: () => router.replace('/(tabs)') },
         ]);
       } else {
         // User is not a member, join the organization first
         console.log('[SelectOrg] User is not a member, joining organization');
         await joinOrganization(orgId, 'Responder');
-        
+
         // Set as active org
         await setActiveOrgId(orgId);
 
         Alert.alert('Success!', `You have joined ${orgName}`, [
-          { text: 'OK', onPress: () => router.replace('/(tabs)') }
+          { text: 'OK', onPress: () => router.replace('/(tabs)') },
         ]);
       }
     } catch (error: any) {
       console.error('Error joining organization:', error);
-      
+
       // Check if user needs to accept terms
       if (error.message === 'TERMS_NOT_ACCEPTED') {
         Alert.alert(
@@ -81,11 +100,11 @@ export default function SelectOrgScreen() {
           'You must accept our Terms of Service and Privacy Policy before joining an organization.',
           [
             { text: 'Cancel', style: 'cancel' },
-            { 
-              text: 'Accept Terms', 
-              onPress: () => router.push('/consent')
-            }
-          ]
+            {
+              text: 'Accept Terms',
+              onPress: () => router.push('/consent'),
+            },
+          ],
         );
       } else {
         Alert.alert('Error', error.message || 'Failed to join organization');
@@ -98,7 +117,7 @@ export default function SelectOrgScreen() {
   const renderOrganization = ({ item }: { item: CertifiedOrg }) => {
     const isMember = myOrgIds.has(item.id);
     const isDemo = item.is_demo_organization === true;
-    
+
     return (
       <View style={styles.orgCard}>
         <View style={styles.orgInfo}>
@@ -118,7 +137,9 @@ export default function SelectOrgScreen() {
             )}
           </View>
           {item.city && item.state && (
-            <Text style={styles.orgLocation}>{item.city}, {item.state}</Text>
+            <Text style={styles.orgLocation}>
+              {item.city}, {item.state}
+            </Text>
           )}
           {item.description && (
             <Text style={styles.orgDescription} numberOfLines={2}>
@@ -135,7 +156,7 @@ export default function SelectOrgScreen() {
         <TouchableOpacity
           style={[
             isMember ? styles.selectButton : styles.joinButton,
-            joining === item.id && styles.joinButtonDisabled
+            joining === item.id && styles.joinButtonDisabled,
           ]}
           onPress={() => handleJoinOrg(item.id, item.name)}
           disabled={joining !== null}
@@ -169,7 +190,9 @@ export default function SelectOrgScreen() {
       ) : organizations.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Ionicons name="business-outline" size={64} color="#d1d5db" />
-          <Text style={styles.emptyText}>No certified organizations are available yet.</Text>
+          <Text style={styles.emptyText}>
+            No certified organizations are available yet.
+          </Text>
           <Text style={styles.emptySubtext}>
             Check back later or request certification for your organization.
           </Text>

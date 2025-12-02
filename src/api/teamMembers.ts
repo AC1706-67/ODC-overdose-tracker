@@ -5,7 +5,7 @@ export async function createTeamMember(
   orgSlug: string,
   fullName: string,
   email?: string,
-  role?: string
+  role?: string,
 ) {
   const clean = fullName?.trim();
   if (!clean) throw new Error('Please enter a name.');

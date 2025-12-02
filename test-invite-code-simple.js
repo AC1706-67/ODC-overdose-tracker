@@ -8,7 +8,7 @@ require('dotenv').config({ path: '.env' });
 
 const supabase = createClient(
   process.env.EXPO_PUBLIC_SUPABASE_URL,
-  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
+  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
 );
 
 // Simulate the joinOrganizationWithCode function
@@ -19,7 +19,10 @@ async function testJoinOrganizationWithCode(rawCode) {
 
   try {
     // Get current user
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
 
     if (userError || !user) {
       throw new Error('You must be logged in to join an organization.');
@@ -30,7 +33,9 @@ async function testJoinOrganizationWithCode(rawCode) {
     // 1) Look up invite code
     const { data: invite, error: inviteError } = await supabase
       .from('organization_invite_codes')
-      .select('id, organization_id, expires_at, is_active, max_uses, current_uses, role')
+      .select(
+        'id, organization_id, expires_at, is_active, max_uses, current_uses, role',
+      )
       .eq('code', code)
       .maybeSingle();
 
@@ -40,7 +45,9 @@ async function testJoinOrganizationWithCode(rawCode) {
     }
 
     if (!invite) {
-      throw new Error('This code is not valid. Please check with your organization administrator.');
+      throw new Error(
+        'This code is not valid. Please check with your organization administrator.',
+      );
     }
 
     console.log(`✅ Invite found for org: ${invite.organization_id}`);
@@ -89,7 +96,10 @@ async function testJoinOrganizationWithCode(rawCode) {
 
     if (membershipError && membershipError.code !== '23505') {
       console.error('❌ Membership insert error:', membershipError);
-      throw new Error(membershipError.message || 'Failed to join organization. Please try again.');
+      throw new Error(
+        membershipError.message ||
+          'Failed to join organization. Please try again.',
+      );
     }
 
     console.log(`✅ Membership added`);
@@ -97,8 +107,10 @@ async function testJoinOrganizationWithCode(rawCode) {
     // 4) Increment code usage
     console.log(`\n📝 Incrementing usage counter...`);
     try {
-      const { data: rpcResult, error: rpcError } = await supabase
-        .rpc('increment_invite_code_usage', { p_code: code });
+      const { data: rpcResult, error: rpcError } = await supabase.rpc(
+        'increment_invite_code_usage',
+        { p_code: code },
+      );
 
       if (rpcError) {
         console.warn('⚠️  Could not increment usage:', rpcError.message);
@@ -111,7 +123,6 @@ async function testJoinOrganizationWithCode(rawCode) {
 
     console.log(`\n✅ SUCCESS! User joined organization: ${organizationId}\n`);
     return { organizationId };
-
   } catch (error) {
     console.error(`\n❌ ERROR: ${error.message}\n`);
     throw error;
@@ -121,7 +132,7 @@ async function testJoinOrganizationWithCode(rawCode) {
 // Run the test
 (async () => {
   const testCode = process.argv[2] || 'ORG-ANON-e706f8';
-  
+
   console.log('='.repeat(60));
   console.log('  INVITE CODE REDEMPTION TEST');
   console.log('='.repeat(60));

@@ -3,17 +3,20 @@ require('dotenv').config();
 
 const supabase = createClient(
   process.env.EXPO_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
+  process.env.SUPABASE_SERVICE_ROLE_KEY,
 );
 
 async function addUserToRAEP() {
   try {
     // Get all users
-    const { data: { users }, error: usersError } = await supabase.auth.admin.listUsers();
+    const {
+      data: { users },
+      error: usersError,
+    } = await supabase.auth.admin.listUsers();
     if (usersError) throw usersError;
-    
+
     console.log('\n=== All Users ===');
-    users.forEach(user => {
+    users.forEach((user) => {
       console.log(`- ${user.email} (ID: ${user.id})`);
     });
 
@@ -23,7 +26,7 @@ async function addUserToRAEP() {
       .select('*')
       .eq('slug', 'raep')
       .single();
-    
+
     if (orgError) throw orgError;
     console.log('\n=== Recovery Alliance Org ===');
     console.log(org);
@@ -33,15 +36,15 @@ async function addUserToRAEP() {
       .from('user_organizations')
       .select('*, users:user_id(email)')
       .eq('organization_id', org.id);
-    
+
     console.log('\n=== Current RAEP Members ===');
-    memberships?.forEach(m => {
+    memberships?.forEach((m) => {
       console.log(`- ${m.users?.email} (${m.role})`);
     });
 
     // Find the newest user (likely the one you just created)
-    const newestUser = users.sort((a, b) => 
-      new Date(b.created_at) - new Date(a.created_at)
+    const newestUser = users.sort(
+      (a, b) => new Date(b.created_at) - new Date(a.created_at),
     )[0];
 
     console.log(`\n=== Adding newest user to RAEP ===`);
@@ -54,7 +57,7 @@ async function addUserToRAEP() {
         user_id: newestUser.id,
         organization_id: org.id,
         role: 'peer',
-        is_active: true
+        is_active: true,
       })
       .select()
       .single();
@@ -69,7 +72,6 @@ async function addUserToRAEP() {
       console.log('✓ User added to Recovery Alliance!');
       console.log(newMembership);
     }
-
   } catch (error) {
     console.error('Error:', error);
   }

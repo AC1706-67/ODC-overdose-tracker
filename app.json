@@ -14,7 +14,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "ai.anonymoushaven.compassionatelog",
-      "buildNumber": "9",
+      "buildNumber": "10",
       "infoPlist": {
         "NSHealthShareUsageDescription": "Compassionate Log helps communities record acts of care and compassion that save lives.",
         "NSLocationWhenInUseUsageDescription": "Location is used to improve incident reporting accuracy.",
@@ -26,18 +26,14 @@
     },
     "android": {
       "package": "ai.anonymoushaven.compassionatelog",
-      "versionCode": 9
+      "versionCode": 10
     },
     "web": {
       "bundler": "metro",
       "output": "single",
       "favicon": "./assets/images/favicon.png"
     },
-    "plugins": [
-      "expo-router",
-      "expo-build-properties",
-      "expo-web-browser"
-    ],
+    "plugins": ["expo-router", "expo-build-properties", "expo-web-browser"],
     "extra": {
       "router": {
         "origin": false

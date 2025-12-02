@@ -3,9 +3,11 @@
 ## ✅ What Was Fixed
 
 ### 1. Request Certification Flow (Purple Button)
+
 **Before:** Always failed with "This organization may already exist"
 
 **After:**
+
 - Creates organization if it doesn't exist
 - Submits certification request to `organization_certification_requests` table
 - Generates an 8-character invite code automatically
@@ -13,14 +15,17 @@
 - User can immediately use the code to join via "I have an organization code"
 
 **Files Changed:**
+
 - `app/onboarding/request-org.tsx` - Updated to use new API
 - `src/api/organizationOnboarding.ts` - New `submitCertificationRequest()` function
 - `src/utils/inviteCodes.ts` - New utility for generating codes
 
 ### 2. Enter Organization Code Flow (Blue Button)
+
 **Before:** Had basic validation but used inline logic
 
 **After:**
+
 - Centralized logic in `joinOrganizationWithCode()` API function
 - Validates code exists, is active, not expired, not at max uses
 - Checks if user is already a member
@@ -29,13 +34,16 @@
 - Shows proper error messages for each failure case
 
 **Files Changed:**
+
 - `app/onboarding/enter-code.tsx` - Updated to use new API
 - `src/api/organizationOnboarding.ts` - New `joinOrganizationWithCode()` function
 
 ### 3. Join Certified Organization Flow (Green Button)
+
 **Before:** Always showed "Failed to load organizations" even when query succeeded with 0 results
 
 **After:**
+
 - Only shows error dialog if Supabase query actually fails
 - Shows friendly empty state when 0 certified orgs exist:
   - "No certified organizations are available yet."
@@ -43,36 +51,42 @@
 - Properly loads and displays certified organizations when they exist
 
 **Files Changed:**
+
 - `app/onboarding/select-org.tsx` - Updated to use new API and show proper empty state
 - `src/api/organizationOnboarding.ts` - New `loadCertifiedOrganizations()` function
 
 ### 4. Organization Type Rename
+
 **Before:** "Harm Reduction Program"
 
 **After:** "Compassionate Community Engagement (CCE)"
 
 **Files Changed:**
+
 - `app/onboarding/request-org.tsx` - Updated dropdown options
 - `types/organization.ts` - Updated OrganizationType union
 
 ## 📁 New Files Created
 
 ### `src/utils/inviteCodes.ts`
+
 ```typescript
-generateInviteCode() // Returns 8-char code like "ABCD1234"
-formatInviteCode()   // Formats as "ABCD-1234"
+generateInviteCode(); // Returns 8-char code like "ABCD1234"
+formatInviteCode(); // Formats as "ABCD-1234"
 ```
 
 ### `src/api/organizationOnboarding.ts`
+
 ```typescript
-submitCertificationRequest(values)  // Creates org + request + invite code
-joinOrganizationWithCode(code)      // Validates and joins org
-loadCertifiedOrganizations()        // Loads public certified orgs
+submitCertificationRequest(values); // Creates org + request + invite code
+joinOrganizationWithCode(code); // Validates and joins org
+loadCertifiedOrganizations(); // Loads public certified orgs
 ```
 
 ## 🔄 Complete User Flows
 
 ### Flow 1: Request New Organization
+
 1. User clicks "Request organization certification"
 2. Fills out form with org details
 3. Submits → Creates org, certification request, and invite code
@@ -80,6 +94,7 @@ loadCertifiedOrganizations()        // Loads public certified orgs
 5. User can immediately use that code to join
 
 ### Flow 2: Join with Invite Code
+
 1. User clicks "I have an organization code"
 2. Enters code (e.g., "ABCD1234")
 3. System validates code and creates membership
@@ -87,6 +102,7 @@ loadCertifiedOrganizations()        // Loads public certified orgs
 5. Redirects to main app
 
 ### Flow 3: Browse Certified Organizations
+
 1. User clicks "Join a certified organization"
 2. If query fails → Shows error dialog
 3. If 0 results → Shows friendly empty state (no error)
@@ -95,6 +111,7 @@ loadCertifiedOrganizations()        // Loads public certified orgs
 ## 🧪 Testing
 
 ### Test Request Certification:
+
 1. Open app → Onboarding screen
 2. Click "Request organization certification"
 3. Fill in:
@@ -106,6 +123,7 @@ loadCertifiedOrganizations()        // Loads public certified orgs
 5. Should see success with invite code
 
 ### Test Join with Code:
+
 1. Copy the invite code from previous test
 2. Go back to onboarding
 3. Click "I have an organization code"
@@ -113,13 +131,14 @@ loadCertifiedOrganizations()        // Loads public certified orgs
 5. Should join successfully and see main app
 
 ### Test Browse Organizations:
+
 1. Go to onboarding
 2. Click "Join a certified organization"
 3. Should see empty state (no error dialog)
 4. To test with data, run in Supabase:
    ```sql
-   UPDATE organizations 
-   SET is_certified = true, is_public = true, is_active = true 
+   UPDATE organizations
+   SET is_certified = true, is_public = true, is_active = true
    WHERE name = 'Test Community Center';
    ```
 5. Refresh screen → should now show the org
@@ -127,6 +146,7 @@ loadCertifiedOrganizations()        // Loads public certified orgs
 ## 🗄️ Database Requirements
 
 The code expects these tables to exist:
+
 - `organizations` - with columns: `is_certified`, `is_public`, `is_active`, `status`
 - `organization_certification_requests` - for tracking requests
 - `organization_invite_codes` - for storing invite codes
@@ -137,6 +157,7 @@ The migration `20251119_add_org_certification_and_codes.sql` should have created
 ## 🚀 Next Steps
 
 1. **Build new APK** with these changes:
+
    ```bash
    eas build --platform android --profile preview
    ```
@@ -152,6 +173,7 @@ The migration `20251119_add_org_certification_and_codes.sql` should have created
 ## 📝 Error Handling
 
 All three flows now have proper error handling:
+
 - **Request Certification:** Shows actual error message from API
 - **Enter Code:** Shows specific error for each validation failure
 - **Browse Orgs:** Only shows error if query fails, not for empty results

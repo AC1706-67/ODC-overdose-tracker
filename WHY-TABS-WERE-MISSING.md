@@ -11,17 +11,20 @@ You could log in successfully and see your Admin role + organization, but only t
 **File:** `app/(tabs)/_layout.tsx`
 
 **The Problem:**
+
 ```typescript
 const hasOrg = !loading && (status === 'ready' || (activeOrg && activeOrg.id));
 ```
 
 This logic required BOTH conditions:
+
 - `status === 'ready'` OR
 - `activeOrg && activeOrg.id`
 
 But the `status` check was failing even when `activeOrg` existed, causing `hasOrg` to be `false`.
 
 **The Fix:**
+
 ```typescript
 const hasOrg = !loading && activeOrg && activeOrg.id;
 ```
@@ -37,6 +40,7 @@ The original RLS policies only checked if a user belonged to an organization. Th
 
 **The Fix:**
 Created role-aware policies:
+
 - **Admins/Managers/Owners** → See ALL outreach logs for their organization
 - **Responders/Viewers** → See only their own logs
 
@@ -49,11 +53,13 @@ This matches the expected behavior where admins have full visibility into their 
 **File:** `app/(tabs)/_layout.tsx`
 
 **Before:**
+
 ```typescript
 const hasOrg = !loading && (status === 'ready' || (activeOrg && activeOrg.id));
 ```
 
 **After:**
+
 ```typescript
 const hasOrg = !loading && activeOrg && activeOrg.id;
 ```
@@ -77,14 +83,17 @@ const hasOrg = !loading && activeOrg && activeOrg.id;
 ## How to Apply the Fix
 
 ### Step 1: Frontend (Already Done)
+
 The tab layout fix is already applied in the code. You'll need to rebuild the APK.
 
 ### Step 2: Backend (Run in Supabase)
+
 1. Go to Supabase SQL Editor
 2. Run `fix-rls-admin-access.sql`
 3. Verify policies with the verification query at the bottom
 
 ### Step 3: Test
+
 1. Install new APK
 2. Login as achavez@recoveryalliance.net (Admin)
 3. You should now see:
@@ -96,6 +105,7 @@ The tab layout fix is already applied in the code. You'll need to rebuild the AP
 ## Why This Happened
 
 The app was designed with conditional tab visibility to support:
+
 - Users without organizations (only see Incidents + Settings)
 - Users with organizations (see all tabs)
 - Organizations with/without outreach enabled

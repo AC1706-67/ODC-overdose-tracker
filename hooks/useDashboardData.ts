@@ -27,7 +27,11 @@ export interface DashboardData {
   }>;
 }
 
-export function useDashboardData(period: string, zipCode?: string, organizationId?: string | null) {
+export function useDashboardData(
+  period: string,
+  zipCode?: string,
+  organizationId?: string | null,
+) {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -37,7 +41,7 @@ export function useDashboardData(period: string, zipCode?: string, organizationI
       // Calculate date range based on period
       const now = new Date();
       const startDate = new Date();
-      
+
       switch (period) {
         case 'day':
           startDate.setDate(now.getDate() - 1);
@@ -69,7 +73,10 @@ export function useDashboardData(period: string, zipCode?: string, organizationI
       // Filter by organization if provided
       if (organizationId) {
         incidentsQuery = incidentsQuery.eq('organization_id', organizationId);
-        distributionsQuery = distributionsQuery.eq('organization_id', organizationId);
+        distributionsQuery = distributionsQuery.eq(
+          'organization_id',
+          organizationId,
+        );
       }
 
       if (zipCode) {
@@ -80,7 +87,7 @@ export function useDashboardData(period: string, zipCode?: string, organizationI
       // Fetch data
       const [incidentsResult, distributionsResult] = await Promise.all([
         incidentsQuery,
-        distributionsQuery
+        distributionsQuery,
       ]);
 
       if (incidentsResult.error) throw incidentsResult.error;
@@ -91,61 +98,84 @@ export function useDashboardData(period: string, zipCode?: string, organizationI
 
       // Process incidents data
       const totalIncidents = incidents.length;
-      const narcanUsed = incidents.filter(i => i.narcan_used).length;
-      const survived = incidents.filter(i => i.survival === 'Survived').length;
+      const narcanUsed = incidents.filter((i) => i.narcan_used).length;
+      const survived = incidents.filter(
+        (i) => i.survival === 'Survived',
+      ).length;
       const survivalRate = totalIncidents > 0 ? survived / totalIncidents : 0;
 
       // Process distributions data
-      const totalDistributions = distributions.reduce((sum, d) => sum + d.kits_given, 0);
+      const totalDistributions = distributions.reduce(
+        (sum, d) => sum + d.kits_given,
+        0,
+      );
       const narcanDistributions = distributions
-        .filter(d => d.kit_type === 'Narcan')
+        .filter((d) => d.kit_type === 'Narcan')
         .reduce((sum, d) => sum + d.kits_given, 0);
 
       // Distribution by type
-      const distributionsByType = distributions.reduce((acc, d) => {
-        const existing = acc.find((item: { type: string; count: number }) => item.type === d.kit_type);
-        if (existing) {
-          existing.count += d.kits_given;
-        } else {
-          acc.push({ type: d.kit_type, count: d.kits_given });
-        }
-        return acc;
-      }, [] as Array<{ type: string; count: number }>);
+      const distributionsByType = distributions.reduce(
+        (acc, d) => {
+          const existing = acc.find(
+            (item: { type: string; count: number }) => item.type === d.kit_type,
+          );
+          if (existing) {
+            existing.count += d.kits_given;
+          } else {
+            acc.push({ type: d.kit_type, count: d.kits_given });
+          }
+          return acc;
+        },
+        [] as Array<{ type: string; count: number }>,
+      );
 
       // Demographics
-      const genderCounts = incidents.reduce((acc, i) => {
-        const existing = acc.find((item: { gender: string; count: number }) => item.gender === i.gender);
-        if (existing) {
-          existing.count++;
-        } else {
-          acc.push({ gender: i.gender, count: 1 });
-        }
-        return acc;
-      }, [] as Array<{ gender: string; count: number }>);
+      const genderCounts = incidents.reduce(
+        (acc, i) => {
+          const existing = acc.find(
+            (item: { gender: string; count: number }) =>
+              item.gender === i.gender,
+          );
+          if (existing) {
+            existing.count++;
+          } else {
+            acc.push({ gender: i.gender, count: 1 });
+          }
+          return acc;
+        },
+        [] as Array<{ gender: string; count: number }>,
+      );
 
-      const ageCounts = incidents.reduce((acc, i) => {
-        const existing = acc.find((item: { age: string; count: number }) => item.age === i.approx_age);
-        if (existing) {
-          existing.count++;
-        } else {
-          acc.push({ age: i.approx_age, count: 1 });
-        }
-        return acc;
-      }, [] as Array<{ age: string; count: number }>);
+      const ageCounts = incidents.reduce(
+        (acc, i) => {
+          const existing = acc.find(
+            (item: { age: string; count: number }) => item.age === i.approx_age,
+          );
+          if (existing) {
+            existing.count++;
+          } else {
+            acc.push({ age: i.approx_age, count: 1 });
+          }
+          return acc;
+        },
+        [] as Array<{ age: string; count: number }>,
+      );
 
       // ZIP code analysis
       const zipCodes = new Set([
-        ...incidents.map(i => i.zip_code),
-        ...distributions.map(d => d.zip_code)
+        ...incidents.map((i) => i.zip_code),
+        ...distributions.map((d) => d.zip_code),
       ]);
 
-      const zipCodeData = Array.from(zipCodes).map(zip => ({
-        zipCode: zip,
-        incidents: incidents.filter(i => i.zip_code === zip).length,
-        distributions: distributions
-          .filter(d => d.zip_code === zip)
-          .reduce((sum, d) => sum + d.kits_given, 0)
-      })).sort((a, b) => b.incidents - a.incidents);
+      const zipCodeData = Array.from(zipCodes)
+        .map((zip) => ({
+          zipCode: zip,
+          incidents: incidents.filter((i) => i.zip_code === zip).length,
+          distributions: distributions
+            .filter((d) => d.zip_code === zip)
+            .reduce((sum, d) => sum + d.kits_given, 0),
+        }))
+        .sort((a, b) => b.incidents - a.incidents);
 
       const dashboardData: DashboardData = {
         incidents: {

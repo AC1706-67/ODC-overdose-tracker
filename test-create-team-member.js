@@ -6,7 +6,9 @@ const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
-  console.log('⚠️  Please set SUPABASE_URL and SUPABASE_ANON_KEY environment variables');
+  console.log(
+    '⚠️  Please set SUPABASE_URL and SUPABASE_ANON_KEY environment variables',
+  );
   console.log('Or update this script with your actual Supabase credentials');
   process.exit(1);
 }
@@ -15,18 +17,21 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function testCreateTeamMember() {
   console.log('🧪 Testing create_team_member function...');
-  
+
   try {
     // First, let's check if the function exists by trying to call it
     const { data, error } = await supabase.rpc('create_team_member', {
       p_full_name: 'Test User',
       p_email: 'test@example.com',
       p_role: 'Volunteer',
-      p_org_slug: 'test-org'
+      p_org_slug: 'test-org',
     });
 
     if (error) {
-      if (error.message.includes('function public.create_team_member') && error.message.includes('does not exist')) {
+      if (
+        error.message.includes('function public.create_team_member') &&
+        error.message.includes('does not exist')
+      ) {
         console.log('❌ Function create_team_member does not exist yet');
         console.log('✅ Ready to execute the SQL to create it');
         return 'FUNCTION_NOT_EXISTS';
@@ -47,11 +52,13 @@ async function testCreateTeamMember() {
   }
 }
 
-testCreateTeamMember().then(result => {
+testCreateTeamMember().then((result) => {
   console.log(`\n📋 Result: ${result}`);
-  
+
   if (result === 'FUNCTION_NOT_EXISTS') {
-    console.log('\n🚀 Execute the SQL function now? The function is ready to be created.');
+    console.log(
+      '\n🚀 Execute the SQL function now? The function is ready to be created.',
+    );
   } else if (result === 'FUNCTION_EXISTS') {
     console.log('\n✅ Function already exists and is working correctly!');
   }

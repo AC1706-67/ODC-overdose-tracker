@@ -15,7 +15,7 @@ interface DashboardChartsProps {
   };
 }
 
-export default function DashboardCharts({ cards, timeSeries }: DashboardChartsProps) {
+export default function DashboardCharts({ cards }: DashboardChartsProps) {
   // Chart configuration
   const chartConfig = {
     backgroundColor: '#ffffff',
@@ -131,7 +131,8 @@ export default function DashboardCharts({ cards, timeSeries }: DashboardChartsPr
       <View style={styles.emptyState}>
         <Text style={styles.emptyTitle}>📊 Charts Coming Soon</Text>
         <Text style={styles.emptyText}>
-          Submit some outreach activities to see beautiful visualizations of your impact!
+          Submit some outreach activities to see beautiful visualizations of
+          your impact!
         </Text>
       </View>
     );

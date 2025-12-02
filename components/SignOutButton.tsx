@@ -10,25 +10,25 @@ interface SignOutButtonProps {
   showIcon?: boolean;
 }
 
-export function SignOutButton({ style, textStyle, showIcon = true }: SignOutButtonProps) {
+export function SignOutButton({
+  style,
+  textStyle,
+  showIcon = true,
+}: SignOutButtonProps) {
   const router = useRouter();
 
   const handleSignOut = () => {
-    Alert.alert(
-      'Sign Out',
-      'Are you sure you want to sign out?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Sign Out', 
-          style: 'destructive', 
-          onPress: async () => {
-            await supabase.auth.signOut();
-            router.replace('/login');
-          }
+    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Sign Out',
+        style: 'destructive',
+        onPress: async () => {
+          await supabase.auth.signOut();
+          router.replace('/login');
         },
-      ]
-    );
+      },
+    ]);
   };
 
   return (

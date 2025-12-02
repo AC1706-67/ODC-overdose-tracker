@@ -1,15 +1,18 @@
 # Multi-Organization Architecture
 
 ## Overview
+
 This app supports multiple organizations with proper data isolation and audit trails.
 
 ## Current Organizations
+
 1. **Recovery Alliance of El Paso** (RAEP) - ID: `6e892800-0429-442f-bff8-417b4d4ec793`
 2. **Communities for Recovery** (C4R)
 
 ## Architecture
 
 ### 1. User Authentication
+
 - **No anonymous users** - all users must sign up with email/password
 - Each user gets a UUID in `auth.users`
 - Users can belong to one or more organizations
@@ -17,6 +20,7 @@ This app supports multiple organizations with proper data isolation and audit tr
 ### 2. Core Tables
 
 #### `organizations`
+
 ```sql
 - id (uuid, primary key)
 - slug (text, unique)
@@ -25,6 +29,7 @@ This app supports multiple organizations with proper data isolation and audit tr
 ```
 
 #### `user_organizations` (junction table)
+
 ```sql
 - user_id (uuid, references auth.users)
 - organization_id (uuid, references organizations)
@@ -33,6 +38,7 @@ This app supports multiple organizations with proper data isolation and audit tr
 ```
 
 #### Data Tables (incidents, outreach_logs, distributions)
+
 ```sql
 - id (uuid, primary key)
 - organization_id (uuid, references organizations) -- WHO OWNS THIS
@@ -45,24 +51,27 @@ This app supports multiple organizations with proper data isolation and audit tr
 ### 3. Row Level Security (RLS)
 
 **The Golden Rule:**
+
 > Users can only see/modify data from organizations they belong to
 
 **Implementation:**
+
 ```sql
 -- Example for incidents table
 CREATE POLICY incidents_org_select ON incidents
 FOR SELECT TO authenticated
 USING (
   organization_id IN (
-    SELECT organization_id 
-    FROM user_organizations 
-    WHERE user_id = auth.uid() 
+    SELECT organization_id
+    FROM user_organizations
+    WHERE user_id = auth.uid()
       AND is_active = true
   )
 );
 ```
 
 This means:
+
 - ✅ RAEP users only see RAEP incidents
 - ✅ C4R users only see C4R incidents
 - ✅ Users in both orgs see data from both
@@ -71,11 +80,13 @@ This means:
 ### 4. Audit Trail
 
 Every record tracks:
+
 - **created_by**: Which user created it
 - **created_at**: When it was created
 - **updated_at**: When it was last modified (auto-updated via trigger)
 
 This gives you:
+
 - Full accountability
 - Ability to track who did what
 - Timestamps for all changes
@@ -83,15 +94,19 @@ This gives you:
 ## Setup Instructions
 
 ### Step 1: Add Audit Columns
+
 Run `add-audit-columns.sql` in Supabase SQL Editor to add tracking columns to all tables.
 
 ### Step 2: Setup RLS Policies
+
 Run `setup-org-based-rls.sql` to create organization-based access control.
 
 ### Step 3: Create Organizations
+
 Run `setup-raep-and-user.sql` to create the Recovery Alliance organization.
 
 ### Step 4: Link Users to Organizations
+
 ```sql
 INSERT INTO user_organizations (user_id, organization_id, role, is_active)
 VALUES (
@@ -105,22 +120,20 @@ VALUES (
 ## App Integration
 
 ### When Creating Records
+
 ```typescript
-const { data, error } = await supabase
-  .from('incidents')
-  .insert({
-    organization_id: activeOrg.id,  // From OrgContext
-    created_by: user.id,             // Auto-set by RLS
-    // ... other fields
-  });
+const { data, error } = await supabase.from('incidents').insert({
+  organization_id: activeOrg.id, // From OrgContext
+  created_by: user.id, // Auto-set by RLS
+  // ... other fields
+});
 ```
 
 ### When Querying Records
+
 ```typescript
 // RLS automatically filters by user's organizations
-const { data, error } = await supabase
-  .from('incidents')
-  .select('*');
+const { data, error } = await supabase.from('incidents').select('*');
 // Only returns incidents from user's orgs!
 ```
 

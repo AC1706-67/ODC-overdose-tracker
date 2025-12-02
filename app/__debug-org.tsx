@@ -9,7 +9,7 @@ export default function DebugOrg() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>🔍 Organization Debug</Text>
-      
+
       <View style={styles.section}>
         <Text style={styles.label}>Loading:</Text>
         <Text style={styles.value}>{loading ? 'Yes' : 'No'}</Text>
@@ -50,25 +50,30 @@ export default function DebugOrg() {
       <View style={styles.section}>
         <Text style={styles.label}>Debug Info:</Text>
         <Text style={styles.value}>
-          ID Match: {activeOrg?.id === '6e892800-0429-442f-bff8-417b4d4ec793' ? '✅' : '❌'}{'\n'}
-          Slug Match: {activeOrg?.slug === 'recovery-alliance-el-paso' ? '✅' : '❌'}{'\n'}
-          Name Match: {activeOrg?.name === 'Recovery Alliance of El Paso' ? '✅' : '❌'}
+          ID Match:{' '}
+          {activeOrg?.id === '6e892800-0429-442f-bff8-417b4d4ec793'
+            ? '✅'
+            : '❌'}
+          {'\n'}
+          Slug Match:{' '}
+          {activeOrg?.slug === 'recovery-alliance-el-paso' ? '✅' : '❌'}
+          {'\n'}
+          Name Match:{' '}
+          {activeOrg?.name === 'Recovery Alliance of El Paso' ? '✅' : '❌'}
         </Text>
       </View>
 
       <View style={styles.section}>
         <Text style={styles.label}>Allowed Slugs:</Text>
         <Text style={styles.value}>
-          - recovery-alliance-el-paso{'\n'}
-          - recovery-alliance
+          - recovery-alliance-el-paso{'\n'}- recovery-alliance
         </Text>
       </View>
 
       <View style={styles.section}>
         <Text style={styles.label}>Allowed Names:</Text>
         <Text style={styles.value}>
-          - Recovery Alliance of El Paso{'\n'}
-          - Recovery Alliance
+          - Recovery Alliance of El Paso{'\n'}- Recovery Alliance
         </Text>
       </View>
     </ScrollView>

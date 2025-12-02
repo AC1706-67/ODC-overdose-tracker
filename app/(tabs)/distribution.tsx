@@ -8,7 +8,12 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import { Package, CircleCheck as CheckCircle, Wifi, WifiOff } from 'lucide-react-native';
+import {
+  Package,
+  CircleCheck as CheckCircle,
+  Wifi,
+  WifiOff,
+} from 'lucide-react-native';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { supabase } from '@/lib/supabase';
 import { useOrg } from '@/src/context/OrgContext';
@@ -16,8 +21,31 @@ import TeamMemberPicker from '@/components/TeamMemberPicker';
 import LocationPicker from '@/components/LocationPicker';
 import { RequireOutreach } from '@/components/RequireOutreach';
 
-const SUPPLY_TYPES = ['Narcan', 'Feminine Hygiene', 'Hygiene', 'Safe Sex', 'Wound Care'];
-const COMMON_ZIP_CODES = ['79901', '79902', '79903', '79904', '79905', '79906', '79907', '79908', '79915', '79924', '79925', '79930', '79932', '79934', '79935', '79936'];
+const SUPPLY_TYPES = [
+  'Narcan',
+  'Feminine Hygiene',
+  'Hygiene',
+  'Safe Sex',
+  'Wound Care',
+];
+const COMMON_ZIP_CODES = [
+  '79901',
+  '79902',
+  '79903',
+  '79904',
+  '79905',
+  '79906',
+  '79907',
+  '79908',
+  '79915',
+  '79924',
+  '79925',
+  '79930',
+  '79932',
+  '79934',
+  '79935',
+  '79936',
+];
 const ZIP_CODE_OPTIONS = ['Enter ZIP Code', 'NA', 'Unknown'];
 
 interface SelectedTeamMember {
@@ -47,33 +75,42 @@ export default function DistributionScreen() {
   const [zipCode, setZipCode] = useState('');
   const [zipCodeMode, setZipCodeMode] = useState('Enter ZIP Code');
   const [location, setLocation] = useState('');
-  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<Location | null>(
+    null,
+  );
   const [selectedSupplyTypes, setSelectedSupplyTypes] = useState<string[]>([]);
   const [numSupplies, setNumSupplies] = useState('0');
   const [malesReached, setMalesReached] = useState('0');
   const [femalesReached, setFemalesReached] = useState('0');
   const [notes, setNotes] = useState('');
-  const [outreachDate, setOutreachDate] = useState(new Date().toISOString().split('T')[0]);
+  const [outreachDate, setOutreachDate] = useState(
+    new Date().toISOString().split('T')[0],
+  );
   const [teamMembers, setTeamMembers] = useState('');
-  const [selectedTeamMembers, setSelectedTeamMembers] = useState<SelectedTeamMember[]>([]);
+  const [selectedTeamMembers, setSelectedTeamMembers] = useState<
+    SelectedTeamMember[]
+  >([]);
   const [memberOrganization, setMemberOrganization] = useState('');
   const [tripCount, setTripCount] = useState('1');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const { isOnline } = useNetworkStatus();
 
   const toggleSupplyType = (supplyType: string) => {
-    setSelectedSupplyTypes(prev => 
-      prev.includes(supplyType) 
-        ? prev.filter(type => type !== supplyType)
-        : [...prev, supplyType]
+    setSelectedSupplyTypes((prev) =>
+      prev.includes(supplyType)
+        ? prev.filter((type) => type !== supplyType)
+        : [...prev, supplyType],
     );
   };
 
   const validateForm = () => {
     if (zipCodeMode === 'Enter ZIP Code') {
       if (!zipCode || zipCode.length !== 5 || !/^\d{5}$/.test(zipCode)) {
-        Alert.alert('Invalid ZIP Code', 'Please enter a valid 5-digit ZIP code or select NA/Unknown.');
+        Alert.alert(
+          'Invalid ZIP Code',
+          'Please enter a valid 5-digit ZIP code or select NA/Unknown.',
+        );
         return false;
       }
     } else if (!zipCodeMode) {
@@ -112,12 +149,16 @@ export default function DistributionScreen() {
       const userId = session?.user?.id || null;
 
       // Parse legacy team members into array if provided (for backward compatibility)
-      const legacyTeamMembersArray = teamMembers 
-        ? teamMembers.split(/[,&]/).map(name => name.trim()).filter(name => name)
+      const legacyTeamMembersArray = teamMembers
+        ? teamMembers
+            .split(/[,&]/)
+            .map((name) => name.trim())
+            .filter((name) => name)
         : [];
 
-      const finalZipCode = zipCodeMode === 'Enter ZIP Code' ? zipCode : zipCodeMode;
-      
+      const finalZipCode =
+        zipCodeMode === 'Enter ZIP Code' ? zipCode : zipCodeMode;
+
       // Prepare the main outreach log payload
       const payload = {
         organization_id: activeOrgId || null,
@@ -125,14 +166,15 @@ export default function DistributionScreen() {
         outreach_date: outreachDate,
         zip_code: finalZipCode,
         location_id: selectedLocation?.id || null,
-        legacy_location: selectedLocation ? null : (location || null), // Use legacy field if no location selected
+        legacy_location: selectedLocation ? null : location || null, // Use legacy field if no location selected
         kit_types: selectedSupplyTypes,
         num_kits: Number(numSupplies || 0),
         people_reached: Number(malesReached || 0) + Number(femalesReached || 0),
         males_reached: Number(malesReached || 0),
         females_reached: Number(femalesReached || 0),
         trip_count: Number(tripCount || 1),
-        legacy_team_members: legacyTeamMembersArray.length > 0 ? legacyTeamMembersArray : null, // Keep legacy for backward compatibility
+        legacy_team_members:
+          legacyTeamMembersArray.length > 0 ? legacyTeamMembersArray : null, // Keep legacy for backward compatibility
         team_organization: memberOrganization || null,
         notes: notes || null,
       };
@@ -151,17 +193,17 @@ export default function DistributionScreen() {
           code: outreachError.code,
           message: outreachError.message,
           details: outreachError.details,
-          hint: outreachError.hint
+          hint: outreachError.hint,
         });
         throw outreachError;
       }
 
       // Insert team member associations if any are selected
       if (selectedTeamMembers.length > 0) {
-        const teamMemberAssociations = selectedTeamMembers.map(member => ({
+        const teamMemberAssociations = selectedTeamMembers.map((member) => ({
           outreach_log_id: outreachData.id,
           team_member_id: member.id,
-          role_in_activity: member.role_in_activity || 'volunteer'
+          role_in_activity: member.role_in_activity || 'volunteer',
         }));
 
         const { error: teamMemberError } = await supabase
@@ -171,7 +213,10 @@ export default function DistributionScreen() {
         if (teamMemberError) {
           console.error('Team member association error:', teamMemberError);
           // Don't fail the whole submission for team member association errors
-          Alert.alert('Warning', 'Outreach recorded but team member associations may not have been saved properly.');
+          Alert.alert(
+            'Warning',
+            'Outreach recorded but team member associations may not have been saved properly.',
+          );
         }
       }
 
@@ -205,225 +250,233 @@ export default function DistributionScreen() {
   return (
     <RequireOutreach>
       <View style={styles.container}>
-        <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <View style={styles.titleRow}>
-            <Package size={24} color="#059669" />
-            <Text style={styles.title}>Outreach Log</Text>
-          </View>
-          <View style={styles.statusRow}>
-            {isOnline ? (
-              <View style={styles.onlineStatus}>
-                <Wifi size={16} color="#059669" />
-                <Text style={styles.onlineText}>Online</Text>
-              </View>
-            ) : (
-              <View style={styles.offlineStatus}>
-                <WifiOff size={16} color="#dc2626" />
-                <Text style={styles.offlineText}>Offline</Text>
-              </View>
-            )}
-          </View>
-        </View>
-
-        <View style={styles.form}>
-          <View style={styles.field}>
-            <Text style={styles.label}>ZIP Code *</Text>
-            <View style={styles.optionsGrid}>
-              {ZIP_CODE_OPTIONS.map((option) => (
-                <TouchableOpacity
-                  key={option}
-                  style={[
-                    styles.optionButton,
-                    zipCodeMode === option && styles.optionButtonSelected,
-                  ]}
-                  onPress={() => setZipCodeMode(option)}
-                >
-                  <Text
-                    style={[
-                      styles.optionText,
-                      zipCodeMode === option && styles.optionTextSelected,
-                    ]}
-                  >
-                    {option}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+        <ScrollView
+          style={styles.scrollView}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.header}>
+            <View style={styles.titleRow}>
+              <Package size={24} color="#059669" />
+              <Text style={styles.title}>Outreach Log</Text>
             </View>
-            {zipCodeMode === 'Enter ZIP Code' && (
-              <>
-                <TextInput
-                  style={[styles.input, { marginTop: 12 }]}
-                  value={zipCode}
-                  onChangeText={setZipCode}
-                  placeholder="12345"
-                  keyboardType="numeric"
-                  maxLength={5}
-                />
-                <Text style={styles.quickSelectLabel}>Quick Select:</Text>
-                <View style={styles.zipOptionsGrid}>
-                  {COMMON_ZIP_CODES.map((zip) => (
-                    <TouchableOpacity
-                      key={zip}
-                      style={[
-                        styles.zipOptionButton,
-                        zipCode === zip && styles.zipOptionButtonSelected,
-                      ]}
-                      onPress={() => setZipCode(zip)}
-                    >
-                      <Text
-                        style={[
-                          styles.zipOptionText,
-                          zipCode === zip && styles.zipOptionTextSelected,
-                        ]}
-                      >
-                        {zip}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
+            <View style={styles.statusRow}>
+              {isOnline ? (
+                <View style={styles.onlineStatus}>
+                  <Wifi size={16} color="#059669" />
+                  <Text style={styles.onlineText}>Online</Text>
                 </View>
-              </>
-            )}
-          </View>
-
-          <LocationPicker
-            selectedLocation={selectedLocation}
-            onLocationChange={setSelectedLocation}
-            legacyLocationText={location}
-            onLegacyLocationChange={setLocation}
-          />
-
-          <View style={styles.field}>
-            <Text style={styles.label}>Supply Type(s) *</Text>
-            <View style={styles.optionsGrid}>
-              {SUPPLY_TYPES.map((option) => (
-                <TouchableOpacity
-                  key={option}
-                  style={[
-                    styles.optionButton,
-                    selectedSupplyTypes.includes(option) && styles.optionButtonSelected,
-                  ]}
-                  onPress={() => toggleSupplyType(option)}
-                >
-                  <Text
-                    style={[
-                      styles.optionText,
-                      selectedSupplyTypes.includes(option) && styles.optionTextSelected,
-                    ]}
-                  >
-                    {option}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+              ) : (
+                <View style={styles.offlineStatus}>
+                  <WifiOff size={16} color="#dc2626" />
+                  <Text style={styles.offlineText}>Offline</Text>
+                </View>
+              )}
             </View>
           </View>
 
-          <View style={styles.field}>
-            <Text style={styles.label}>Number of Supplies</Text>
-            <TextInput
-              style={styles.input}
-              value={numSupplies}
-              onChangeText={setNumSupplies}
-              placeholder="0"
-              keyboardType="numeric"
+          <View style={styles.form}>
+            <View style={styles.field}>
+              <Text style={styles.label}>ZIP Code *</Text>
+              <View style={styles.optionsGrid}>
+                {ZIP_CODE_OPTIONS.map((option) => (
+                  <TouchableOpacity
+                    key={option}
+                    style={[
+                      styles.optionButton,
+                      zipCodeMode === option && styles.optionButtonSelected,
+                    ]}
+                    onPress={() => setZipCodeMode(option)}
+                  >
+                    <Text
+                      style={[
+                        styles.optionText,
+                        zipCodeMode === option && styles.optionTextSelected,
+                      ]}
+                    >
+                      {option}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              {zipCodeMode === 'Enter ZIP Code' && (
+                <>
+                  <TextInput
+                    style={[styles.input, { marginTop: 12 }]}
+                    value={zipCode}
+                    onChangeText={setZipCode}
+                    placeholder="12345"
+                    keyboardType="numeric"
+                    maxLength={5}
+                  />
+                  <Text style={styles.quickSelectLabel}>Quick Select:</Text>
+                  <View style={styles.zipOptionsGrid}>
+                    {COMMON_ZIP_CODES.map((zip) => (
+                      <TouchableOpacity
+                        key={zip}
+                        style={[
+                          styles.zipOptionButton,
+                          zipCode === zip && styles.zipOptionButtonSelected,
+                        ]}
+                        onPress={() => setZipCode(zip)}
+                      >
+                        <Text
+                          style={[
+                            styles.zipOptionText,
+                            zipCode === zip && styles.zipOptionTextSelected,
+                          ]}
+                        >
+                          {zip}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </>
+              )}
+            </View>
+
+            <LocationPicker
+              selectedLocation={selectedLocation}
+              onLocationChange={setSelectedLocation}
+              legacyLocationText={location}
+              onLegacyLocationChange={setLocation}
             />
-          </View>
 
-          <View style={styles.field}>
-            <Text style={styles.label}>Males Reached</Text>
-            <TextInput
-              style={styles.input}
-              value={malesReached}
-              onChangeText={setMalesReached}
-              placeholder="0"
-              keyboardType="numeric"
+            <View style={styles.field}>
+              <Text style={styles.label}>Supply Type(s) *</Text>
+              <View style={styles.optionsGrid}>
+                {SUPPLY_TYPES.map((option) => (
+                  <TouchableOpacity
+                    key={option}
+                    style={[
+                      styles.optionButton,
+                      selectedSupplyTypes.includes(option) &&
+                        styles.optionButtonSelected,
+                    ]}
+                    onPress={() => toggleSupplyType(option)}
+                  >
+                    <Text
+                      style={[
+                        styles.optionText,
+                        selectedSupplyTypes.includes(option) &&
+                          styles.optionTextSelected,
+                      ]}
+                    >
+                      {option}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            <View style={styles.field}>
+              <Text style={styles.label}>Number of Supplies</Text>
+              <TextInput
+                style={styles.input}
+                value={numSupplies}
+                onChangeText={setNumSupplies}
+                placeholder="0"
+                keyboardType="numeric"
+              />
+            </View>
+
+            <View style={styles.field}>
+              <Text style={styles.label}>Males Reached</Text>
+              <TextInput
+                style={styles.input}
+                value={malesReached}
+                onChangeText={setMalesReached}
+                placeholder="0"
+                keyboardType="numeric"
+              />
+            </View>
+
+            <View style={styles.field}>
+              <Text style={styles.label}>Females Reached</Text>
+              <TextInput
+                style={styles.input}
+                value={femalesReached}
+                onChangeText={setFemalesReached}
+                placeholder="0"
+                keyboardType="numeric"
+              />
+            </View>
+
+            <View style={styles.field}>
+              <Text style={styles.label}>Outreach Date</Text>
+              <TextInput
+                style={styles.input}
+                value={outreachDate}
+                onChangeText={setOutreachDate}
+                placeholder="YYYY-MM-DD"
+              />
+            </View>
+
+            <TeamMemberPicker
+              selectedMembers={selectedTeamMembers}
+              onMembersChange={setSelectedTeamMembers}
             />
+
+            {/* Legacy team member input for backward compatibility */}
+            <View style={styles.field}>
+              <Text style={styles.label}>Additional Team Members (Legacy)</Text>
+              <TextInput
+                style={styles.input}
+                value={teamMembers}
+                onChangeText={setTeamMembers}
+                placeholder="e.g., John D., Maria S., Alex R. (for non-registered members)"
+                multiline
+              />
+            </View>
+
+            <View style={styles.field}>
+              <Text style={styles.label}>Team Organization</Text>
+              <TextInput
+                style={styles.input}
+                value={memberOrganization}
+                onChangeText={setMemberOrganization}
+                placeholder="e.g., Casa Vida, El Paso Health Dept"
+              />
+            </View>
+
+            <View style={styles.field}>
+              <Text style={styles.label}>Number of Trips</Text>
+              <TextInput
+                style={styles.input}
+                value={tripCount}
+                onChangeText={setTripCount}
+                placeholder="1"
+                keyboardType="numeric"
+              />
+            </View>
+
+            <View style={styles.field}>
+              <Text style={styles.label}>Notes/Observations</Text>
+              <TextInput
+                style={[styles.input, styles.textArea]}
+                value={notes}
+                onChangeText={setNotes}
+                placeholder="Additional notes about the outreach activity..."
+                multiline
+                numberOfLines={3}
+              />
+            </View>
+
+            <TouchableOpacity
+              style={[
+                styles.submitButton,
+                isSubmitting && styles.submitButtonDisabled,
+              ]}
+              onPress={handleSubmit}
+              disabled={isSubmitting}
+            >
+              <CheckCircle size={20} color="#ffffff" />
+              <Text style={styles.submitText}>
+                {isSubmitting ? 'Recording...' : 'Record Outreach'}
+              </Text>
+            </TouchableOpacity>
           </View>
-
-          <View style={styles.field}>
-            <Text style={styles.label}>Females Reached</Text>
-            <TextInput
-              style={styles.input}
-              value={femalesReached}
-              onChangeText={setFemalesReached}
-              placeholder="0"
-              keyboardType="numeric"
-            />
-          </View>
-
-          <View style={styles.field}>
-            <Text style={styles.label}>Outreach Date</Text>
-            <TextInput
-              style={styles.input}
-              value={outreachDate}
-              onChangeText={setOutreachDate}
-              placeholder="YYYY-MM-DD"
-            />
-          </View>
-
-          <TeamMemberPicker
-            selectedMembers={selectedTeamMembers}
-            onMembersChange={setSelectedTeamMembers}
-          />
-
-          {/* Legacy team member input for backward compatibility */}
-          <View style={styles.field}>
-            <Text style={styles.label}>Additional Team Members (Legacy)</Text>
-            <TextInput
-              style={styles.input}
-              value={teamMembers}
-              onChangeText={setTeamMembers}
-              placeholder="e.g., John D., Maria S., Alex R. (for non-registered members)"
-              multiline
-            />
-          </View>
-
-          <View style={styles.field}>
-            <Text style={styles.label}>Team Organization</Text>
-            <TextInput
-              style={styles.input}
-              value={memberOrganization}
-              onChangeText={setMemberOrganization}
-              placeholder="e.g., Casa Vida, El Paso Health Dept"
-            />
-          </View>
-
-          <View style={styles.field}>
-            <Text style={styles.label}>Number of Trips</Text>
-            <TextInput
-              style={styles.input}
-              value={tripCount}
-              onChangeText={setTripCount}
-              placeholder="1"
-              keyboardType="numeric"
-            />
-          </View>
-
-          <View style={styles.field}>
-            <Text style={styles.label}>Notes/Observations</Text>
-            <TextInput
-              style={[styles.input, styles.textArea]}
-              value={notes}
-              onChangeText={setNotes}
-              placeholder="Additional notes about the outreach activity..."
-              multiline
-              numberOfLines={3}
-            />
-          </View>
-
-          <TouchableOpacity
-            style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]}
-            onPress={handleSubmit}
-            disabled={isSubmitting}
-          >
-            <CheckCircle size={20} color="#ffffff" />
-            <Text style={styles.submitText}>
-              {isSubmitting ? 'Recording...' : 'Record Outreach'}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </View>
+        </ScrollView>
+      </View>
     </RequireOutreach>
   );
 }

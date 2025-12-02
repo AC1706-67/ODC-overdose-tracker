@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Dimensions,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Dimensions } from 'react-native';
 import { BarChart, PieChart } from 'react-native-chart-kit';
 import { TrendingUp, Users, Calendar, Award } from 'lucide-react-native';
 
@@ -27,9 +21,9 @@ interface TeamMemberComparisonChartProps {
   loading?: boolean;
 }
 
-export default function TeamMemberComparisonChart({ 
-  teamMembers, 
-  loading = false 
+export default function TeamMemberComparisonChart({
+  teamMembers,
+  loading = false,
 }: TeamMemberComparisonChartProps) {
   const chartConfig = {
     backgroundColor: '#ffffff',
@@ -81,45 +75,57 @@ export default function TeamMemberComparisonChart({
 
   // Activities Bar Chart Data
   const activitiesBarData = {
-    labels: topPerformers.map(member => 
-      member.full_name.length > 8 ? member.full_name.substring(0, 8) + '...' : member.full_name
+    labels: topPerformers.map((member) =>
+      member.full_name.length > 8
+        ? member.full_name.substring(0, 8) + '...'
+        : member.full_name,
     ),
     datasets: [
       {
-        data: topPerformers.map(member => member.activities_count),
+        data: topPerformers.map((member) => member.activities_count),
       },
     ],
   };
 
   // People Reached Bar Chart Data
   const peopleReachedBarData = {
-    labels: topPerformers.map(member => 
-      member.full_name.length > 8 ? member.full_name.substring(0, 8) + '...' : member.full_name
+    labels: topPerformers.map((member) =>
+      member.full_name.length > 8
+        ? member.full_name.substring(0, 8) + '...'
+        : member.full_name,
     ),
     datasets: [
       {
-        data: topPerformers.map(member => member.total_people_reached),
+        data: topPerformers.map((member) => member.total_people_reached),
       },
     ],
   };
 
   // Activity Distribution Pie Chart Data
-  const activityDistributionData = topPerformers.slice(0, 6).map((member, index) => ({
-    name: member.full_name.length > 12 ? member.full_name.substring(0, 12) + '...' : member.full_name,
-    population: member.activities_count,
-    color: [
-      '#3b82f6', '#ef4444', '#f59e0b', '#10b981', '#8b5cf6', '#f97316'
-    ][index % 6],
-    legendFontColor: '#374151',
-    legendFontSize: 11,
-  }));
+  const activityDistributionData = topPerformers
+    .slice(0, 6)
+    .map((member, index) => ({
+      name:
+        member.full_name.length > 12
+          ? member.full_name.substring(0, 12) + '...'
+          : member.full_name,
+      population: member.activities_count,
+      color: ['#3b82f6', '#ef4444', '#f59e0b', '#10b981', '#8b5cf6', '#f97316'][
+        index % 6
+      ],
+      legendFontColor: '#374151',
+      legendFontSize: 11,
+    }));
 
   // Calculate summary stats
-  const totalActivities = teamMembers.reduce((sum, member) => sum + member.activities_count, 0);
-  const totalPeopleReached = teamMembers.reduce((sum, member) => sum + member.total_people_reached, 0);
-  const avgActivitiesPerMember = teamMembers.length > 0 ? totalActivities / teamMembers.length : 0;
-  const mostActiveTeamMember = teamMembers.reduce((prev, current) => 
-    prev.activities_count > current.activities_count ? prev : current
+  const totalActivities = teamMembers.reduce(
+    (sum, member) => sum + member.activities_count,
+    0,
+  );
+  const avgActivitiesPerMember =
+    teamMembers.length > 0 ? totalActivities / teamMembers.length : 0;
+  const mostActiveTeamMember = teamMembers.reduce((prev, current) =>
+    prev.activities_count > current.activities_count ? prev : current,
   );
 
   return (
@@ -145,13 +151,17 @@ export default function TeamMemberComparisonChart({
 
         <View style={styles.summaryCard}>
           <TrendingUp size={16} color="#f59e0b" />
-          <Text style={styles.summaryValue}>{avgActivitiesPerMember.toFixed(1)}</Text>
+          <Text style={styles.summaryValue}>
+            {avgActivitiesPerMember.toFixed(1)}
+          </Text>
           <Text style={styles.summaryLabel}>Avg per Member</Text>
         </View>
 
         <View style={styles.summaryCard}>
           <Award size={16} color="#ef4444" />
-          <Text style={styles.summaryValue}>{mostActiveTeamMember.activities_count}</Text>
+          <Text style={styles.summaryValue}>
+            {mostActiveTeamMember.activities_count}
+          </Text>
           <Text style={styles.summaryLabel}>Top Performer</Text>
         </View>
       </View>
@@ -162,7 +172,9 @@ export default function TeamMemberComparisonChart({
           <Award size={20} color="#f59e0b" />
           <Text style={styles.topPerformerTitle}>Top Performer</Text>
         </View>
-        <Text style={styles.topPerformerName}>{mostActiveTeamMember.full_name}</Text>
+        <Text style={styles.topPerformerName}>
+          {mostActiveTeamMember.full_name}
+        </Text>
         <View style={styles.topPerformerStats}>
           <Text style={styles.topPerformerStat}>
             {mostActiveTeamMember.activities_count} activities
@@ -245,7 +257,9 @@ export default function TeamMemberComparisonChart({
               </View>
               <View style={styles.rankingInfo}>
                 <Text style={styles.rankingName}>{member.full_name}</Text>
-                <Text style={styles.rankingOrg}>{member.organization_name}</Text>
+                <Text style={styles.rankingOrg}>
+                  {member.organization_name}
+                </Text>
               </View>
               <View style={styles.rankingStats}>
                 <Text style={styles.rankingActivities}>

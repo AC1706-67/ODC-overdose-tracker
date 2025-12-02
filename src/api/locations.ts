@@ -3,7 +3,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 export async function createLocation(
   supabase: SupabaseClient,
   orgSlug: string,
-  name: string
+  name: string,
 ) {
   const clean = name?.trim();
   if (!clean) throw new Error('Please enter a location name.');

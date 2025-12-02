@@ -1,29 +1,32 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { 
-  Organization, 
-  UserOrganizationInfo, 
+import {
+  Organization,
+  UserOrganizationInfo,
   OrganizationStats,
   Profile,
   UserOrganization,
-  OrganizationInvite
+  OrganizationInvite,
 } from '@/types/organization';
 
 export function useUserOrganizations() {
-  const [organizations, setOrganizations] = useState<UserOrganizationInfo[]>([]);
+  const [organizations, setOrganizations] = useState<UserOrganizationInfo[]>(
+    [],
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchUserOrganizations = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .rpc('get_user_organizations');
+      const { data, error } = await supabase.rpc('get_user_organizations');
 
       if (error) throw error;
       setOrganizations(data || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch organizations');
+      setError(
+        err instanceof Error ? err.message : 'Failed to fetch organizations',
+      );
     } finally {
       setLoading(false);
     }
@@ -58,7 +61,9 @@ export function useOrganization(organizationId: string) {
       if (error) throw error;
       setOrganization(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch organization');
+      setError(
+        err instanceof Error ? err.message : 'Failed to fetch organization',
+      );
     } finally {
       setLoading(false);
     }
@@ -78,7 +83,10 @@ export function useOrganization(organizationId: string) {
   };
 }
 
-export function useOrganizationStats(organizationId: string, days: number = 30) {
+export function useOrganizationStats(
+  organizationId: string,
+  days: number = 30,
+) {
   const [stats, setStats] = useState<OrganizationStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -89,12 +97,11 @@ export function useOrganizationStats(organizationId: string, days: number = 30) 
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - days);
 
-      const { data, error } = await supabase
-        .rpc('get_organization_stats', {
-          org_uuid: organizationId,
-          start_date: startDate.toISOString(),
-          end_date: new Date().toISOString(),
-        });
+      const { data, error } = await supabase.rpc('get_organization_stats', {
+        org_uuid: organizationId,
+        start_date: startDate.toISOString(),
+        end_date: new Date().toISOString(),
+      });
 
       if (error) throw error;
       setStats(data?.[0] || null);
@@ -120,7 +127,9 @@ export function useOrganizationStats(organizationId: string, days: number = 30) 
 }
 
 export function useOrganizationMembers(organizationId: string) {
-  const [members, setMembers] = useState<(UserOrganization & { profile: Profile })[]>([]);
+  const [members, setMembers] = useState<
+    (UserOrganization & { profile: Profile })[]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -129,10 +138,12 @@ export function useOrganizationMembers(organizationId: string) {
       setLoading(true);
       const { data, error } = await supabase
         .from('user_organizations')
-        .select(`
+        .select(
+          `
           *,
           profile:profiles(*)
-        `)
+        `,
+        )
         .eq('organization_id', organizationId)
         .eq('is_active', true)
         .order('joined_at', { ascending: false });
@@ -158,9 +169,9 @@ export function useOrganizationMembers(organizationId: string) {
       await fetchMembers(); // Refresh the list
       return { success: true };
     } catch (err) {
-      return { 
-        success: false, 
-        error: err instanceof Error ? err.message : 'Failed to update role' 
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : 'Failed to update role',
       };
     }
   };
@@ -177,9 +188,9 @@ export function useOrganizationMembers(organizationId: string) {
       await fetchMembers(); // Refresh the list
       return { success: true };
     } catch (err) {
-      return { 
-        success: false, 
-        error: err instanceof Error ? err.message : 'Failed to remove member' 
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : 'Failed to remove member',
       };
     }
   };
@@ -242,9 +253,9 @@ export function useOrganizationInvites(organizationId: string) {
       await fetchInvites(); // Refresh the list
       return { success: true, invite: data };
     } catch (err) {
-      return { 
-        success: false, 
-        error: err instanceof Error ? err.message : 'Failed to create invite' 
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : 'Failed to create invite',
       };
     }
   };
@@ -260,9 +271,9 @@ export function useOrganizationInvites(organizationId: string) {
       await fetchInvites(); // Refresh the list
       return { success: true };
     } catch (err) {
-      return { 
-        success: false, 
-        error: err instanceof Error ? err.message : 'Failed to cancel invite' 
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : 'Failed to cancel invite',
       };
     }
   };
@@ -291,8 +302,10 @@ export function useProfile() {
   const fetchProfile = async () => {
     try {
       setLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
       if (!user) throw new Error('No authenticated user');
 
       const { data, error } = await supabase
@@ -312,7 +325,9 @@ export function useProfile() {
 
   const updateProfile = async (updates: Partial<Profile>) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('No authenticated user');
 
       const { error } = await supabase
@@ -324,9 +339,9 @@ export function useProfile() {
       await fetchProfile(); // Refresh the profile
       return { success: true };
     } catch (err) {
-      return { 
-        success: false, 
-        error: err instanceof Error ? err.message : 'Failed to update profile' 
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : 'Failed to update profile',
       };
     }
   };

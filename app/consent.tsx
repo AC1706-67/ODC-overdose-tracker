@@ -1,5 +1,12 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, Pressable, Alert, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  Alert,
+  ScrollView,
+} from 'react-native';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'expo-router';
 
@@ -10,12 +17,15 @@ export default function ConsentScreen() {
 
   async function acceptTerms() {
     if (!agreedToTerms) {
-      Alert.alert('Error', 'You must agree to the Terms of Service and Privacy Policy');
+      Alert.alert(
+        'Error',
+        'You must agree to the Terms of Service and Privacy Policy',
+      );
       return;
     }
 
     setLoading(true);
-    
+
     const {
       data: { user },
       error: userError,
@@ -53,7 +63,7 @@ export default function ConsentScreen() {
           text: 'OK',
           onPress: () => router.replace('/onboarding'),
         },
-      ]
+      ],
     );
   }
 
@@ -61,18 +71,19 @@ export default function ConsentScreen() {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.title}>Terms & Privacy</Text>
       <Text style={styles.subtitle}>
-        Before you can join an organization, you must accept our Terms of Service and Privacy Policy.
+        Before you can join an organization, you must accept our Terms of
+        Service and Privacy Policy.
       </Text>
 
       <View style={styles.linksContainer}>
-        <Pressable 
+        <Pressable
           style={styles.linkButton}
           onPress={() => router.push('/legal/terms')}
         >
           <Text style={styles.linkButtonText}>📄 Read Terms of Service</Text>
         </Pressable>
 
-        <Pressable 
+        <Pressable
           style={styles.linkButton}
           onPress={() => router.push('/legal/privacy')}
         >
@@ -80,12 +91,14 @@ export default function ConsentScreen() {
         </Pressable>
       </View>
 
-      <Pressable 
+      <Pressable
         style={styles.checkboxContainer}
         onPress={() => setAgreedToTerms(!agreedToTerms)}
         disabled={loading}
       >
-        <View style={[styles.checkbox, agreedToTerms && styles.checkboxChecked]}>
+        <View
+          style={[styles.checkbox, agreedToTerms && styles.checkboxChecked]}
+        >
           {agreedToTerms && <Text style={styles.checkmark}>✓</Text>}
         </View>
         <Text style={styles.checkboxLabel}>
@@ -94,7 +107,10 @@ export default function ConsentScreen() {
       </Pressable>
 
       <Pressable
-        style={[styles.button, (!agreedToTerms || loading) && styles.buttonDisabled]}
+        style={[
+          styles.button,
+          (!agreedToTerms || loading) && styles.buttonDisabled,
+        ]}
         onPress={acceptTerms}
         disabled={!agreedToTerms || loading}
       >

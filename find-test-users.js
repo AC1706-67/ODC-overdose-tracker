@@ -7,7 +7,7 @@ require('dotenv').config();
 
 const supabase = createClient(
   process.env.EXPO_PUBLIC_SUPABASE_URL,
-  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
+  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
 );
 
 async function findTestUsers() {
@@ -30,7 +30,8 @@ async function findTestUsers() {
   // Get user-organization memberships
   const { data: memberships, error: memberError } = await supabase
     .from('user_organizations')
-    .select(`
+    .select(
+      `
       user_id,
       role,
       is_active,
@@ -39,7 +40,8 @@ async function findTestUsers() {
         slug,
         outreach_enabled
       )
-    `)
+    `,
+    )
     .eq('is_active', true);
 
   if (memberError) {
@@ -48,30 +50,30 @@ async function findTestUsers() {
   }
 
   console.log('\n👥 USER-ORGANIZATION MEMBERSHIPS:\n');
-  
+
   if (!memberships || memberships.length === 0) {
     console.log('⚠️  No active user memberships found');
     return;
   }
 
   const grouped = {};
-  memberships.forEach(m => {
+  memberships.forEach((m) => {
     const userId = m.user_id;
     if (!grouped[userId]) {
       grouped[userId] = {
         user_id: userId,
-        organizations: []
+        organizations: [],
       };
     }
     grouped[userId].organizations.push({
       org: m.organizations.name,
       slug: m.organizations.slug,
       role: m.role,
-      outreach: m.organizations.outreach_enabled
+      outreach: m.organizations.outreach_enabled,
     });
   });
 
-  Object.values(grouped).forEach(user => {
+  Object.values(grouped).forEach((user) => {
     console.log(`User ID: ${user.user_id}`);
     console.table(user.organizations);
     console.log('');
@@ -85,7 +87,9 @@ async function findTestUsers() {
     console.log(`     '${userId}'${i < arr.length - 1 ? ',' : ''}`);
   });
   console.log('   );');
-  console.log('3. Update test-outreach-logs.ts with the correct email/password\n');
+  console.log(
+    '3. Update test-outreach-logs.ts with the correct email/password\n',
+  );
 }
 
 findTestUsers().catch(console.error);

@@ -20,13 +20,16 @@ async function setupDefaultOrgSystem() {
     console.log('📝 Step 1: Creating Haven AI organization...');
     const { data: havenOrg, error: orgError } = await supabase
       .from('organizations')
-      .upsert({
-        slug: 'haven-ai',
-        name: 'Haven AI',
-        is_active: true,
-        outreach_enabled: false,
-        is_certified: true
-      }, { onConflict: 'slug' })
+      .upsert(
+        {
+          slug: 'haven-ai',
+          name: 'Haven AI',
+          is_active: true,
+          outreach_enabled: false,
+          is_certified: true,
+        },
+        { onConflict: 'slug' },
+      )
       .select()
       .single();
 
@@ -70,9 +73,13 @@ async function setupDefaultOrgSystem() {
       $$ LANGUAGE plpgsql SECURITY DEFINER;
     `;
 
-    const { error: funcError } = await supabase.rpc('exec_sql', { sql: triggerFunction });
+    const { error: funcError } = await supabase.rpc('exec_sql', {
+      sql: triggerFunction,
+    });
     if (funcError) {
-      console.log('⚠️  Note: exec_sql RPC might not exist. Run the SQL manually in Supabase SQL Editor.');
+      console.log(
+        '⚠️  Note: exec_sql RPC might not exist. Run the SQL manually in Supabase SQL Editor.',
+      );
       console.log('SQL to run:\n', triggerFunction);
     } else {
       console.log('✅ Trigger function created');
@@ -93,13 +100,14 @@ async function setupDefaultOrgSystem() {
 
     // Step 4: Find and assign Chavez user to RAEP
     console.log('\n📝 Step 4: Finding Chavez user...');
-    const { data: users, error: userError } = await supabase.auth.admin.listUsers();
-    
+    const { data: users, error: userError } =
+      await supabase.auth.admin.listUsers();
+
     if (userError) {
       console.error('❌ Error listing users:', userError);
     } else {
-      const chavezUser = users.users.find(u => 
-        u.email?.toLowerCase().includes('chavez')
+      const chavezUser = users.users.find((u) =>
+        u.email?.toLowerCase().includes('chavez'),
       );
 
       if (chavezUser) {
@@ -109,7 +117,9 @@ async function setupDefaultOrgSystem() {
         const { data: raepOrg, error: raepError } = await supabase
           .from('organizations')
           .select('id, name, slug')
-          .or('slug.eq.recovery-alliance-el-paso,name.ilike.%recovery%alliance%')
+          .or(
+            'slug.eq.recovery-alliance-el-paso,name.ilike.%recovery%alliance%',
+          )
           .limit(1)
           .single();
 
@@ -126,12 +136,15 @@ async function setupDefaultOrgSystem() {
           // Assign to RAEP
           const { error: assignError } = await supabase
             .from('user_organizations')
-            .upsert({
-              user_id: chavezUser.id,
-              organization_id: raepOrg.id,
-              role: 'admin',
-              is_active: true
-            }, { onConflict: 'user_id,organization_id' });
+            .upsert(
+              {
+                user_id: chavezUser.id,
+                organization_id: raepOrg.id,
+                role: 'admin',
+                is_active: true,
+              },
+              { onConflict: 'user_id,organization_id' },
+            );
 
           if (assignError) {
             console.error('❌ Error assigning to RAEP:', assignError);
@@ -151,8 +164,9 @@ async function setupDefaultOrgSystem() {
     console.log('- Haven AI organization created as default');
     console.log('- New users will auto-join Haven AI');
     console.log('- Existing Chavez user assigned to RAEP');
-    console.log('\n⚠️  IMPORTANT: Run the trigger SQL manually in Supabase SQL Editor (shown above)');
-
+    console.log(
+      '\n⚠️  IMPORTANT: Run the trigger SQL manually in Supabase SQL Editor (shown above)',
+    );
   } catch (error) {
     console.error('❌ Error:', error);
   }

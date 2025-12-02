@@ -1,5 +1,13 @@
 import { useState } from 'react';
-import { View, TextInput, Button, Alert, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import {
+  View,
+  TextInput,
+  Button,
+  Alert,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'expo-router';
 
@@ -16,22 +24,27 @@ export default function Login() {
     }
 
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
     setLoading(false);
-    
+
     if (error) {
       Alert.alert('Sign in failed', error.message);
       return;
     }
-    
+
     router.replace('/');
   }
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Compassionate LOG</Text>
-      <Text style={styles.subtitle}>Recording acts of care and compassion - Sign in to continue</Text>
-      
+      <Text style={styles.subtitle}>
+        Recording acts of care and compassion - Sign in to continue
+      </Text>
+
       <TextInput
         placeholder="Email"
         autoCapitalize="none"
@@ -41,7 +54,7 @@ export default function Login() {
         style={styles.input}
         editable={!loading}
       />
-      
+
       <TextInput
         placeholder="Password"
         secureTextEntry
@@ -50,14 +63,14 @@ export default function Login() {
         style={styles.input}
         editable={!loading}
       />
-      
-      <Button 
-        title={loading ? "Signing in..." : "Sign in"} 
+
+      <Button
+        title={loading ? 'Signing in...' : 'Sign in'}
         onPress={signIn}
         disabled={loading}
       />
 
-      <TouchableOpacity 
+      <TouchableOpacity
         onPress={() => router.push('/signup')}
         style={styles.linkContainer}
         disabled={loading}

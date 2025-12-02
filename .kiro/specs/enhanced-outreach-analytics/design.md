@@ -11,6 +11,7 @@ This design implements a normalized database schema for tracking team members, l
 #### New Tables
 
 **1. team_members**
+
 ```sql
 CREATE TABLE team_members (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -26,6 +27,7 @@ CREATE TABLE team_members (
 ```
 
 **2. locations**
+
 ```sql
 CREATE TABLE locations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -42,6 +44,7 @@ CREATE TABLE locations (
 ```
 
 **3. outreach_team_members** (Junction Table)
+
 ```sql
 CREATE TABLE outreach_team_members (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -55,8 +58,9 @@ CREATE TABLE outreach_team_members (
 #### Enhanced Existing Tables
 
 **outreach_logs** (Add location reference)
+
 ```sql
-ALTER TABLE outreach_logs 
+ALTER TABLE outreach_logs
 ADD COLUMN location_id UUID REFERENCES locations(id),
 ADD COLUMN legacy_location TEXT, -- Keep original location field for migration
 ADD COLUMN legacy_team_members TEXT[]; -- Keep original team_members for migration
@@ -65,11 +69,13 @@ ADD COLUMN legacy_team_members TEXT[]; -- Keep original team_members for migrati
 ### Data Migration Strategy
 
 #### Phase 1: Schema Creation
+
 1. Create new tables with proper indexes and constraints
 2. Add new columns to existing tables
 3. Set up RLS policies for multi-organization support
 
 #### Phase 2: Data Migration
+
 1. Extract unique locations from existing outreach_logs.location field
 2. Create location records with normalized data
 3. Extract team member names from existing team_members arrays
@@ -77,6 +83,7 @@ ADD COLUMN legacy_team_members TEXT[]; -- Keep original team_members for migrati
 5. Create junction table records linking outreach activities to team members
 
 #### Phase 3: Application Updates
+
 1. Update outreach submission form to use new schema
 2. Enhance dashboard with new analytics
 3. Maintain backward compatibility during transition
@@ -86,9 +93,10 @@ ADD COLUMN legacy_team_members TEXT[]; -- Keep original team_members for migrati
 ### Database Views for Analytics
 
 **1. team_member_stats_v1**
+
 ```sql
 CREATE VIEW team_member_stats_v1 AS
-SELECT 
+SELECT
   tm.id,
   tm.name,
   tm.organization_id,
@@ -106,9 +114,10 @@ GROUP BY tm.id, tm.name, tm.organization_id, o.name;
 ```
 
 **2. location_analytics_v1**
+
 ```sql
 CREATE VIEW location_analytics_v1 AS
-SELECT 
+SELECT
   l.id,
   l.name,
   l.zip_code,
@@ -126,9 +135,10 @@ GROUP BY l.id, l.name, l.zip_code, l.city;
 ```
 
 **3. activity_timeline_v1**
+
 ```sql
 CREATE VIEW activity_timeline_v1 AS
-SELECT 
+SELECT
   ol.id as outreach_id,
   ol.outreach_date,
   ol.organization_id,
@@ -206,12 +216,14 @@ interface EnhancedOutreachLog {
 ## Error Handling
 
 ### Migration Error Handling
+
 - Validate all foreign key relationships before migration
 - Provide detailed logging for data transformation issues
 - Implement rollback procedures for failed migrations
 - Maintain data integrity checks throughout the process
 
 ### Runtime Error Handling
+
 - Handle missing team member or location references gracefully
 - Provide fallback to legacy data when new schema data is unavailable
 - Validate organization access permissions for multi-tenant security
@@ -219,16 +231,19 @@ interface EnhancedOutreachLog {
 ## Testing Strategy
 
 ### Unit Tests
+
 - Test data migration scripts with sample data
 - Validate view queries return expected results
 - Test RLS policies for proper organization isolation
 
 ### Integration Tests
+
 - Test complete outreach submission flow with new schema
 - Validate dashboard analytics with migrated data
 - Test multi-organization data isolation
 
 ### Performance Tests
+
 - Benchmark query performance with large datasets
 - Test index effectiveness for common analytics queries
 - Validate migration performance with production-sized data

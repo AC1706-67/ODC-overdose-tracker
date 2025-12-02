@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, SafeAreaView, Alert, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  TouchableOpacity,
+  SafeAreaView,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useOrg } from '@/src/context/OrgContext';
@@ -24,11 +33,11 @@ export default function EnterCodeScreen() {
       await setActiveOrgId(result.organizationId);
 
       Alert.alert('Success!', 'You have joined the organization', [
-        { text: 'OK', onPress: () => router.replace('/(tabs)') }
+        { text: 'OK', onPress: () => router.replace('/(tabs)') },
       ]);
     } catch (error: any) {
       console.error('Error:', error);
-      
+
       // Check if user needs to accept terms
       if (error.message === 'TERMS_NOT_ACCEPTED') {
         Alert.alert(
@@ -36,11 +45,11 @@ export default function EnterCodeScreen() {
           'You must accept our Terms of Service and Privacy Policy before joining an organization.',
           [
             { text: 'Cancel', style: 'cancel' },
-            { 
-              text: 'Accept Terms', 
-              onPress: () => router.push('/consent')
-            }
-          ]
+            {
+              text: 'Accept Terms',
+              onPress: () => router.push('/consent'),
+            },
+          ],
         );
       } else {
         Alert.alert('Error', error.message || 'Something went wrong');

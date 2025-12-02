@@ -18,23 +18,24 @@ interface OrganizationSelectorProps {
   showCreateOption?: boolean;
 }
 
-export function OrganizationSelector({ 
-  selectedOrgId, 
+export function OrganizationSelector({
+  selectedOrgId,
   onOrganizationChange,
-  showCreateOption = false 
+  showCreateOption = false,
 }: OrganizationSelectorProps) {
   const [modalVisible, setModalVisible] = useState(false);
   const { organizations, loading } = useUserOrganizations();
   const { profile, updateProfile } = useProfile();
 
-  const selectedOrg = organizations.find(org => org.organization_id === selectedOrgId) ||
-                     organizations.find(org => org.is_default) ||
-                     organizations[0];
+  const selectedOrg =
+    organizations.find((org) => org.organization_id === selectedOrgId) ||
+    organizations.find((org) => org.is_default) ||
+    organizations[0];
 
   const handleOrgSelect = async (org: UserOrganizationInfo) => {
     setModalVisible(false);
     onOrganizationChange?.(org);
-    
+
     // Update user's default organization
     if (profile && org.organization_id !== profile.default_organization_id) {
       await updateProfile({ default_organization_id: org.organization_id });
@@ -46,7 +47,7 @@ export function OrganizationSelector({
     Alert.alert(
       'Create Organization',
       'Organization creation will be implemented in the admin panel.',
-      [{ text: 'OK' }]
+      [{ text: 'OK' }],
     );
   };
 
@@ -110,20 +111,28 @@ export function OrganizationSelector({
                   key={org.organization_id}
                   style={[
                     styles.orgItem,
-                    selectedOrg?.organization_id === org.organization_id && styles.orgItemSelected,
+                    selectedOrg?.organization_id === org.organization_id &&
+                      styles.orgItemSelected,
                   ]}
                   onPress={() => handleOrgSelect(org)}
                 >
                   <View style={styles.orgItemContent}>
-                    <Building2 
-                      size={24} 
-                      color={selectedOrg?.organization_id === org.organization_id ? '#3b82f6' : '#6b7280'} 
+                    <Building2
+                      size={24}
+                      color={
+                        selectedOrg?.organization_id === org.organization_id
+                          ? '#3b82f6'
+                          : '#6b7280'
+                      }
                     />
                     <View style={styles.orgItemInfo}>
-                      <Text style={[
-                        styles.orgItemName,
-                        selectedOrg?.organization_id === org.organization_id && styles.orgItemNameSelected,
-                      ]}>
+                      <Text
+                        style={[
+                          styles.orgItemName,
+                          selectedOrg?.organization_id ===
+                            org.organization_id && styles.orgItemNameSelected,
+                        ]}
+                      >
                         {org.organization_name}
                       </Text>
                       <View style={styles.orgItemMeta}>
@@ -147,8 +156,12 @@ export function OrganizationSelector({
                   <View style={styles.orgItemContent}>
                     <Users size={24} color="#059669" />
                     <View style={styles.orgItemInfo}>
-                      <Text style={styles.createOrgText}>Create New Organization</Text>
-                      <Text style={styles.createOrgSubtext}>Set up a new health center or agency</Text>
+                      <Text style={styles.createOrgText}>
+                        Create New Organization
+                      </Text>
+                      <Text style={styles.createOrgSubtext}>
+                        Set up a new health center or agency
+                      </Text>
                     </View>
                   </View>
                 </TouchableOpacity>

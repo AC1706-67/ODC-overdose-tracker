@@ -5,7 +5,9 @@ const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
-  console.log('⚠️  Please set SUPABASE_URL and SUPABASE_ANON_KEY environment variables');
+  console.log(
+    '⚠️  Please set SUPABASE_URL and SUPABASE_ANON_KEY environment variables',
+  );
   console.log('Or update this script with your actual Supabase credentials');
   process.exit(1);
 }
@@ -14,7 +16,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function inspectExistingFunction() {
   console.log('🔍 Inspecting existing create_team_member function...');
-  
+
   try {
     // Query the function definition from pg_proc
     const { data, error } = await supabase.rpc('sql', {
@@ -28,12 +30,12 @@ async function inspectExistingFunction() {
         LEFT JOIN pg_namespace n ON n.oid = p.pronamespace
         WHERE p.proname = 'create_team_member'
           AND n.nspname = 'public';
-      `
+      `,
     });
 
     if (error) {
       console.error('❌ Error querying function:', error);
-      
+
       // Try alternative approach using information_schema
       const { data: altData, error: altError } = await supabase
         .from('information_schema.routines')
@@ -66,23 +68,27 @@ async function inspectExistingFunction() {
     } else {
       console.log('❓ No function found with name create_team_member');
     }
-
   } catch (error) {
     console.error('❌ Error:', error.message);
-    
+
     // Try a simple test call to see what happens
     console.log('\n🧪 Testing function call to see current behavior...');
     try {
-      const { data: testData, error: testError } = await supabase.rpc('create_team_member', {
-        p_full_name: 'Test User',
-        p_email: 'test@example.com', 
-        p_role: 'Test Role',
-        p_org_slug: 'test-org'
-      });
+      const { data: testData, error: testError } = await supabase.rpc(
+        'create_team_member',
+        {
+          p_full_name: 'Test User',
+          p_email: 'test@example.com',
+          p_role: 'Test Role',
+          p_org_slug: 'test-org',
+        },
+      );
 
       if (testError) {
         console.log('📋 Function call error (expected):', testError.message);
-        console.log('This tells us the function exists but may have different parameters or return type');
+        console.log(
+          'This tells us the function exists but may have different parameters or return type',
+        );
       } else {
         console.log('📋 Function call succeeded, returned:', testData);
         console.log('Type of returned data:', typeof testData);

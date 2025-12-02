@@ -1,14 +1,15 @@
 const { createClient } = require('@supabase/supabase-js');
 
 const supabaseUrl = 'https://vitwypicporqpeefwsjs.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZpdHd5cGljcG9ycXBlZWZ3c2pzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1ODc0NTUsImV4cCI6MjA3NDE2MzQ1NX0.LZvBs3c5XIQPTdEDwkEEqZO0irjmR7WZnsSsyuZ7wcI';
+const supabaseKey =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZpdHd5cGljcG9ycXBlZWZ3c2pzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1ODc0NTUsImV4cCI6MjA3NDE2MzQ1NX0.LZvBs3c5XIQPTdEDwkEEqZO0irjmR7WZnsSsyuZ7wcI';
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function createHealthDashboardView() {
   try {
     console.log('🏥 Creating health_dashboard_v1 view...');
-    
+
     const createViewSQL = `
       CREATE OR REPLACE VIEW health_dashboard_v1 AS
       SELECT 
@@ -36,21 +37,23 @@ async function createHealthDashboardView() {
       FROM incidents
       WHERE organization_id IS NULL;
     `;
-    
-    const { error } = await supabase.rpc('exec_sql', { sql_query: createViewSQL });
-    
+
+    const { error } = await supabase.rpc('exec_sql', {
+      sql_query: createViewSQL,
+    });
+
     if (error) {
       console.log('❌ Error creating view:', error);
     } else {
       console.log('✅ health_dashboard_v1 view created successfully');
     }
-    
+
     // Grant permissions on the view
     console.log('🔐 Granting permissions on view...');
-    await supabase.rpc('exec_sql', { 
-      sql_query: 'GRANT SELECT ON health_dashboard_v1 TO authenticated, anon;' 
+    await supabase.rpc('exec_sql', {
+      sql_query: 'GRANT SELECT ON health_dashboard_v1 TO authenticated, anon;',
     });
-    
+
     // Test the view
     console.log('🧪 Testing the view...');
     const { data: testData, error: testError } = await supabase
@@ -58,15 +61,14 @@ async function createHealthDashboardView() {
       .select('*')
       .eq('organization_id', null)
       .single();
-    
+
     if (testError) {
       console.log('❌ Test error:', testError);
     } else {
       console.log('✅ View test successful:', testData);
     }
-    
+
     console.log('\n🎉 Health dashboard view is ready!');
-    
   } catch (err) {
     console.error('❌ Error creating health dashboard view:', err);
   }

@@ -5,9 +5,9 @@ const sqlFunction = fs.readFileSync('create-team-member-function.sql', 'utf8');
 
 console.log('🚀 Executing create_team_member function...');
 console.log('📋 SQL to execute:');
-console.log('=' .repeat(60));
+console.log('='.repeat(60));
 console.log(sqlFunction);
-console.log('=' .repeat(60));
+console.log('='.repeat(60));
 
 // Since we can't execute directly, let's create a simple execution script
 const executionScript = `
@@ -30,6 +30,8 @@ console.log('  ✅ Returns structured JSON with action type');
 console.log('  ✅ Proper error handling and validation');
 console.log('  ✅ Security with DEFINER and RLS compliance');
 
-console.log('\n📱 Your TeamMemberPicker component is already updated to use this function!');
+console.log(
+  '\n📱 Your TeamMemberPicker component is already updated to use this function!',
+);
 
 // File saved and ready for Git commit

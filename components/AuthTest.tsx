@@ -24,7 +24,10 @@ export function AuthTest() {
       if (error) {
         Alert.alert('Database Test Failed', error.message);
       } else {
-        Alert.alert('Database Test Passed', 'Successfully connected to Supabase!');
+        Alert.alert(
+          'Database Test Passed',
+          'Successfully connected to Supabase!',
+        );
       }
     } catch {
       Alert.alert('Database Test Error', 'Unexpected error occurred');
@@ -42,8 +45,8 @@ export function AuthTest() {
       <Text style={styles.title}>Authentication Test</Text>
       <Text style={styles.status}>✅ User authenticated</Text>
       <Text style={styles.email}>Email: {session.user?.email}</Text>
-      <Button 
-        title={testing ? "Testing..." : "Test Database Connection"} 
+      <Button
+        title={testing ? 'Testing...' : 'Test Database Connection'}
         onPress={testDatabaseConnection}
         disabled={testing}
       />

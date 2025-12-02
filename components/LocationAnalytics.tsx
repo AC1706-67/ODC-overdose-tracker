@@ -7,7 +7,13 @@ import {
   Dimensions,
   RefreshControl,
 } from 'react-native';
-import { MapPin, Navigation, BarChart3, Users, Package } from 'lucide-react-native';
+import {
+  MapPin,
+  Navigation,
+  BarChart3,
+  Users,
+  Package,
+} from 'lucide-react-native';
 import { useOrg } from '@/src/context/OrgContext';
 import { supabase } from '@/lib/supabase';
 import LoadingSkeleton from '@/components/LoadingSkeleton';
@@ -60,15 +66,17 @@ export default function LocationAnalytics() {
       }
 
       const { data, error: fetchError } = await query;
-      
+
       if (fetchError) {
         throw fetchError;
       }
-      
+
       setLocations(data || []);
     } catch (err) {
       console.error('[LocationAnalytics] Error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load location data');
+      setError(
+        err instanceof Error ? err.message : 'Failed to load location data',
+      );
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -97,13 +105,21 @@ export default function LocationAnalytics() {
   // Calculate summary metrics
   const totalLocations = locations.length;
   const totalVisits = locations.reduce((sum, loc) => sum + loc.visits_count, 0);
-  const totalPeopleReached = locations.reduce((sum, loc) => sum + loc.total_people_reached, 0);
-  const totalKitsDistributed = locations.reduce((sum, loc) => sum + loc.total_kits_distributed, 0);
+  const totalPeopleReached = locations.reduce(
+    (sum, loc) => sum + loc.total_people_reached,
+    0,
+  );
+  const totalKitsDistributed = locations.reduce(
+    (sum, loc) => sum + loc.total_kits_distributed,
+    0,
+  );
 
   return (
-    <ScrollView 
+    <ScrollView
       style={styles.container}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
     >
       <View style={styles.header}>
         <MapPin size={24} color="#7c3aed" />
@@ -167,7 +183,9 @@ export default function LocationAnalytics() {
               <View style={styles.locationHeader}>
                 <Navigation size={16} color="#7c3aed" />
                 <View style={styles.locationInfo}>
-                  <Text style={styles.locationName}>{location.location_label}</Text>
+                  <Text style={styles.locationName}>
+                    {location.location_label}
+                  </Text>
                   {location.city && location.state && (
                     <Text style={styles.locationAddress}>
                       {location.city}, {location.state} {location.zip_code}
@@ -175,7 +193,7 @@ export default function LocationAnalytics() {
                   )}
                 </View>
               </View>
-              
+
               <View style={styles.locationStats}>
                 <View style={styles.statRow}>
                   <Text style={styles.statLabel}>Visits:</Text>
@@ -183,11 +201,15 @@ export default function LocationAnalytics() {
                 </View>
                 <View style={styles.statRow}>
                   <Text style={styles.statLabel}>People Reached:</Text>
-                  <Text style={styles.statValue}>{location.total_people_reached}</Text>
+                  <Text style={styles.statValue}>
+                    {location.total_people_reached}
+                  </Text>
                 </View>
                 <View style={styles.statRow}>
                   <Text style={styles.statLabel}>Team Members:</Text>
-                  <Text style={styles.statValue}>{location.unique_team_members}</Text>
+                  <Text style={styles.statValue}>
+                    {location.unique_team_members}
+                  </Text>
                 </View>
                 <View style={styles.statRow}>
                   <Text style={styles.statLabel}>Active Days:</Text>
@@ -197,7 +219,8 @@ export default function LocationAnalytics() {
 
               {location.last_seen_at && (
                 <Text style={styles.locationDate}>
-                  Last activity: {new Date(location.last_seen_at).toLocaleDateString()}
+                  Last activity:{' '}
+                  {new Date(location.last_seen_at).toLocaleDateString()}
                 </Text>
               )}
             </View>
@@ -206,7 +229,8 @@ export default function LocationAnalytics() {
           <View style={styles.emptyState}>
             <Text style={styles.emptyTitle}>📍 No Location Data</Text>
             <Text style={styles.emptyText}>
-              Location analytics will appear here once outreach activities are logged with location information.
+              Location analytics will appear here once outreach activities are
+              logged with location information.
             </Text>
           </View>
         )}

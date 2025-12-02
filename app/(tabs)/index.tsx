@@ -8,12 +8,32 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import { CircleAlert as AlertCircle, CircleCheck as CheckCircle, Wifi, WifiOff } from 'lucide-react-native';
+import {
+  CircleAlert as AlertCircle,
+  CircleCheck as CheckCircle,
+  Wifi,
+  WifiOff,
+} from 'lucide-react-native';
 import { useIncidentStorage } from '@/hooks/useIncidentStorage';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 
-const GENDER_OPTIONS = ['Male', 'Female', 'Other', 'Prefer not to say', 'Unknown'];
-const AGE_OPTIONS = ['<18', '18-25', '26-35', '36-45', '46-55', '56-65', '65+', 'Unknown'];
+const GENDER_OPTIONS = [
+  'Male',
+  'Female',
+  'Other',
+  'Prefer not to say',
+  'Unknown',
+];
+const AGE_OPTIONS = [
+  '<18',
+  '18-25',
+  '26-35',
+  '36-45',
+  '46-55',
+  '56-65',
+  '65+',
+  'Unknown',
+];
 const SURVIVAL_OPTIONS = ['Survived', 'Deceased', 'Unknown'];
 const ZIP_CODE_OPTIONS = ['Enter ZIP Code', 'NA', 'Unknown'];
 
@@ -25,14 +45,17 @@ export default function IncidentScreen() {
   const [narcanUsed, setNarcanUsed] = useState<boolean | null>(null);
   const [survival, setSurvival] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const { submitIncident, pendingCount, syncPending } = useIncidentStorage();
   const { isOnline } = useNetworkStatus();
 
   const validateForm = () => {
     if (zipCodeMode === 'Enter ZIP Code') {
       if (!zipCode || zipCode.length !== 5 || !/^\d{5}$/.test(zipCode)) {
-        Alert.alert('Invalid ZIP Code', 'Please enter a valid 5-digit ZIP code or select NA/Unknown.');
+        Alert.alert(
+          'Invalid ZIP Code',
+          'Please enter a valid 5-digit ZIP code or select NA/Unknown.',
+        );
         return false;
       }
     } else if (!zipCodeMode) {
@@ -51,7 +74,8 @@ export default function IncidentScreen() {
 
     setIsSubmitting(true);
     try {
-      const finalZipCode = zipCodeMode === 'Enter ZIP Code' ? zipCode : zipCodeMode;
+      const finalZipCode =
+        zipCodeMode === 'Enter ZIP Code' ? zipCode : zipCodeMode;
       await submitIncident({
         zip_code: finalZipCode,
         gender,
@@ -70,7 +94,10 @@ export default function IncidentScreen() {
 
       Alert.alert('Success', 'Incident recorded successfully.');
     } catch {
-      Alert.alert('Error', 'Failed to record incident. It will be saved locally and synced when online.');
+      Alert.alert(
+        'Error',
+        'Failed to record incident. It will be saved locally and synced when online.',
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -84,7 +111,10 @@ export default function IncidentScreen() {
 
   return (
     <View style={styles.container}>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.header}>
           <View style={styles.titleRow}>
             <AlertCircle size={24} color="#dc2626" />
@@ -260,7 +290,10 @@ export default function IncidentScreen() {
           </View>
 
           <TouchableOpacity
-            style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]}
+            style={[
+              styles.submitButton,
+              isSubmitting && styles.submitButtonDisabled,
+            ]}
             onPress={handleSubmit}
             disabled={isSubmitting}
           >

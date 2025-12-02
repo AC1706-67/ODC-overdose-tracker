@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '@/lib/supabase';
 
@@ -45,11 +51,13 @@ export function OrgProvider({ children }: { children: ReactNode }) {
         }
 
         // First, try to get the user's organization from user_organizations
-        const { data: { user } } = await supabase.auth.getUser();
-        
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
         if (user) {
           console.log('[OrgContext] Loading org for user:', user.id);
-          
+
           // Get user's organization memberships (may be multiple)
           const { data: memberships, error: membershipError } = await supabase
             .from('user_organizations')
@@ -57,22 +65,32 @@ export function OrgProvider({ children }: { children: ReactNode }) {
             .eq('user_id', user.id)
             .eq('is_active', true);
 
-          console.log('[OrgContext] Membership result:', JSON.stringify({ memberships, error: membershipError }));
+          console.log(
+            '[OrgContext] Membership result:',
+            JSON.stringify({ memberships, error: membershipError }),
+          );
 
           // Handle membership error
           if (membershipError) {
-            console.error('[OrgContext] Error loading memberships:', membershipError);
+            console.error(
+              '[OrgContext] Error loading memberships:',
+              membershipError,
+            );
             setStatus('error');
             setLoading(false);
             return;
           }
 
           // Use first membership if available
-          const membership = memberships && memberships.length > 0 ? memberships[0] : null;
+          const membership =
+            memberships && memberships.length > 0 ? memberships[0] : null;
 
           if (membership?.organization_id) {
-            console.log('[OrgContext] Found organization_id:', membership.organization_id);
-            
+            console.log(
+              '[OrgContext] Found organization_id:',
+              membership.organization_id,
+            );
+
             // Now get the full organization data
             const { data: org, error: orgError } = await supabase
               .from('organizations')
@@ -80,10 +98,16 @@ export function OrgProvider({ children }: { children: ReactNode }) {
               .eq('id', membership.organization_id)
               .single();
 
-            console.log('[OrgContext] Organization result:', JSON.stringify({ org, error: orgError }));
+            console.log(
+              '[OrgContext] Organization result:',
+              JSON.stringify({ org, error: orgError }),
+            );
 
             if (org) {
-              console.log('[OrgContext] ✅ Successfully loaded org:', JSON.stringify(org));
+              console.log(
+                '[OrgContext] ✅ Successfully loaded org:',
+                JSON.stringify(org),
+              );
               setActiveOrg(org);
               setActiveOrgIdState(org.id);
               setStatus('ready');
@@ -95,7 +119,9 @@ export function OrgProvider({ children }: { children: ReactNode }) {
               setStatus('error');
             }
           } else {
-            console.warn('[OrgContext] ❌ No membership found - user needs to join an org');
+            console.warn(
+              '[OrgContext] ❌ No membership found - user needs to join an org',
+            );
             setStatus('no-org');
             setLoading(false);
             return;
@@ -176,7 +202,17 @@ export function OrgProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <OrgContext.Provider value={{ activeOrgId, activeOrg, loading, status, setActiveOrgId, clearActiveOrg, skipOnboarding }}>
+    <OrgContext.Provider
+      value={{
+        activeOrgId,
+        activeOrg,
+        loading,
+        status,
+        setActiveOrgId,
+        clearActiveOrg,
+        skipOnboarding,
+      }}
+    >
       {children}
     </OrgContext.Provider>
   );

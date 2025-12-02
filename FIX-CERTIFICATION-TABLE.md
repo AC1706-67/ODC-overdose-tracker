@@ -1,20 +1,24 @@
 # Fix Missing Certification Requests Table
 
 ## Problem
+
 The `organization_certification_requests` table doesn't exist in your database, causing the Request Certification form to fail.
 
 ## Root Cause
+
 The migration `20251119_add_org_certification_and_codes.sql` creates:
+
 - ✅ `organization_invite_codes` table
 - ❌ Missing: `organization_certification_requests` table
 
 ## Solution
 
 ### Step 1: Check if Table Exists
+
 Run this in Supabase SQL Editor:
 
 ```sql
-SELECT 
+SELECT
   table_name,
   table_type
 FROM information_schema.tables
@@ -25,6 +29,7 @@ WHERE table_schema = 'public'
 **If it returns 0 rows** → Table doesn't exist, proceed to Step 2
 
 ### Step 2: Create the Table
+
 Copy and paste the entire contents of `create-certification-requests-table.sql` into Supabase SQL Editor and run it.
 
 Or run this directly:
@@ -51,11 +56,11 @@ CREATE TABLE IF NOT EXISTS organization_certification_requests (
 );
 
 -- Add constraint for status values
-ALTER TABLE organization_certification_requests 
+ALTER TABLE organization_certification_requests
 DROP CONSTRAINT IF EXISTS certification_requests_status_check;
 
-ALTER TABLE organization_certification_requests 
-ADD CONSTRAINT certification_requests_status_check 
+ALTER TABLE organization_certification_requests
+ADD CONSTRAINT certification_requests_status_check
   CHECK (status IN ('pending', 'approved', 'rejected'));
 
 -- Enable RLS
@@ -90,10 +95,11 @@ CREATE TRIGGER cert_requests_updated_at
 ```
 
 ### Step 3: Verify
+
 Run this to confirm:
 
 ```sql
-SELECT 
+SELECT
   'Table created successfully!' as message,
   table_name,
   table_type
@@ -105,6 +111,7 @@ WHERE table_schema = 'public'
 Should return 1 row showing the table exists.
 
 ### Step 4: Test the Form
+
 1. Open the app
 2. Go to onboarding
 3. Click "Request organization certification"
@@ -118,6 +125,7 @@ Should now work without errors!
 **Purpose:** Stores certification requests from users who want their organization added to the platform.
 
 **Fields:**
+
 - `organization_name` - Name of the organization
 - `organization_type` - Type (e.g., "Compassionate Community Engagement (CCE)")
 - `contact_name`, `contact_email` - Who to contact
@@ -127,6 +135,7 @@ Should now work without errors!
 - `reviewed_by`, `reviewed_at`, `review_notes` - Admin review info
 
 **Security (RLS):**
+
 - Users can only see their own requests
 - Users can create new requests
 - Admins can view all (policy commented out - add when you have admin roles)
@@ -136,6 +145,7 @@ Should now work without errors!
 Once you have admin roles set up, you can:
 
 1. **View all pending requests:**
+
    ```sql
    SELECT * FROM organization_certification_requests
    WHERE status = 'pending'
@@ -143,9 +153,10 @@ Once you have admin roles set up, you can:
    ```
 
 2. **Approve a request:**
+
    ```sql
    UPDATE organization_certification_requests
-   SET 
+   SET
      status = 'approved',
      reviewed_by = auth.uid(),
      reviewed_at = now(),

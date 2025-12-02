@@ -1,42 +1,46 @@
 import { supabase } from '@/lib/supabase';
 
 export async function fetchTeamDashboardData(activeOrgId: string | null) {
-  const since = new Date(Date.now() - 30*24*60*60*1000).toISOString();
-  
+  const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+
   let query = supabase
     .from('outreach_logs')
-    .select('team_members, team_organization, trip_count, location, outreach_date, created_at')
+    .select(
+      'team_members, team_organization, trip_count, location, outreach_date, created_at',
+    )
     .gte('created_at', since);
-  
+
   // Filter by organization
   if (activeOrgId === null) {
     query = query.is('organization_id', null);
   } else {
     query = query.eq('organization_id', activeOrgId);
   }
-  
+
   const { data, error } = await query;
-  
+
   if (error) throw error;
 
   // Process the data
   const logs = data || [];
-  
+
   // Extract unique team members (split by comma and clean up)
   const allMembers = new Set<string>();
   const organizationCounts: { [key: string]: number } = {};
   let totalTrips = 0;
   const locations = new Set<string>();
-  const monthlyActivity: { [key: string]: { trips: number; members: Set<string> } } = {};
+  const monthlyActivity: {
+    [key: string]: { trips: number; members: Set<string> };
+  } = {};
 
-  logs.forEach(log => {
+  logs.forEach((log) => {
     // Process team members
     if (log.team_members) {
       const members = log.team_members
         .split(',')
         .map((m: string) => m.trim())
         .filter((m: string) => m.length > 0);
-      
+
       members.forEach((member: string) => allMembers.add(member));
     }
 
@@ -56,21 +60,26 @@ export async function fetchTeamDashboardData(activeOrgId: string | null) {
 
     // Process monthly activity
     const date = new Date(log.outreach_date || log.created_at);
-    const monthKey = date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
-    
+    const monthKey = date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+    });
+
     if (!monthlyActivity[monthKey]) {
       monthlyActivity[monthKey] = { trips: 0, members: new Set() };
     }
-    
+
     monthlyActivity[monthKey].trips += log.trip_count || 1;
-    
+
     if (log.team_members) {
       const members = log.team_members
         .split(',')
         .map((m: string) => m.trim())
         .filter((m: string) => m.length > 0);
-      
-      members.forEach((member: string) => monthlyActivity[monthKey].members.add(member));
+
+      members.forEach((member: string) =>
+        monthlyActivity[monthKey].members.add(member),
+      );
     }
   });
 
@@ -78,7 +87,8 @@ export async function fetchTeamDashboardData(activeOrgId: string | null) {
   const totalTeamMembers = allMembers.size;
   const uniqueOrganizations = Object.keys(organizationCounts).length;
   const activeLocations = locations.size;
-  const avgTripsPerMember = totalTeamMembers > 0 ? totalTrips / totalTeamMembers : 0;
+  const avgTripsPerMember =
+    totalTeamMembers > 0 ? totalTrips / totalTeamMembers : 0;
 
   // Format organization breakdown
   const organizationBreakdown = Object.entries(organizationCounts)

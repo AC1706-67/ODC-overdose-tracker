@@ -9,9 +9,19 @@ const needles = [
   /\bODC\b(?!\s*Log)/i,
 ];
 const skip = new Set([
-  'node_modules', '.git', 'dist', 'build', '.expo', '.gradle', 
-  'ios/Pods', 'android/build', 'android/.cxx', '.cxx',
-  '.env', '.env.local', '.env.example' // Skip env files - they're not in the app
+  'node_modules',
+  '.git',
+  'dist',
+  'build',
+  '.expo',
+  '.gradle',
+  'ios/Pods',
+  'android/build',
+  'android/.cxx',
+  '.cxx',
+  '.env',
+  '.env.local',
+  '.env.example', // Skip env files - they're not in the app
 ]);
 
 // Ignore patterns for files we don't need to scan
@@ -20,9 +30,9 @@ const IGNORE_PARTS = [
   'supabase/migrations/',
   'package-lock.json',
   'scripts/forbidden-scan.js', // don't flag our own patterns
-  'rebrand-safe.ps1',          // rebrand helper contains old text intentionally
-  'TESTFLIGHT_SETUP.md',       // docs examples
-  '.env',                      // not bundled in app
+  'rebrand-safe.ps1', // rebrand helper contains old text intentionally
+  'TESTFLIGHT_SETUP.md', // docs examples
+  '.env', // not bundled in app
   'test-', // test scripts
   'debug-', // debug scripts
   'check-', // check scripts
@@ -41,7 +51,7 @@ const IGNORE_PARTS = [
 
 function shouldIgnore(filePath) {
   const normalized = filePath.replace(/\\/g, '/');
-  return IGNORE_PARTS.some(p => normalized.includes(p));
+  return IGNORE_PARTS.some((p) => normalized.includes(p));
 }
 
 let errors = 0;
@@ -51,26 +61,35 @@ function walk(dir) {
     for (const f of fs.readdirSync(dir)) {
       const p = path.join(dir, f);
       const st = fs.statSync(p);
-      
-      if (st.isDirectory()) { 
+
+      if (st.isDirectory()) {
         // Skip if folder name matches or if path contains skip patterns
-        const shouldSkip = skip.has(f) || Array.from(skip).some(pattern => p.includes(pattern));
-        if (!shouldSkip) walk(p); 
-        continue; 
+        const shouldSkip =
+          skip.has(f) ||
+          Array.from(skip).some((pattern) => p.includes(pattern));
+        if (!shouldSkip) walk(p);
+        continue;
       }
-      
+
       if (!st.isFile()) continue;
-      
+
       // Skip ignored files
       if (shouldIgnore(p)) continue;
-      
+
       // Skip binary files and large files
       if (st.size > 1024 * 1024) continue; // Skip files > 1MB
-      if (path.extname(f).match(/\.(png|jpg|jpeg|gif|ico|ttf|woff|woff2|eot|zip|jar|so|dylib|a)$/i)) continue;
-      
+      if (
+        path
+          .extname(f)
+          .match(
+            /\.(png|jpg|jpeg|gif|ico|ttf|woff|woff2|eot|zip|jar|so|dylib|a)$/i,
+          )
+      )
+        continue;
+
       try {
         const txt = fs.readFileSync(p, 'utf8');
-        needles.forEach(rx => {
+        needles.forEach((rx) => {
           if (rx.test(txt)) {
             console.log(`[HIT] ${p} :: ${rx}`);
             errors++;
@@ -90,7 +109,9 @@ walk(process.cwd());
 
 if (errors) {
   console.error(`\n❌ Forbidden string hits: ${errors}`);
-  console.log('\n💡 Review the hits above and update as needed for brand compliance.');
+  console.log(
+    '\n💡 Review the hits above and update as needed for brand compliance.',
+  );
   process.exit(1);
 } else {
   console.log('\n✅ No forbidden brand references found!');

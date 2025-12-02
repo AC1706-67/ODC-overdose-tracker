@@ -1,6 +1,7 @@
 # Backend Functions Inventory
 
 ## Overview
+
 This document lists all PostgreSQL functions implemented in your Supabase backend, organized by category.
 
 ---
@@ -8,6 +9,7 @@ This document lists all PostgreSQL functions implemented in your Supabase backen
 ## 🔐 Authentication & User Management
 
 ### `handle_new_user()`
+
 **File:** `supabase/migrations/20251012_add_organizational_structure.sql`
 **Type:** Trigger function
 **Purpose:** Automatically creates a profile entry when a new user signs up
@@ -26,6 +28,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 ```
 
 ### `auto_assign_default_organization()`
+
 **File:** `supabase/migrations/20251126_harmonize_rls_and_prep_zip_sharing.sql`
 **Type:** Trigger function
 **Purpose:** Automatically assigns new users to the demo organization
@@ -60,12 +63,14 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 ## 🏢 Organization Management
 
 ### `get_user_organizations(user_uuid)`
+
 **File:** `supabase/migrations/20251012_update_existing_tables_for_orgs.sql`
 **Purpose:** Get all organizations a user belongs to
 **Parameters:**
+
 - `user_uuid` (uuid, default: `auth.uid()`)
-**Returns:** Table with organization details and user role
-**Security:** `SECURITY DEFINER`
+  **Returns:** Table with organization details and user role
+  **Security:** `SECURITY DEFINER`
 
 ```sql
 RETURNS TABLE (
@@ -78,25 +83,29 @@ RETURNS TABLE (
 ```
 
 ### `user_has_org_permission(user_uuid, org_uuid, required_role)`
+
 **File:** `supabase/migrations/20251012_update_existing_tables_for_orgs.sql`
 **Purpose:** Check if user has specific permission level in an organization
 **Parameters:**
+
 - `user_uuid` (uuid)
 - `org_uuid` (uuid)
 - `required_role` (text, default: `'Responder'`)
-**Returns:** `boolean`
-**Security:** `SECURITY DEFINER`
-**Role Hierarchy:** `['Viewer', 'Responder', 'Supervisor', 'Manager', 'Admin', 'Owner']`
+  **Returns:** `boolean`
+  **Security:** `SECURITY DEFINER`
+  **Role Hierarchy:** `['Viewer', 'Responder', 'Supervisor', 'Manager', 'Admin', 'Owner']`
 
 ### `get_organization_stats(org_uuid, start_date, end_date)`
+
 **File:** `supabase/migrations/20251012_update_existing_tables_for_orgs.sql`
 **Purpose:** Get comprehensive statistics for an organization
 **Parameters:**
+
 - `org_uuid` (uuid)
 - `start_date` (timestamptz, default: `now() - 30 days`)
 - `end_date` (timestamptz, default: `now()`)
-**Returns:** Table with incident/distribution statistics
-**Security:** `SECURITY DEFINER`
+  **Returns:** Table with incident/distribution statistics
+  **Security:** `SECURITY DEFINER`
 
 ```sql
 RETURNS TABLE (
@@ -110,26 +119,30 @@ RETURNS TABLE (
 ```
 
 ### `increment_invite_code_usage(p_code)`
+
 **File:** `supabase/migrations/20251119_add_org_certification_and_codes.sql` (updated in `fix-invite-code-function-parameter.sql`)
 **Purpose:** Increment usage count for an invite code and return org ID
 **Parameters:**
-- `p_code` (text) - The invite code (p_ prefix follows PostgreSQL convention)
-**Returns:** `uuid` - Organization ID
-**Security:** `SECURITY DEFINER`
-**Side Effects:** Increments `current_uses` counter
-**Frontend call:** `.rpc('increment_invite_code_usage', { p_code: code })`
+
+- `p_code` (text) - The invite code (p\_ prefix follows PostgreSQL convention)
+  **Returns:** `uuid` - Organization ID
+  **Security:** `SECURITY DEFINER`
+  **Side Effects:** Increments `current_uses` counter
+  **Frontend call:** `.rpc('increment_invite_code_usage', { p_code: code })`
 
 ---
 
 ## 📊 Dashboard & Analytics
 
 ### `get_dashboard_data(org_id)`
+
 **File:** `supabase/migrations/20251012_create_dashboard_views.sql`
 **Purpose:** Get comprehensive dashboard data for an organization
 **Parameters:**
+
 - `org_id` (text, default: `'anonymous'`)
-**Returns:** Table with KPIs, trends, and analytics
-**Security:** `SECURITY DEFINER`
+  **Returns:** Table with KPIs, trends, and analytics
+  **Security:** `SECURITY DEFINER`
 
 ```sql
 RETURNS TABLE (
@@ -151,13 +164,15 @@ RETURNS TABLE (
 ```
 
 ### `get_team_member_stats(org_uuid, start_date, end_date)`
+
 **File:** `supabase/migrations/20251101_create_enhanced_outreach_analytics.sql`
 **Purpose:** Get team member performance statistics
 **Parameters:**
+
 - `org_uuid` (uuid, default: `NULL` for all orgs)
 - `start_date` (timestamptz, default: `now() - 30 days`)
 - `end_date` (timestamptz, default: `now()`)
-**Returns:** Table with team member activity metrics
+  **Returns:** Table with team member activity metrics
 
 ```sql
 RETURNS TABLE (
@@ -175,13 +190,15 @@ RETURNS TABLE (
 ```
 
 ### `get_location_analytics(org_uuid, start_date, end_date)`
+
 **File:** `supabase/migrations/20251101_create_enhanced_outreach_analytics.sql`
 **Purpose:** Get location-based outreach analytics
 **Parameters:**
+
 - `org_uuid` (uuid, default: `NULL` for all orgs)
 - `start_date` (timestamptz, default: `now() - 30 days`)
 - `end_date` (timestamptz, default: `now()`)
-**Returns:** Table with location activity metrics
+  **Returns:** Table with location activity metrics
 
 ```sql
 RETURNS TABLE (
@@ -205,16 +222,19 @@ RETURNS TABLE (
 ## 🔄 Data Migration & Validation
 
 ### `log_migration_step(migration_name, step_name, status, details)`
+
 **File:** `supabase/migrations/20251101_complete_data_migration.sql`
 **Purpose:** Log migration progress for tracking
 **Parameters:**
+
 - `migration_name` (text)
 - `step_name` (text)
 - `status` (text) - 'started', 'completed', 'failed'
 - `details` (jsonb, default: `NULL`)
-**Returns:** `void`
+  **Returns:** `void`
 
 ### `validate_complete_migration()`
+
 **File:** `supabase/migrations/20251101_complete_data_migration.sql`
 **Purpose:** Comprehensive validation of enhanced outreach migration
 **Returns:** Table with validation results
@@ -228,6 +248,7 @@ RETURNS TABLE (
 ```
 
 ### `validate_team_member_migration()`
+
 **File:** `supabase/migrations/20251101_migrate_team_member_data.sql`
 **Purpose:** Validate team member data migration
 **Returns:** Table with migration statistics
@@ -243,6 +264,7 @@ RETURNS TABLE (
 ```
 
 ### `validate_location_migration()`
+
 **File:** `supabase/migrations/20251101_migrate_location_data.sql`
 **Purpose:** Validate location data migration
 **Returns:** Table with migration statistics
@@ -258,6 +280,7 @@ RETURNS TABLE (
 ```
 
 ### `rollback_enhanced_outreach_migration()`
+
 **File:** `supabase/migrations/20251101_complete_data_migration.sql`
 **Purpose:** Emergency rollback function for enhanced outreach migration
 **Returns:** `void`
@@ -268,6 +291,7 @@ RETURNS TABLE (
 ## 🛠️ Utility Functions
 
 ### `handle_updated_at()`
+
 **File:** `supabase/migrations/20251119_add_org_certification_and_codes.sql`
 **Type:** Trigger function
 **Purpose:** Automatically update `updated_at` timestamp on row changes
@@ -285,11 +309,13 @@ $$ LANGUAGE plpgsql;
 ```
 
 ### `parse_location_string(location_text)`
+
 **File:** `supabase/migrations/20251101_migrate_location_data.sql`
 **Purpose:** Parse legacy location strings into structured components
 **Parameters:**
+
 - `location_text` (TEXT)
-**Returns:** Table with parsed location components
+  **Returns:** Table with parsed location components
 
 ```sql
 RETURNS TABLE (
@@ -303,25 +329,30 @@ RETURNS TABLE (
 ```
 
 ### `clean_team_member_name(name_text)`
+
 **File:** `supabase/migrations/20251101_migrate_team_member_data.sql`
 **Purpose:** Clean and normalize team member names
 **Parameters:**
+
 - `name_text` (TEXT)
-**Returns:** `TEXT`
-**Operations:** Trim, title case, remove extra spaces
+  **Returns:** `TEXT`
+  **Operations:** Trim, title case, remove extra spaces
 
 ### `extract_team_member_names(team_members_data)`
+
 **File:** `supabase/migrations/20251101_migrate_team_member_data.sql`
 **Purpose:** Extract individual names from comma-separated string
 **Parameters:**
+
 - `team_members_data` (TEXT)
-**Returns:** `TEXT[]` (array of names)
+  **Returns:** `TEXT[]` (array of names)
 
 ---
 
 ## 📋 Function Usage Summary
 
 ### By Category
+
 - **Authentication:** 2 functions
 - **Organization Management:** 4 functions
 - **Dashboard & Analytics:** 3 functions
@@ -329,10 +360,12 @@ RETURNS TABLE (
 - **Utility:** 4 functions
 
 ### Security Levels
+
 - **SECURITY DEFINER:** 10 functions (elevated privileges)
 - **Regular:** 7 functions (caller privileges)
 
 ### Trigger Functions
+
 - `handle_new_user()` - Creates profile on signup
 - `auto_assign_default_organization()` - Assigns to demo org
 - `handle_updated_at()` - Updates timestamps
@@ -344,6 +377,7 @@ RETURNS TABLE (
 These functions are called from the frontend via `.rpc()`:
 
 ### Commonly Used
+
 - `get_user_organizations()` - Org picker, settings
 - `user_has_org_permission()` - Permission checks
 - `get_organization_stats()` - Dashboard displays
@@ -353,6 +387,7 @@ These functions are called from the frontend via `.rpc()`:
 - `increment_invite_code_usage()` - Invite code redemption
 
 ### Migration/Admin Only
+
 - `validate_complete_migration()`
 - `validate_team_member_migration()`
 - `validate_location_migration()`
@@ -376,7 +411,9 @@ These functions are called from the frontend via `.rpc()`:
 ## 🔄 Recommended Actions
 
 ### Cleanup Opportunities
+
 Consider dropping these after successful migration:
+
 - `log_migration_step()`
 - `validate_complete_migration()`
 - `validate_team_member_migration()`
@@ -386,13 +423,16 @@ Consider dropping these after successful migration:
 - `extract_team_member_names()`
 
 ### Documentation Needed
+
 Add inline documentation for:
+
 - Input validation rules
 - Expected return formats
 - Error handling behavior
 - Performance considerations
 
 ### Testing Recommendations
+
 - Unit tests for utility functions
 - Integration tests for org permission checks
 - Load tests for analytics functions

@@ -3,11 +3,13 @@
 ## Prerequisites
 
 ### 1. Apple Developer Account
+
 - **Required**: Apple Developer Program membership ($99/year)
 - **Sign up**: https://developer.apple.com/programs/
 - **Account type**: Individual or Organization
 
 ### 2. App Store Connect Setup
+
 - **Access**: https://appstoreconnect.apple.com/
 - **Create App**: New app with bundle ID `org.Compassionate Log.overdose`
 
@@ -16,6 +18,7 @@
 ### Phase 1: Apple Developer Setup
 
 1. **Create App Identifier**
+
    ```
    - Login to Apple Developer Portal
    - Certificates, Identifiers & Profiles → Identifiers
@@ -38,22 +41,24 @@
 ### Phase 2: EAS Build Configuration
 
 3. **Configure iOS Credentials**
+
    ```bash
    # Login to EAS (if not already)
    npx eas login
-   
+
    # Configure iOS credentials
    npx eas credentials:configure -p ios
-   
+
    # Choose: "Set up new ASC API Key"
    # Follow prompts to connect Apple Developer account
    ```
 
 4. **Build for TestFlight**
+
    ```bash
    # Build for internal testing (TestFlight)
    npx eas build --platform ios --profile preview
-   
+
    # Or build for App Store submission
    npx eas build --platform ios --profile store
    ```
@@ -61,10 +66,11 @@
 ### Phase 3: TestFlight Submission
 
 5. **Submit to TestFlight**
+
    ```bash
    # Automatic submission to TestFlight
    npx eas submit --platform ios --profile store
-   
+
    # Or manual upload via Xcode/Transporter
    ```
 
@@ -82,17 +88,20 @@
 ## Build Commands
 
 ### Development Build (Simulator)
+
 ```bash
 npx eas build --platform ios --profile development
 ```
 
 ### TestFlight Build (Internal Testing)
+
 ```bash
 npx eas build --platform ios --profile preview
 npx eas submit --platform ios --profile preview
 ```
 
 ### App Store Build (External Testing + Store)
+
 ```bash
 npx eas build --platform ios --profile store
 npx eas submit --platform ios --profile store
@@ -101,12 +110,14 @@ npx eas submit --platform ios --profile store
 ## TestFlight Testing Process
 
 ### Internal Testing (Immediate)
+
 - **Testers**: Apple Developer team members
 - **Limit**: 100 testers
 - **Review**: No App Review required
 - **Distribution**: Immediate after build processing
 
 ### External Testing (App Review Required)
+
 - **Testers**: Anyone with email/public link
 - **Limit**: 10,000 testers
 - **Review**: Apple App Review required (1-7 days)
@@ -115,6 +126,7 @@ npx eas submit --platform ios --profile store
 ## App Store Connect Metadata
 
 ### Required Information
+
 ```
 App Information:
 - Name: Compassionate Log
@@ -134,6 +146,7 @@ App Privacy:
 ```
 
 ### Screenshots Required
+
 - **iPhone**: 6.7", 6.5", 5.5" displays
 - **iPad**: 12.9", 11" displays (if supporting iPad)
 - **Minimum**: 3 screenshots per device type
@@ -141,12 +154,14 @@ App Privacy:
 ## Compliance & Legal
 
 ### Health Data Compliance
+
 - **HIPAA**: Ensure no PHI is collected
 - **Privacy Policy**: Required for health apps
 - **Terms of Service**: Recommended
 - **Data Retention**: Clear policies needed
 
 ### App Review Guidelines
+
 - **Medical Apps**: Follow Apple's medical app guidelines
 - **Data Collection**: Clearly explain data usage
 - **Functionality**: App must work as described
@@ -154,12 +169,14 @@ App Privacy:
 ## Troubleshooting
 
 ### Common Issues
+
 1. **Bundle ID Conflicts**: Ensure unique bundle identifier
 2. **Provisioning Profiles**: EAS handles automatically
 3. **App Review Rejection**: Address feedback and resubmit
 4. **TestFlight Expiry**: Builds expire after 90 days
 
 ### Support Resources
+
 - **EAS Documentation**: https://docs.expo.dev/eas/
 - **Apple Developer**: https://developer.apple.com/support/
 - **App Store Connect**: https://help.apple.com/app-store-connect/

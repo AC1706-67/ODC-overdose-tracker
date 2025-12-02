@@ -3,12 +3,12 @@ require('dotenv').config();
 
 const supabase = createClient(
   process.env.EXPO_PUBLIC_SUPABASE_URL,
-  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
+  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
 );
 
 async function testRecursionFix() {
   console.log('🔍 Testing if infinite recursion is fixed...\n');
-  
+
   try {
     // Test 1: Check user_organizations table access
     console.log('1. Testing user_organizations table access...');
@@ -16,13 +16,16 @@ async function testRecursionFix() {
       .from('user_organizations')
       .select('*')
       .limit(5);
-    
+
     if (userOrgsError) {
       if (userOrgsError.message.includes('infinite recursion')) {
         console.log('❌ STILL HAS INFINITE RECURSION:', userOrgsError.message);
         return false;
       } else {
-        console.log('⚠️ Different error (might be expected):', userOrgsError.message);
+        console.log(
+          '⚠️ Different error (might be expected):',
+          userOrgsError.message,
+        );
       }
     } else {
       console.log('✅ user_organizations table accessible');
@@ -35,13 +38,16 @@ async function testRecursionFix() {
       .from('organizations')
       .select('*')
       .limit(5);
-    
+
     if (orgsError) {
       if (orgsError.message.includes('infinite recursion')) {
         console.log('❌ STILL HAS INFINITE RECURSION:', orgsError.message);
         return false;
       } else {
-        console.log('⚠️ Different error (might be expected):', orgsError.message);
+        console.log(
+          '⚠️ Different error (might be expected):',
+          orgsError.message,
+        );
       }
     } else {
       console.log('✅ organizations table accessible');
@@ -54,7 +60,7 @@ async function testRecursionFix() {
       .from('org_dashboard_kpis')
       .select('*')
       .limit(1);
-    
+
     if (dashboardError) {
       console.log('⚠️ Dashboard view error:', dashboardError.message);
     } else {
@@ -68,7 +74,7 @@ async function testRecursionFix() {
       .from('outreach_logs')
       .select('count')
       .limit(1);
-    
+
     if (outreachError) {
       console.log('⚠️ Outreach logs error:', outreachError.message);
     } else {
@@ -78,7 +84,6 @@ async function testRecursionFix() {
     console.log('\n🎉 SUCCESS: No infinite recursion detected!');
     console.log('The database should now work with the app.');
     return true;
-
   } catch (error) {
     console.log('❌ Test failed with error:', error.message);
     return false;

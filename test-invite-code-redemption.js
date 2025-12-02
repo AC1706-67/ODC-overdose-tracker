@@ -1,6 +1,6 @@
 /**
  * Test script for invite code redemption
- * 
+ *
  * Usage:
  * 1. Update the testCode with a real invite code from your database
  * 2. Make sure you're logged in (or update to use service role)
@@ -14,7 +14,7 @@ dotenv.config({ path: '.env' });
 
 const supabase = createClient(
   process.env.EXPO_PUBLIC_SUPABASE_URL,
-  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
+  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
 );
 
 async function testInviteCodeRedemption() {
@@ -74,7 +74,10 @@ async function testInviteCodeRedemption() {
 
     // Step 3: Check current user
     console.log('3️⃣ Checking current user...');
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
 
     if (userError || !user) {
       console.error('❌ No user logged in');
@@ -129,8 +132,10 @@ try {
 
     // Alternative: Test the RPC function directly
     console.log('\n6️⃣ Testing increment_invite_code_usage RPC...');
-    const { data: rpcResult, error: rpcError } = await supabase
-      .rpc('increment_invite_code_usage', { p_code: testCode.toUpperCase() });
+    const { data: rpcResult, error: rpcError } = await supabase.rpc(
+      'increment_invite_code_usage',
+      { p_code: testCode.toUpperCase() },
+    );
 
     if (rpcError) {
       console.error('❌ RPC Error:', rpcError);
@@ -153,7 +158,6 @@ try {
     }
 
     console.log('✅ All tests completed!\n');
-
   } catch (error) {
     console.error('❌ Unexpected error:', error);
   }

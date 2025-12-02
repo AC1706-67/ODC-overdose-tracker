@@ -35,18 +35,21 @@ router.replace('/onboarding');
 ## User Flows
 
 ### Flow A: Join with Organization Code
+
 1. User selects "I have an organization code"
 2. Enters code (e.g., "RAEP2025")
 3. System validates code and joins organization
 4. Redirects to dashboard
 
 ### Flow B: Browse Certified Organizations
+
 1. User selects "Join a certified organization"
 2. Views list of approved, certified organizations
 3. Taps organization to join as Responder
 4. Redirects to dashboard
 
 ### Flow C: Request New Organization
+
 1. User selects "Request organization certification"
 2. Fills out organization details form
 3. Submits request (status: pending)
@@ -54,6 +57,7 @@ router.replace('/onboarding');
 5. User notified when approved
 
 ### Flow D: Skip
+
 1. User selects "Skip for now"
 2. Joins default organization (Anonymous Haven AI)
 3. Redirects to dashboard
@@ -77,7 +81,7 @@ VALUES (
 ### Review Pending Organizations
 
 ```sql
-SELECT 
+SELECT
   name,
   contact_name,
   contact_email,
@@ -95,7 +99,7 @@ ORDER BY created_at DESC;
 ```sql
 -- Approve the organization
 UPDATE organizations
-SET 
+SET
   status = 'approved',
   is_certified = true,
   is_active = true,
@@ -119,7 +123,7 @@ VALUES ('pending-org-uuid', 'NEWORG2025', 'New Organization 2025', 'Responder');
 
 ```sql
 UPDATE organizations
-SET 
+SET
   status = 'rejected',
   approved_by = 'admin-user-uuid',
   approved_at = now(),
@@ -134,11 +138,14 @@ WHERE id = 'pending-org-uuid';
 ```typescript
 const { data: inviteCode } = await supabase
   .from('organization_invite_codes')
-  .select('organization_id, role, is_active, max_uses, current_uses, expires_at')
+  .select(
+    'organization_id, role, is_active, max_uses, current_uses, expires_at',
+  )
   .eq('code', code.toUpperCase())
   .single();
 
-const isValid = inviteCode?.is_active &&
+const isValid =
+  inviteCode?.is_active &&
   (!inviteCode.expires_at || new Date(inviteCode.expires_at) > new Date()) &&
   (!inviteCode.max_uses || inviteCode.current_uses < inviteCode.max_uses);
 ```
@@ -146,17 +153,15 @@ const isValid = inviteCode?.is_active &&
 ### Join Organization
 
 ```typescript
-const { error } = await supabase
-  .from('user_organizations')
-  .insert({
-    user_id: user.id,
-    organization_id: orgId,
-    role: 'Responder',
-  });
+const { error } = await supabase.from('user_organizations').insert({
+  user_id: user.id,
+  organization_id: orgId,
+  role: 'Responder',
+});
 
 // Increment code usage if using a code
-await supabase.rpc('increment_invite_code_usage', { 
-  code_text: code.toUpperCase() 
+await supabase.rpc('increment_invite_code_usage', {
+  code_text: code.toUpperCase(),
 });
 ```
 
@@ -196,14 +201,12 @@ const { data: org } = await supabase
   .single();
 
 // Add requester as pending owner
-await supabase
-  .from('user_organizations')
-  .insert({
-    user_id: user.id,
-    organization_id: org.id,
-    role: 'Owner',
-    is_active: false,
-  });
+await supabase.from('user_organizations').insert({
+  user_id: user.id,
+  organization_id: org.id,
+  role: 'Owner',
+  is_active: false,
+});
 ```
 
 ## Security
@@ -218,6 +221,7 @@ await supabase
 ### Code Usage Tracking
 
 The `increment_invite_code_usage()` function:
+
 - Atomically increments usage counter
 - Validates code is active
 - Checks expiration date
@@ -240,24 +244,29 @@ node test-onboarding-flow.js
 ## Files
 
 ### Database
+
 - `supabase/migrations/20251119_add_org_certification_and_codes.sql` - Migration
 - `verify-onboarding-migration.sql` - Verification queries
 
 ### Frontend
+
 - `app/onboarding/index.tsx` - Main router
 - `app/onboarding/enter-code.tsx` - Code entry
 - `app/onboarding/select-org.tsx` - Org browser
 - `app/onboarding/request-org.tsx` - Request form
 
 ### Types
+
 - `types/organization.ts` - TypeScript definitions
 
 ### Documentation
+
 - `ONBOARDING_FLOW_IMPLEMENTATION.md` - Detailed implementation
 - `MIGRATION_BEST_PRACTICES_APPLIED.md` - Migration quality notes
 - `ONBOARDING_README.md` - This file
 
 ### Testing
+
 - `test-onboarding-flow.js` - Automated tests
 - `users_orgs.csv` - Current user mapping
 

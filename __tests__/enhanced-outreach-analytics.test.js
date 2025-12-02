@@ -2,7 +2,7 @@
 
 /**
  * Comprehensive Tests for Enhanced Outreach Analytics
- * 
+ *
  * This test suite covers:
  * 1. Data migration scripts validation
  * 2. Analytics query performance
@@ -16,31 +16,39 @@ const { createClient } = require('@supabase/supabase-js');
 
 // Test configuration
 const TEST_CONFIG = {
-  supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://vitwypicporqpeefwsjs.supabase.co',
-  supabaseKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZpdHd5cGljcG9ycXBlZWZ3c2pzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1ODc0NTUsImV4cCI6MjA3NDE2MzQ1NX0.LZvBs3c5XIQPTdEDwkEEqZO0irjmR7WZnsSsyuZ7wcI',
-  testTimeout: 30000
+  supabaseUrl:
+    process.env.EXPO_PUBLIC_SUPABASE_URL ||
+    'https://vitwypicporqpeefwsjs.supabase.co',
+  supabaseKey:
+    process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ||
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZpdHd5cGljcG9ycXBlZWZ3c2pzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1ODc0NTUsImV4cCI6MjA3NDE2MzQ1NX0.LZvBs3c5XIQPTdEDwkEEqZO0irjmR7WZnsSsyuZ7wcI',
+  testTimeout: 30000,
 };
 
 class EnhancedOutreachAnalyticsTests {
   constructor() {
-    this.supabase = createClient(TEST_CONFIG.supabaseUrl, TEST_CONFIG.supabaseKey);
+    this.supabase = createClient(
+      TEST_CONFIG.supabaseUrl,
+      TEST_CONFIG.supabaseKey,
+    );
     this.testResults = {
       passed: 0,
       failed: 0,
-      errors: []
+      errors: [],
     };
   }
 
   log(message, type = 'info') {
     const timestamp = new Date().toISOString();
-    const prefix = {
-      'info': '📋',
-      'success': '✅',
-      'error': '❌',
-      'warning': '⚠️',
-      'test': '🧪'
-    }[type] || '📋';
-    
+    const prefix =
+      {
+        info: '📋',
+        success: '✅',
+        error: '❌',
+        warning: '⚠️',
+        test: '🧪',
+      }[type] || '📋';
+
     console.log(`${prefix} [${timestamp}] ${message}`);
   }
 
@@ -64,7 +72,7 @@ class EnhancedOutreachAnalyticsTests {
       'supabase/migrations/20251101_migrate_location_data.sql',
       'supabase/migrations/20251101_migrate_team_member_data.sql',
       'supabase/migrations/20251101_complete_data_migration.sql',
-      'supabase/migrations/20251101_create_missing_analytics_views.sql'
+      'supabase/migrations/20251101_create_missing_analytics_views.sql',
     ];
 
     for (const file of migrationFiles) {
@@ -73,19 +81,28 @@ class EnhancedOutreachAnalyticsTests {
       }
 
       const content = fs.readFileSync(file, 'utf8');
-      
+
       // Validate SQL syntax basics
       if (content.trim().length === 0) {
         throw new Error(`Empty migration file: ${file}`);
       }
 
       // Check for proper transaction handling
-      if (content.includes('CREATE TABLE') && !content.includes('IF NOT EXISTS')) {
-        this.log(`Warning: ${file} creates tables without IF NOT EXISTS`, 'warning');
+      if (
+        content.includes('CREATE TABLE') &&
+        !content.includes('IF NOT EXISTS')
+      ) {
+        this.log(
+          `Warning: ${file} creates tables without IF NOT EXISTS`,
+          'warning',
+        );
       }
 
       // Check for RLS setup
-      if (content.includes('CREATE TABLE') && content.includes('team_members')) {
+      if (
+        content.includes('CREATE TABLE') &&
+        content.includes('team_members')
+      ) {
         if (!content.includes('ENABLE ROW LEVEL SECURITY')) {
           this.log(`Warning: ${file} may be missing RLS setup`, 'warning');
         }
@@ -103,7 +120,10 @@ class EnhancedOutreachAnalyticsTests {
       .select('*')
       .limit(0);
 
-    if (tmError && !tmError.message.includes('relation "team_members" does not exist')) {
+    if (
+      tmError &&
+      !tmError.message.includes('relation "team_members" does not exist')
+    ) {
       throw new Error(`team_members table issue: ${tmError.message}`);
     }
 
@@ -113,7 +133,10 @@ class EnhancedOutreachAnalyticsTests {
       .select('*')
       .limit(0);
 
-    if (locError && !locError.message.includes('relation "locations" does not exist')) {
+    if (
+      locError &&
+      !locError.message.includes('relation "locations" does not exist')
+    ) {
       throw new Error(`locations table issue: ${locError.message}`);
     }
 
@@ -123,8 +146,15 @@ class EnhancedOutreachAnalyticsTests {
       .select('*')
       .limit(0);
 
-    if (juncError && !juncError.message.includes('relation "outreach_team_members" does not exist')) {
-      throw new Error(`outreach_team_members table issue: ${juncError.message}`);
+    if (
+      juncError &&
+      !juncError.message.includes(
+        'relation "outreach_team_members" does not exist',
+      )
+    ) {
+      throw new Error(
+        `outreach_team_members table issue: ${juncError.message}`,
+      );
     }
 
     this.log('Database schema validation completed', 'success');
@@ -139,20 +169,25 @@ class EnhancedOutreachAnalyticsTests {
       .limit(0);
 
     if (schemaError) {
-      this.log('team_members table not accessible - testing logic validation only', 'warning');
-      
+      this.log(
+        'team_members table not accessible - testing logic validation only',
+        'warning',
+      );
+
       // Test data validation logic without database operations
       const testTeamMember = {
         name: 'Test Member 1',
         organization_id: 'test-org-1',
         email: 'test1@example.com',
         role: 'volunteer',
-        is_active: true
+        is_active: true,
       };
 
       // Validate required fields
       if (!testTeamMember.name || !testTeamMember.organization_id) {
-        throw new Error('Team member validation failed - missing required fields');
+        throw new Error(
+          'Team member validation failed - missing required fields',
+        );
       }
 
       // Validate email format (basic check)
@@ -164,21 +199,29 @@ class EnhancedOutreachAnalyticsTests {
       const org1Members = [
         { id: '1', name: 'Member 1', organization_id: 'org1' },
         { id: '2', name: 'Member 2', organization_id: 'org1' },
-        { id: '3', name: 'Member 3', organization_id: 'org2' }
+        { id: '3', name: 'Member 3', organization_id: 'org2' },
       ];
 
-      const filteredMembers = org1Members.filter(m => m.organization_id === 'org1');
+      const filteredMembers = org1Members.filter(
+        (m) => m.organization_id === 'org1',
+      );
       if (filteredMembers.length !== 2) {
         throw new Error('Organization scoping logic failed');
       }
 
-      this.log('Team member CRUD logic validation completed (schema not available)', 'success');
+      this.log(
+        'Team member CRUD logic validation completed (schema not available)',
+        'success',
+      );
       return;
     }
 
     // Full database testing if schema exists
-    this.log('team_members table exists - testing database operations', 'success');
-    
+    this.log(
+      'team_members table exists - testing database operations',
+      'success',
+    );
+
     // First, let's check what columns actually exist by trying a simple select
     const { data: existingData, error: selectError } = await this.supabase
       .from('team_members')
@@ -191,10 +234,10 @@ class EnhancedOutreachAnalyticsTests {
 
     // Try to determine the actual schema by attempting an insert with minimal data
     const testOrg1 = 'test-org-1-' + Date.now();
-    
+
     // Try different column combinations to find what works
     let testMember = { organization_id: testOrg1 };
-    
+
     const { data: insertTest, error: insertError } = await this.supabase
       .from('team_members')
       .insert([testMember])
@@ -203,21 +246,29 @@ class EnhancedOutreachAnalyticsTests {
 
     if (insertError) {
       // If basic insert fails, test the logic without database operations
-      this.log(`Database insert failed (${insertError.message}) - testing logic only`, 'warning');
-      
+      this.log(
+        `Database insert failed (${insertError.message}) - testing logic only`,
+        'warning',
+      );
+
       // Test organization scoping logic
       const mockMembers = [
         { id: '1', organization_id: 'org1' },
         { id: '2', organization_id: 'org1' },
-        { id: '3', organization_id: 'org2' }
+        { id: '3', organization_id: 'org2' },
       ];
 
-      const org1Members = mockMembers.filter(m => m.organization_id === 'org1');
+      const org1Members = mockMembers.filter(
+        (m) => m.organization_id === 'org1',
+      );
       if (org1Members.length !== 2) {
         throw new Error('Organization scoping logic failed');
       }
 
-      this.log('Team member CRUD logic validation completed (database schema incomplete)', 'success');
+      this.log(
+        'Team member CRUD logic validation completed (database schema incomplete)',
+        'success',
+      );
       return;
     }
 
@@ -236,7 +287,9 @@ class EnhancedOutreachAnalyticsTests {
 
       // Should find our created member
       if (!org1Members || org1Members.length === 0) {
-        throw new Error('Organization scoping failed - no members found for test org');
+        throw new Error(
+          'Organization scoping failed - no members found for test org',
+        );
       }
 
       // Test UPDATE operations (if the table supports updates)
@@ -266,12 +319,17 @@ class EnhancedOutreachAnalyticsTests {
         createdMember = null; // Mark as cleaned up
       }
 
-      this.log('Team member CRUD operations with organization scoping validated', 'success');
-
+      this.log(
+        'Team member CRUD operations with organization scoping validated',
+        'success',
+      );
     } finally {
       // Cleanup test data
       if (createdMember) {
-        await this.supabase.from('team_members').delete().eq('id', createdMember.id);
+        await this.supabase
+          .from('team_members')
+          .delete()
+          .eq('id', createdMember.id);
       }
     }
   }
@@ -285,13 +343,16 @@ class EnhancedOutreachAnalyticsTests {
       .limit(0);
 
     if (schemaError) {
-      this.log('locations table not accessible - testing logic validation only', 'warning');
-      
+      this.log(
+        'locations table not accessible - testing logic validation only',
+        'warning',
+      );
+
       // Test location normalization logic without database operations
       const testLocations = [
         { name: 'Montana & Sioux', location_type: 'intersection' },
         { name: 'montana & sioux', location_type: 'intersection' },
-        { name: '123 Main Street', location_type: 'address' }
+        { name: '123 Main Street', location_type: 'address' },
       ];
 
       // Test case-insensitive duplicate detection
@@ -299,7 +360,9 @@ class EnhancedOutreachAnalyticsTests {
       const normalizedName2 = testLocations[1].name.toLowerCase().trim();
 
       if (normalizedName1 !== normalizedName2) {
-        throw new Error('Location normalization logic error - names should match after normalization');
+        throw new Error(
+          'Location normalization logic error - names should match after normalization',
+        );
       }
 
       // Test location type validation
@@ -314,11 +377,17 @@ class EnhancedOutreachAnalyticsTests {
       const intersectionLocation = testLocations[0];
       const addressLocation = testLocations[2];
 
-      if (intersectionLocation.name.includes('&') && intersectionLocation.location_type !== 'intersection') {
+      if (
+        intersectionLocation.name.includes('&') &&
+        intersectionLocation.location_type !== 'intersection'
+      ) {
         throw new Error('Location with & should be classified as intersection');
       }
 
-      if (!addressLocation.name.includes('&') && addressLocation.location_type !== 'address') {
+      if (
+        !addressLocation.name.includes('&') &&
+        addressLocation.location_type !== 'address'
+      ) {
         throw new Error('Location without & should be classified as address');
       }
 
@@ -326,7 +395,7 @@ class EnhancedOutreachAnalyticsTests {
       const locations = [
         { id: '1', name: 'Montana & Sioux' },
         { id: '2', name: 'montana & sioux' },
-        { id: '3', name: 'Main Street' }
+        { id: '3', name: 'Main Street' },
       ];
 
       const duplicates = [];
@@ -344,16 +413,19 @@ class EnhancedOutreachAnalyticsTests {
         throw new Error('Duplicate detection algorithm failed');
       }
 
-      this.log('Location normalization and deduplication logic validated (schema not available)', 'success');
+      this.log(
+        'Location normalization and deduplication logic validated (schema not available)',
+        'success',
+      );
       return;
     }
 
     // Full database testing if schema exists
     this.log('locations table exists - testing database operations', 'success');
-    
+
     // Try to insert a minimal location to test the schema
     const testLocation = {
-      name: 'Test Location ' + Date.now()
+      name: 'Test Location ' + Date.now(),
     };
 
     const { data: createdLocation, error: insertError } = await this.supabase
@@ -364,27 +436,32 @@ class EnhancedOutreachAnalyticsTests {
 
     if (insertError) {
       // If basic insert fails, test the logic without database operations
-      this.log(`Database insert failed (${insertError.message}) - testing logic only`, 'warning');
-      
+      this.log(
+        `Database insert failed (${insertError.message}) - testing logic only`,
+        'warning',
+      );
+
       // Test location normalization logic
       const location1 = 'Montana & Sioux';
       const location2 = 'montana & sioux';
-      
+
       const normalized1 = location1.toLowerCase().trim();
       const normalized2 = location2.toLowerCase().trim();
-      
+
       if (normalized1 !== normalized2) {
         throw new Error('Location normalization failed');
       }
 
-      this.log('Location normalization logic validated (database schema incomplete)', 'success');
+      this.log(
+        'Location normalization logic validated (database schema incomplete)',
+        'success',
+      );
       return;
     }
 
     let createdLocations = [createdLocation];
 
     try {
-
       // Test location search functionality
       const { data: searchResults, error: searchError } = await this.supabase
         .from('locations')
@@ -400,17 +477,19 @@ class EnhancedOutreachAnalyticsTests {
       // Test case-insensitive duplicate detection logic
       const location1 = 'Montana & Sioux';
       const location2 = 'montana & sioux';
-      
+
       const normalized1 = location1.toLowerCase().trim();
       const normalized2 = location2.toLowerCase().trim();
 
       if (normalized1 !== normalized2) {
-        throw new Error('Location normalization logic error - names should match after normalization');
+        throw new Error(
+          'Location normalization logic error - names should match after normalization',
+        );
       }
 
       // Test location type classification logic
       const validLocationTypes = ['intersection', 'address', 'area'];
-      
+
       function classifyLocation(name) {
         if (name.includes('&')) return 'intersection';
         if (/^\d+\s/.test(name)) return 'address';
@@ -423,12 +502,16 @@ class EnhancedOutreachAnalyticsTests {
       for (let i = 0; i < testNames.length; i++) {
         const classified = classifyLocation(testNames[i]);
         if (classified !== expectedTypes[i]) {
-          throw new Error(`Location classification failed for ${testNames[i]}: expected ${expectedTypes[i]}, got ${classified}`);
+          throw new Error(
+            `Location classification failed for ${testNames[i]}: expected ${expectedTypes[i]}, got ${classified}`,
+          );
         }
       }
 
-      this.log('Location normalization and deduplication logic validated', 'success');
-
+      this.log(
+        'Location normalization and deduplication logic validated',
+        'success',
+      );
     } finally {
       // Cleanup test data
       for (const location of createdLocations) {
@@ -442,7 +525,7 @@ class EnhancedOutreachAnalyticsTests {
     const performanceThresholds = {
       team_member_stats_v1: 3000, // 3 seconds max
       location_analytics_v1: 3000,
-      activity_timeline_v1: 5000 // 5 seconds max for timeline
+      activity_timeline_v1: 5000, // 5 seconds max for timeline
     };
 
     let viewsExist = false;
@@ -458,20 +541,28 @@ class EnhancedOutreachAnalyticsTests {
 
       const queryTime = Date.now() - startTime;
 
-      if (error && (error.message.includes('does not exist') || error.message.includes('schema cache'))) {
+      if (
+        error &&
+        (error.message.includes('does not exist') ||
+          error.message.includes('schema cache'))
+      ) {
         this.log(`Analytics view ${viewName} not yet created`, 'warning');
         continue;
       }
 
       if (error) {
-        throw new Error(`Analytics view ${viewName} query failed: ${error.message}`);
+        throw new Error(
+          `Analytics view ${viewName} query failed: ${error.message}`,
+        );
       }
 
       viewsExist = true;
 
       // Performance validation
       if (queryTime > maxTime) {
-        throw new Error(`Performance issue: ${viewName} took ${queryTime}ms (max: ${maxTime}ms)`);
+        throw new Error(
+          `Performance issue: ${viewName} took ${queryTime}ms (max: ${maxTime}ms)`,
+        );
       }
 
       // Data accuracy validation
@@ -480,7 +571,12 @@ class EnhancedOutreachAnalyticsTests {
 
         // Validate team_member_stats_v1 structure
         if (viewName === 'team_member_stats_v1') {
-          const requiredFields = ['id', 'name', 'organization_id', 'total_activities'];
+          const requiredFields = [
+            'id',
+            'name',
+            'organization_id',
+            'total_activities',
+          ];
           for (const field of requiredFields) {
             if (!(field in sampleRecord)) {
               throw new Error(`Missing required field ${field} in ${viewName}`);
@@ -488,7 +584,10 @@ class EnhancedOutreachAnalyticsTests {
           }
 
           // Validate data types and ranges
-          if (typeof sampleRecord.total_activities !== 'number' || sampleRecord.total_activities < 0) {
+          if (
+            typeof sampleRecord.total_activities !== 'number' ||
+            sampleRecord.total_activities < 0
+          ) {
             throw new Error(`Invalid total_activities value in ${viewName}`);
           }
         }
@@ -502,14 +601,21 @@ class EnhancedOutreachAnalyticsTests {
             }
           }
 
-          if (typeof sampleRecord.total_activities !== 'number' || sampleRecord.total_activities < 0) {
+          if (
+            typeof sampleRecord.total_activities !== 'number' ||
+            sampleRecord.total_activities < 0
+          ) {
             throw new Error(`Invalid total_activities value in ${viewName}`);
           }
         }
 
         // Validate activity_timeline_v1 structure
         if (viewName === 'activity_timeline_v1') {
-          const requiredFields = ['outreach_id', 'outreach_date', 'organization_id'];
+          const requiredFields = [
+            'outreach_id',
+            'outreach_date',
+            'organization_id',
+          ];
           for (const field of requiredFields) {
             if (!(field in sampleRecord)) {
               throw new Error(`Missing required field ${field} in ${viewName}`);
@@ -517,18 +623,27 @@ class EnhancedOutreachAnalyticsTests {
           }
 
           // Validate date format
-          if (sampleRecord.outreach_date && isNaN(Date.parse(sampleRecord.outreach_date))) {
+          if (
+            sampleRecord.outreach_date &&
+            isNaN(Date.parse(sampleRecord.outreach_date))
+          ) {
             throw new Error(`Invalid date format in ${viewName}`);
           }
         }
       }
 
-      this.log(`Analytics view ${viewName} performance (${queryTime}ms) and accuracy validated`, 'success');
+      this.log(
+        `Analytics view ${viewName} performance (${queryTime}ms) and accuracy validated`,
+        'success',
+      );
     }
 
     if (!viewsExist) {
-      this.log('Analytics views not yet created - testing query structure validation only', 'warning');
-      
+      this.log(
+        'Analytics views not yet created - testing query structure validation only',
+        'warning',
+      );
+
       // Test analytics query structure validation without actual views
       const mockTeamMemberStats = {
         id: 'test-id',
@@ -537,7 +652,7 @@ class EnhancedOutreachAnalyticsTests {
         total_activities: 5,
         active_days: 3,
         total_people_reached: 25,
-        last_activity_date: '2024-01-01'
+        last_activity_date: '2024-01-01',
       };
 
       const mockLocationAnalytics = {
@@ -546,7 +661,7 @@ class EnhancedOutreachAnalyticsTests {
         zip_code: '12345',
         total_activities: 10,
         total_people_reached: 50,
-        unique_team_members: 3
+        unique_team_members: 3,
       };
 
       const mockActivityTimeline = {
@@ -554,32 +669,50 @@ class EnhancedOutreachAnalyticsTests {
         outreach_date: '2024-01-01',
         organization_id: 'test-org',
         location_name: 'Test Location',
-        team_members: ['Member 1', 'Member 2']
+        team_members: ['Member 1', 'Member 2'],
       };
 
       // Validate mock data structures
-      const requiredTeamFields = ['id', 'name', 'organization_id', 'total_activities'];
+      const requiredTeamFields = [
+        'id',
+        'name',
+        'organization_id',
+        'total_activities',
+      ];
       for (const field of requiredTeamFields) {
         if (!(field in mockTeamMemberStats)) {
-          throw new Error(`Missing required field ${field} in team_member_stats structure`);
+          throw new Error(
+            `Missing required field ${field} in team_member_stats structure`,
+          );
         }
       }
 
       const requiredLocationFields = ['id', 'name', 'total_activities'];
       for (const field of requiredLocationFields) {
         if (!(field in mockLocationAnalytics)) {
-          throw new Error(`Missing required field ${field} in location_analytics structure`);
+          throw new Error(
+            `Missing required field ${field} in location_analytics structure`,
+          );
         }
       }
 
-      const requiredTimelineFields = ['outreach_id', 'outreach_date', 'organization_id'];
+      const requiredTimelineFields = [
+        'outreach_id',
+        'outreach_date',
+        'organization_id',
+      ];
       for (const field of requiredTimelineFields) {
         if (!(field in mockActivityTimeline)) {
-          throw new Error(`Missing required field ${field} in activity_timeline structure`);
+          throw new Error(
+            `Missing required field ${field} in activity_timeline structure`,
+          );
         }
       }
 
-      this.log('Analytics view structure validation completed (views not available)', 'success');
+      this.log(
+        'Analytics view structure validation completed (views not available)',
+        'success',
+      );
     } else {
       // Test cross-view data consistency if views exist
       await this.testCrossViewDataConsistency();
@@ -609,7 +742,10 @@ class EnhancedOutreachAnalyticsTests {
 
     // Skip consistency checks if views don't exist yet
     if (!teamStats || !timeline) {
-      this.log('Skipping cross-view consistency check - views not available', 'warning');
+      this.log(
+        'Skipping cross-view consistency check - views not available',
+        'warning',
+      );
       return;
     }
 
@@ -618,15 +754,19 @@ class EnhancedOutreachAnalyticsTests {
       for (const teamMember of teamStats) {
         if (teamMember.total_activities > 0) {
           // Count activities for this team member in timeline
-          const timelineActivities = timeline.filter(activity => 
-            activity.team_members && 
-            Array.isArray(activity.team_members) && 
-            activity.team_members.includes(teamMember.name)
+          const timelineActivities = timeline.filter(
+            (activity) =>
+              activity.team_members &&
+              Array.isArray(activity.team_members) &&
+              activity.team_members.includes(teamMember.name),
           );
 
           // Note: This is a partial check since we're only looking at limited data
           // In a full implementation, we'd need to query all data for accurate comparison
-          this.log(`Team member ${teamMember.name} consistency check passed`, 'success');
+          this.log(
+            `Team member ${teamMember.name} consistency check passed`,
+            'success',
+          );
         }
       }
     }
@@ -639,14 +779,14 @@ class EnhancedOutreachAnalyticsTests {
     const views = [
       'team_member_stats_v1',
       'location_analytics_v1',
-      'activity_timeline_v1'
+      'activity_timeline_v1',
     ];
 
     let anyViewExists = false;
 
     for (const view of views) {
       const startTime = Date.now();
-      
+
       const { data, error } = await this.supabase
         .from(view)
         .select('*')
@@ -654,7 +794,11 @@ class EnhancedOutreachAnalyticsTests {
 
       const queryTime = Date.now() - startTime;
 
-      if (error && (error.message.includes('does not exist') || error.message.includes('schema cache'))) {
+      if (
+        error &&
+        (error.message.includes('does not exist') ||
+          error.message.includes('schema cache'))
+      ) {
         this.log(`View ${view} not yet created`, 'warning');
         continue;
       }
@@ -673,7 +817,10 @@ class EnhancedOutreachAnalyticsTests {
     }
 
     if (!anyViewExists) {
-      this.log('No analytics views available yet - basic performance test skipped', 'warning');
+      this.log(
+        'No analytics views available yet - basic performance test skipped',
+        'warning',
+      );
     }
   }
 
@@ -681,9 +828,18 @@ class EnhancedOutreachAnalyticsTests {
   async testDataMigrationLogic() {
     // Test location parsing logic
     const locationTestCases = [
-      { input: 'Montana & Sioux', expected: { type: 'intersection', name: 'Montana & Sioux' } },
-      { input: '123 Main Street', expected: { type: 'address', name: '123 Main Street' } },
-      { input: 'Downtown Area', expected: { type: 'area', name: 'Downtown Area' } }
+      {
+        input: 'Montana & Sioux',
+        expected: { type: 'intersection', name: 'Montana & Sioux' },
+      },
+      {
+        input: '123 Main Street',
+        expected: { type: 'address', name: '123 Main Street' },
+      },
+      {
+        input: 'Downtown Area',
+        expected: { type: 'area', name: 'Downtown Area' },
+      },
     ];
 
     for (const testCase of locationTestCases) {
@@ -697,7 +853,7 @@ class EnhancedOutreachAnalyticsTests {
     const teamMemberTestCases = [
       { input: 'John Doe, Jane Smith', expected: ['John Doe', 'Jane Smith'] },
       { input: 'Alice & Bob', expected: ['Alice', 'Bob'] },
-      { input: 'Single Person', expected: ['Single Person'] }
+      { input: 'Single Person', expected: ['Single Person'] },
     ];
 
     for (const testCase of teamMemberTestCases) {
@@ -725,7 +881,7 @@ class EnhancedOutreachAnalyticsTests {
     // Test that enhanced columns exist (if migration has run)
     if (outreachData && outreachData.length > 0) {
       const sampleRecord = outreachData[0];
-      
+
       // Check for new columns (they might be null if migration hasn't run)
       const hasLocationId = 'location_id' in sampleRecord;
       const hasLegacyLocation = 'legacy_location' in sampleRecord;
@@ -747,30 +903,42 @@ class EnhancedOutreachAnalyticsTests {
       {
         name: 'outreach_logs_query',
         query: () => this.supabase.from('outreach_logs').select('*').limit(100),
-        maxTime: 2000
+        maxTime: 2000,
       },
       {
         name: 'dashboard_data_aggregation',
-        query: () => this.supabase.from('outreach_logs').select('zip_code, people_reached').limit(500),
-        maxTime: 3000
-      }
+        query: () =>
+          this.supabase
+            .from('outreach_logs')
+            .select('zip_code, people_reached')
+            .limit(500),
+        maxTime: 3000,
+      },
     ];
 
     for (const test of performanceTests) {
       const startTime = Date.now();
-      
+
       const { data, error } = await test.query();
-      
+
       const queryTime = Date.now() - startTime;
 
       if (error) {
-        throw new Error(`Performance test ${test.name} failed: ${error.message}`);
+        throw new Error(
+          `Performance test ${test.name} failed: ${error.message}`,
+        );
       }
 
       if (queryTime > test.maxTime) {
-        this.log(`Performance issue: ${test.name} took ${queryTime}ms (max: ${test.maxTime}ms)`, 'warning');
+        this.log(
+          `Performance issue: ${test.name} took ${queryTime}ms (max: ${test.maxTime}ms)`,
+          'warning',
+        );
       } else {
-        this.log(`Performance OK: ${test.name} completed in ${queryTime}ms`, 'success');
+        this.log(
+          `Performance OK: ${test.name} completed in ${queryTime}ms`,
+          'success',
+        );
       }
     }
   }
@@ -791,11 +959,15 @@ class EnhancedOutreachAnalyticsTests {
     if (existingOutreach && existingOutreach.length > 0) {
       for (const record of existingOutreach) {
         if (!record.id || !record.outreach_date || !record.zip_code) {
-          throw new Error(`Data integrity issue: missing required fields in record ${record.id}`);
+          throw new Error(
+            `Data integrity issue: missing required fields in record ${record.id}`,
+          );
         }
 
         if (record.people_reached < 0) {
-          throw new Error(`Data integrity issue: negative people_reached in record ${record.id}`);
+          throw new Error(
+            `Data integrity issue: negative people_reached in record ${record.id}`,
+          );
         }
       }
     }
@@ -809,16 +981,40 @@ class EnhancedOutreachAnalyticsTests {
     this.log('='.repeat(60), 'info');
 
     const tests = [
-      { name: 'Migration Scripts Validation', fn: () => this.testMigrationScripts() },
-      { name: 'Database Schema Validation', fn: () => this.testDatabaseSchema() },
-      { name: 'Team Member CRUD Operations', fn: () => this.testTeamMemberCRUDOperations() },
-      { name: 'Location Normalization and Deduplication', fn: () => this.testLocationNormalizationAndDeduplication() },
-      { name: 'Analytics Views Performance and Accuracy', fn: () => this.testAnalyticsViewPerformanceAndAccuracy() },
-      { name: 'Analytics Views Performance', fn: () => this.testAnalyticsViews() },
+      {
+        name: 'Migration Scripts Validation',
+        fn: () => this.testMigrationScripts(),
+      },
+      {
+        name: 'Database Schema Validation',
+        fn: () => this.testDatabaseSchema(),
+      },
+      {
+        name: 'Team Member CRUD Operations',
+        fn: () => this.testTeamMemberCRUDOperations(),
+      },
+      {
+        name: 'Location Normalization and Deduplication',
+        fn: () => this.testLocationNormalizationAndDeduplication(),
+      },
+      {
+        name: 'Analytics Views Performance and Accuracy',
+        fn: () => this.testAnalyticsViewPerformanceAndAccuracy(),
+      },
+      {
+        name: 'Analytics Views Performance',
+        fn: () => this.testAnalyticsViews(),
+      },
       { name: 'Data Migration Logic', fn: () => this.testDataMigrationLogic() },
-      { name: 'Core Functionality Integration', fn: () => this.testCoreFunctionality() },
-      { name: 'Performance Benchmarks', fn: () => this.testPerformanceBenchmarks() },
-      { name: 'Data Integrity Validation', fn: () => this.testDataIntegrity() }
+      {
+        name: 'Core Functionality Integration',
+        fn: () => this.testCoreFunctionality(),
+      },
+      {
+        name: 'Performance Benchmarks',
+        fn: () => this.testPerformanceBenchmarks(),
+      },
+      { name: 'Data Integrity Validation', fn: () => this.testDataIntegrity() },
     ];
 
     for (const test of tests) {
@@ -828,9 +1024,15 @@ class EnhancedOutreachAnalyticsTests {
     // Print summary
     this.log('='.repeat(60), 'info');
     this.log('TEST SUMMARY', 'info');
-    this.log(`Total Tests: ${this.testResults.passed + this.testResults.failed}`, 'info');
+    this.log(
+      `Total Tests: ${this.testResults.passed + this.testResults.failed}`,
+      'info',
+    );
     this.log(`Passed: ${this.testResults.passed}`, 'success');
-    this.log(`Failed: ${this.testResults.failed}`, this.testResults.failed > 0 ? 'error' : 'success');
+    this.log(
+      `Failed: ${this.testResults.failed}`,
+      this.testResults.failed > 0 ? 'error' : 'success',
+    );
 
     if (this.testResults.errors.length > 0) {
       this.log('FAILED TESTS:', 'error');
@@ -839,15 +1041,30 @@ class EnhancedOutreachAnalyticsTests {
       });
     }
 
-    const successRate = (this.testResults.passed / (this.testResults.passed + this.testResults.failed)) * 100;
-    this.log(`Success Rate: ${successRate.toFixed(1)}%`, successRate >= 80 ? 'success' : 'warning');
+    const successRate =
+      (this.testResults.passed /
+        (this.testResults.passed + this.testResults.failed)) *
+      100;
+    this.log(
+      `Success Rate: ${successRate.toFixed(1)}%`,
+      successRate >= 80 ? 'success' : 'warning',
+    );
 
     if (this.testResults.failed === 0) {
-      this.log('🎉 ALL TESTS PASSED! Enhanced Outreach Analytics is ready.', 'success');
+      this.log(
+        '🎉 ALL TESTS PASSED! Enhanced Outreach Analytics is ready.',
+        'success',
+      );
     } else if (successRate >= 80) {
-      this.log('✅ Most tests passed. Review warnings and failed tests.', 'warning');
+      this.log(
+        '✅ Most tests passed. Review warnings and failed tests.',
+        'warning',
+      );
     } else {
-      this.log('❌ Multiple test failures. Review implementation before deployment.', 'error');
+      this.log(
+        '❌ Multiple test failures. Review implementation before deployment.',
+        'error',
+      );
     }
 
     return this.testResults.failed === 0;
@@ -857,11 +1074,12 @@ class EnhancedOutreachAnalyticsTests {
 // Run tests if this script is executed directly
 if (require.main === module) {
   const tester = new EnhancedOutreachAnalyticsTests();
-  tester.runAllTests()
-    .then(success => {
+  tester
+    .runAllTests()
+    .then((success) => {
       process.exit(success ? 0 : 1);
     })
-    .catch(error => {
+    .catch((error) => {
       console.error('❌ Test runner error:', error);
       process.exit(1);
     });

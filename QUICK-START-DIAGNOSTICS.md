@@ -4,38 +4,38 @@
 
 ```sql
 -- 1. Check table columns
-SELECT 
+SELECT
   column_name,
   data_type,
   is_nullable,
   column_default
-FROM information_schema.columns 
-WHERE table_schema = 'public' 
-  AND table_name = 'outreach_logs' 
+FROM information_schema.columns
+WHERE table_schema = 'public'
+  AND table_name = 'outreach_logs'
 ORDER BY ordinal_position;
 
 -- 2. Check RLS policies
-SELECT 
+SELECT
   policyname,
   cmd,
   roles,
   qual as using_expression,
   with_check
-FROM pg_policies 
-WHERE schemaname = 'public' 
+FROM pg_policies
+WHERE schemaname = 'public'
   AND tablename = 'outreach_logs'
 ORDER BY cmd, policyname;
 
 -- 3. Check RLS is enabled
-SELECT 
+SELECT
   tablename,
   rowsecurity as rls_enabled
-FROM pg_tables 
-WHERE schemaname = 'public' 
+FROM pg_tables
+WHERE schemaname = 'public'
   AND tablename = 'outreach_logs';
 
 -- 4. Count logs by organization
-SELECT 
+SELECT
   ol.organization_id,
   o.name as org_name,
   o.slug as org_slug,
@@ -46,7 +46,7 @@ GROUP BY ol.organization_id, o.name, o.slug
 ORDER BY log_count DESC;
 
 -- 5. Check organizations with outreach enabled
-SELECT 
+SELECT
   id,
   name,
   slug,
@@ -57,7 +57,7 @@ WHERE outreach_enabled = true
 ORDER BY name;
 
 -- 6. Check user memberships
-SELECT 
+SELECT
   uo.user_id,
   u.email,
   o.name as org_name,
@@ -80,7 +80,7 @@ node find-test-users.js
 ## Step 3: Get User Emails (Run in Supabase SQL Editor)
 
 ```sql
-SELECT 
+SELECT
   id as user_id,
   email,
   created_at,
@@ -100,14 +100,14 @@ const TEST_USERS = {
     email: 'YOUR_EMAIL_HERE@example.com',
     password: 'YOUR_PASSWORD_HERE',
     label: 'RAEP User',
-    expectedOrg: 'recovery-alliance-el-paso'
+    expectedOrg: 'recovery-alliance-el-paso',
   },
   haven: {
     email: 'ANOTHER_EMAIL@example.com',
     password: 'ANOTHER_PASSWORD',
     label: 'Haven AI User',
-    expectedOrg: 'anonymous-haven-ai'
-  }
+    expectedOrg: 'anonymous-haven-ai',
+  },
 };
 ```
 
@@ -120,6 +120,7 @@ npx tsx test-outreach-logs.ts
 ## Expected Output
 
 ### ✅ Success Looks Like:
+
 ```
 🧪 Testing: RAEP User
 ✅ Sign In: Authenticated as user@example.com
@@ -132,6 +133,7 @@ npx tsx test-outreach-logs.ts
 ```
 
 ### ❌ Failure Looks Like:
+
 ```
 ❌ Sign In: Authentication failed
    Error: Invalid login credentials
@@ -140,23 +142,27 @@ npx tsx test-outreach-logs.ts
 ## Troubleshooting
 
 ### If No Organizations Exist:
+
 ```sql
 INSERT INTO organizations (name, slug, outreach_enabled, is_active)
-VALUES 
+VALUES
   ('Recovery Alliance El Paso', 'recovery-alliance-el-paso', true, true),
   ('Anonymous Haven AI', 'anonymous-haven-ai', true, true);
 ```
 
 ### If User Has No Organization:
+
 ```sql
 -- Get user ID and org ID from previous queries, then:
 INSERT INTO user_organizations (user_id, organization_id, role, is_active)
-VALUES 
+VALUES
   ('USER_UUID_HERE', 'ORG_UUID_HERE', 'peer', true);
 ```
 
 ### If RLS Policies Missing:
+
 Re-run the harmonization migration:
+
 ```bash
 # In Supabase dashboard, go to SQL Editor and run:
 supabase/migrations/20251126_harmonize_rls_and_prep_zip_sharing.sql
@@ -175,5 +181,6 @@ supabase/migrations/20251126_harmonize_rls_and_prep_zip_sharing.sql
 ## Success Criteria
 
 All tests should pass except:
+
 - ⚠️ DELETE may fail for non-admin users (this is expected and correct)
 - ✅ Cross-org access should be blocked (this is a security feature)
