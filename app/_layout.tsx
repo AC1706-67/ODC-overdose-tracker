@@ -41,6 +41,7 @@ function NavigationController() {
 
     const inAuth = segments[0] === 'login' || segments[0] === 'signup';
     const inOnboarding = segments[0] === 'onboarding';
+    const inPublicRoute = segments[0] === 'request-organization' || segments[0] === 'legal';
 
     console.log(
       '[Navigation] session:',
@@ -51,8 +52,8 @@ function NavigationController() {
       segments[0],
     );
 
-    // Not logged in → go to login
-    if (!session && !inAuth) {
+    // Not logged in → go to login (unless on public route)
+    if (!session && !inAuth && !inPublicRoute) {
       console.log('[Navigation] No session, redirecting to login');
       router.replace('/login');
       return;
@@ -121,6 +122,7 @@ export default function RootLayout() {
           >
             <Stack.Screen name="login" options={{ headerShown: false }} />
             <Stack.Screen name="signup" options={{ headerShown: false }} />
+            <Stack.Screen name="request-organization" options={{ headerShown: false }} />
             <Stack.Screen name="onboarding" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" />
           </Stack>

@@ -298,6 +298,35 @@ adb logcat | grep -i "compassionate"
 # See: verify-rls-harmonization.sql
 ```
 
+### Signup Health Check
+
+Run the automated signup test to verify the complete signup flow:
+
+```bash
+node manual-signup-test.js
+```
+
+This verifies:
+- ✅ Auth user creation
+- ✅ Profile creation
+- ✅ Organization assignment
+- ✅ Login functionality
+- ✅ Database integrity
+
+The test creates a real user account that you can use to test the app. Check the output for login credentials.
+
+**Database health check:**
+```sql
+-- Run in Supabase SQL Editor
+\i test-current-signup-flow.sql
+```
+
+This checks:
+- Default organization exists
+- RLS policies are correct
+- No orphaned users
+- Recent signups are complete
+
 ## Version History
 
 - **v1.5.2** (Current): Legal compliance, terms acceptance, code quality improvements

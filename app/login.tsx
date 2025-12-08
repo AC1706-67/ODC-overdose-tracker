@@ -36,24 +36,8 @@ export default function Login() {
         return;
       }
 
-      // Check if profile exists, if not create it (for users who confirmed email)
-      if (data.user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('id', data.user.id)
-          .single();
-
-        if (!profile) {
-          // Profile doesn't exist, create it now
-          await supabase.rpc('handle_new_user_signup_manual', {
-            user_id: data.user.id,
-            user_email: data.user.email,
-            user_metadata: data.user.user_metadata,
-          });
-        }
-      }
-
+      // Profile is created automatically by trigger on signup
+      // Just navigate to home
       router.replace('/');
     } catch (err) {
       console.error('Login error:', err);

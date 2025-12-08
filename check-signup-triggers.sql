@@ -1,49 +1,35 @@
--- Check all triggers on auth.users table
+-- Check if there are any triggers on auth.users
 SELECT 
+  'Auth Triggers' as check_type,
   trigger_name,
   event_manipulation,
-  action_statement,
-  action_timing
+  action_statement
 FROM information_schema.triggers
-WHERE event_object_table = 'users'
-  AND event_object_schema = 'auth'
-ORDER BY trigger_name;
+WHERE event_object_schema = 'auth'
+  AND event_object_table = 'users';
 
--- Check if handle_new_user function exists
+-- Check if there are any functions that might be called on signup
 SELECT 
+  'Signup Functions' as check_type,
   proname as function_name,
-  prosrc as function_body
+  pg_get_functiondef(oid) as definition
 FROM pg_proc
-WHERE proname IN ('handle_new_user', 'auto_assign_default_organization');
+WHERE proname LIKE '%signup%'
+  OR proname LIKE '%new_user%'
+  OR proname LIKE '%handle_new%';
 
--- Check profiles table structure
+-- Check recent auth users and their profiles
 SELECT 
-  column_name,
-  data_type,
-  is_nullable,
-  column_default
-FROM information_schema.columns
-WHERE table_schema = 'public'
-  AND table_name = 'profiles'
-ORDER BY ordinal_position;
-
--- Check user_organizations table structure
-SELECT 
-  column_name,
-  data_type,
-  is_nullable,
-  column_default
-FROM information_schema.columns
-WHERE table_schema = 'public'
-  AND table_name = 'user_organizations'
-ORDER BY ordinal_position;
-
--- Check if "Anonymous Haven AI" organization exists
-SELECT 
-  id,
-  name,
-  slug,
-  is_active
-FROM public.organizations
-WHERE slug IN ('haven-ai', 'anonymous-haven-ai', 'anonymous-haven')
-   OR name ILIKE '%anonymous%haven%';
+  'Recent Signups' as check_type,
+  au.email,
+  au.created_at as auth_created,
+  p.created_at as profile_created,
+  CASE 
+    WHEN p.created_at IS NOT NULL THEN 
+      EXTRACT(EPOCH FROM (p.created_at - au.created_at)) || ' seconds'
+    ELSE 'No profile'
+  END as time_diff
+FROM auth.users au
+LEFT JOIN public.profiles p ON au.id = p.id
+ORDER BY au.created_at DESC
+LIMIT 5;

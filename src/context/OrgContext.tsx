@@ -38,8 +38,8 @@ export function OrgProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<OrgStatus>('loading');
 
   useEffect(() => {
-    // Load user's organization on app start
-    (async () => {
+    // Load user's organization on app start AND when auth state changes
+    const loadUserOrg = async () => {
       try {
         // Check if user has skipped onboarding
         const hasSkipped = await AsyncStorage.getItem('onboardingSkipped');
@@ -145,7 +145,35 @@ export function OrgProvider({ children }: { children: ReactNode }) {
       } finally {
         setLoading(false);
       }
-    })();
+    };
+
+    // Load org data immediately
+    loadUserOrg();
+
+    // Listen for auth state changes (login/logout)
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('[OrgContext] Auth state changed:', event);
+        
+        if (event === 'SIGNED_IN' && session) {
+          // User just logged in - reload org data
+          setLoading(true);
+          await loadUserOrg();
+        } else if (event === 'SIGNED_OUT') {
+          // User logged out - clear org data
+          console.log('[OrgContext] User signed out, clearing org data');
+          setActiveOrg(null);
+          setActiveOrgIdState(null);
+          setStatus('no-org');
+          setLoading(false);
+        }
+      },
+    );
+
+    // Cleanup listener on unmount
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
   const loadOrgData = async (orgId: string) => {
