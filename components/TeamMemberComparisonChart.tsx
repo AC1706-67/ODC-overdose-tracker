@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Dimensions } from 'react-native';
 import { BarChart, PieChart } from 'react-native-chart-kit';
 import { TrendingUp, Users, Calendar, Award } from 'lucide-react-native';
+import { formatAnonymousName } from '@/src/utils/nameFormatter';
 
 const { width } = Dimensions.get('window');
 
@@ -75,11 +76,10 @@ export default function TeamMemberComparisonChart({
 
   // Activities Bar Chart Data
   const activitiesBarData = {
-    labels: topPerformers.map((member) =>
-      member.full_name.length > 8
-        ? member.full_name.substring(0, 8) + '...'
-        : member.full_name,
-    ),
+    labels: topPerformers.map((member) => {
+      const name = formatAnonymousName(member.full_name);
+      return name.length > 8 ? name.substring(0, 8) + '...' : name;
+    }),
     datasets: [
       {
         data: topPerformers.map((member) => member.activities_count),
@@ -89,11 +89,10 @@ export default function TeamMemberComparisonChart({
 
   // People Reached Bar Chart Data
   const peopleReachedBarData = {
-    labels: topPerformers.map((member) =>
-      member.full_name.length > 8
-        ? member.full_name.substring(0, 8) + '...'
-        : member.full_name,
-    ),
+    labels: topPerformers.map((member) => {
+      const name = formatAnonymousName(member.full_name);
+      return name.length > 8 ? name.substring(0, 8) + '...' : name;
+    }),
     datasets: [
       {
         data: topPerformers.map((member) => member.total_people_reached),
@@ -104,18 +103,18 @@ export default function TeamMemberComparisonChart({
   // Activity Distribution Pie Chart Data
   const activityDistributionData = topPerformers
     .slice(0, 6)
-    .map((member, index) => ({
-      name:
-        member.full_name.length > 12
-          ? member.full_name.substring(0, 12) + '...'
-          : member.full_name,
-      population: member.activities_count,
-      color: ['#3b82f6', '#ef4444', '#f59e0b', '#10b981', '#8b5cf6', '#f97316'][
-        index % 6
-      ],
-      legendFontColor: '#374151',
-      legendFontSize: 11,
-    }));
+    .map((member, index) => {
+      const name = formatAnonymousName(member.full_name);
+      return {
+        name: name.length > 12 ? name.substring(0, 12) + '...' : name,
+        population: member.activities_count,
+        color: ['#3b82f6', '#ef4444', '#f59e0b', '#10b981', '#8b5cf6', '#f97316'][
+          index % 6
+        ],
+        legendFontColor: '#374151',
+        legendFontSize: 11,
+      };
+    });
 
   // Calculate summary stats
   const totalActivities = teamMembers.reduce(
@@ -173,7 +172,7 @@ export default function TeamMemberComparisonChart({
           <Text style={styles.topPerformerTitle}>Top Performer</Text>
         </View>
         <Text style={styles.topPerformerName}>
-          {mostActiveTeamMember.full_name}
+          {formatAnonymousName(mostActiveTeamMember.full_name)}
         </Text>
         <View style={styles.topPerformerStats}>
           <Text style={styles.topPerformerStat}>
@@ -256,7 +255,7 @@ export default function TeamMemberComparisonChart({
                 <Text style={styles.rankingNumber}>#{index + 1}</Text>
               </View>
               <View style={styles.rankingInfo}>
-                <Text style={styles.rankingName}>{member.full_name}</Text>
+                <Text style={styles.rankingName}>{formatAnonymousName(member.full_name)}</Text>
                 <Text style={styles.rankingOrg}>
                   {member.organization_name}
                 </Text>

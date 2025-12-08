@@ -15,6 +15,7 @@ import TeamMemberPerformanceCard from './TeamMemberPerformanceCard';
 import TeamMemberActivityTimeline from './TeamMemberActivityTimeline';
 import TeamMemberComparisonChart from './TeamMemberComparisonChart';
 import LoadingSkeleton from './LoadingSkeleton';
+import { formatAnonymousName } from '@/src/utils/nameFormatter';
 
 interface TeamMemberStats {
   team_member_id: string;
@@ -281,7 +282,7 @@ export default function TeamMemberAnalytics() {
           >
             <Text style={styles.backButtonText}>← Back to Overview</Text>
           </TouchableOpacity>
-          <Text style={styles.individualTitle}>{selectedMember.full_name}</Text>
+          <Text style={styles.individualTitle}>{formatAnonymousName(selectedMember.full_name)}</Text>
           <Text style={styles.individualOrg}>
             {selectedMember.organization_name}
           </Text>
@@ -329,7 +330,7 @@ export default function TeamMemberAnalytics() {
             onPress={() => handleViewModeChange('individual')}
           >
             <Text style={styles.backButtonText}>
-              ← Back to {selectedMember.full_name}
+              ← Back to {formatAnonymousName(selectedMember.full_name)}
             </Text>
           </TouchableOpacity>
         </View>
@@ -337,7 +338,7 @@ export default function TeamMemberAnalytics() {
 
       <TeamMemberActivityTimeline
         activities={activities}
-        teamMemberName={selectedMember?.full_name}
+        teamMemberName={selectedMember ? formatAnonymousName(selectedMember.full_name) : undefined}
         loading={loading}
       />
     </ScrollView>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { UserCheck, Calendar, Users, TrendingUp } from 'lucide-react-native';
+import { formatAnonymousName } from '@/src/utils/nameFormatter';
 
 interface TeamMemberPerformanceCardProps {
   teamMember: {
@@ -48,7 +49,7 @@ export default function TeamMemberPerformanceCard({
         <View style={styles.nameSection}>
           <UserCheck size={20} color="#3b82f6" />
           <Text style={styles.name} numberOfLines={1}>
-            {teamMember.full_name}
+            {formatAnonymousName(teamMember.full_name)}
           </Text>
         </View>
         <View

@@ -24,6 +24,7 @@ import LoadingSkeleton from '@/components/LoadingSkeleton';
 import DashboardCharts from '@/components/DashboardCharts';
 import TeamMemberAnalytics from '@/components/TeamMemberAnalytics';
 import LocationAnalytics from '../../components/LocationAnalytics';
+import { formatAnonymousName } from '@/src/utils/nameFormatter';
 
 const { width } = Dimensions.get('window');
 
@@ -230,7 +231,7 @@ export default function OutreachDashboardScreen() {
           <View key={member.team_member_id} style={styles.teamMemberCard}>
             <View style={styles.teamMemberHeader}>
               <UserCheck size={16} color="#3b82f6" />
-              <Text style={styles.teamMemberName}>{member.full_name}</Text>
+              <Text style={styles.teamMemberName}>{formatAnonymousName(member.full_name)}</Text>
             </View>
             <View style={styles.teamMemberStats}>
               <Text style={styles.teamMemberStat}>
