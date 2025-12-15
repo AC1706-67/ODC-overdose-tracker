@@ -415,3 +415,70 @@ Compassionate Log supports community health initiatives by providing healthcare 
 ---
 
 **Built with care for public health and community safety**
+
+## Build Sharing Utility
+
+The project includes a convenient build sharing utility for distributing test builds to team members and stakeholders.
+
+### Quick Start
+
+```bash
+# Set your Expo token (get from https://expo.dev/settings/access-tokens)
+export EXPO_TOKEN=your_token_here
+
+# Generate share link and QR code for latest Android build
+npm run build:share
+```
+
+### What It Does
+
+- 🔍 Fetches the most recent successful Android EAS build
+- 📱 Prefers internal distribution builds for team testing
+- 🔗 Provides direct APK download URLs when available
+- 📱 Generates QR codes (terminal ASCII + PNG file)
+- 📋 Creates ready-to-send share messages with install warnings
+
+### Output
+
+The utility generates:
+- **Terminal QR Code**: Scan directly from your terminal
+- **PNG QR Code**: Saved to `./build-share/qr-latest-android.png`
+- **Share Message**: Copy-paste ready text with app info and install warnings
+- **Build Metadata**: ID, status, creation date, and URLs
+
+### Example Output
+
+```
+✅ Found build: f8e2d4c6-1234-5678-9abc-def012345678
+   Status: FINISHED
+   Created: 12/14/2025, 2:30:15 PM
+   Distribution: INTERNAL
+
+📋 Share Message:
+──────────────────────────────────────────────────
+Compassionate Log v1.5.2 (Android APK)
+You may see an 'unknown app' install warning—this is normal for test builds.
+Direct download: https://expo.dev/artifacts/eas/abc123...
+──────────────────────────────────────────────────
+
+📱 QR Code saved to: ./build-share/qr-latest-android.png
+🔗 Share URL: https://expo.dev/artifacts/eas/abc123...
+📄 Build page: https://expo.dev/accounts/dr.ecovery/projects/odc-overdose-tracker/builds/f8e2d4c6...
+✨ Direct APK download available!
+```
+
+### Tester Message Template
+
+```
+Compassionate LOG Android Test Build (v1.5.2)
+
+Scan the QR or use this link to install:
+[QR CODE IMAGE or BUILD PAGE URL]
+
+Android may warn "unknown app" — normal for test builds.
+If you get blocked, tell me what screen you're on and I'll walk you through it.
+```
+
+**Note**: This generates links for production APK builds. `exp://` links require Expo Go and are for development previews only.
+
+For detailed setup instructions, see [BUILD-SHARE-README.md](BUILD-SHARE-README.md).
