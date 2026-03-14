@@ -89,7 +89,7 @@ SELECT
   state,
   status,
   created_at
-FROM organization_certification_requests
+FROM certification_requests
 WHERE status = 'pending'
 ORDER BY created_at DESC;
 
@@ -98,7 +98,7 @@ SELECT
   '=== Summary ===' as section,
   (SELECT COUNT(*) FROM organizations WHERE is_certified = true) as certified_orgs,
   (SELECT COUNT(*) FROM organization_invite_codes WHERE is_active = true) as active_codes,
-  (SELECT COUNT(*) FROM organization_certification_requests WHERE status = 'pending') as pending_requests;
+  (SELECT COUNT(*) FROM certification_requests WHERE status = 'pending') as pending_requests;
 
 -- ============================================================================
 -- RESULT: Share code "RAEP2025" with your staff!

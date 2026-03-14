@@ -86,17 +86,16 @@ export async function submitCertificationRequest(
 
     // 3) Insert certification request
     const { error: certInsertError } = await supabase
-      .from('organization_certification_requests')
+      .from('certification_requests')
       .insert({
         organization_name: organizationName.trim(),
         organization_type: organizationType,
         city: city || null,
         state: state || null,
-        website: website || null,
         contact_name: contactName,
         contact_email: contactEmail,
         description: description || null,
-        created_by: user.id,
+        status: 'pending',
       });
 
     if (certInsertError) {
