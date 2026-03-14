@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import type { Session } from '@supabase/supabase-js';
 
 export function useSession() {
-  const [session, setSession] =
-    useState<
-      Awaited<ReturnType<typeof supabase.auth.getSession>>['data']['session']
-    >(null);
+  // undefined = still loading, null = no session, Session = authenticated
+  const [session, setSession] = useState<Session | null | undefined>(undefined);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));

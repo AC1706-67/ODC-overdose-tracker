@@ -1,11 +1,4 @@
 # build artifacts & caches
-android/.gradle/
-android/build/
-android/app/build/
-android/app/*.apk
-ios/Pods/
-ios/build/
-*.xcworkspace/xcuserdata/
 .expo/
 .expo-shared/
 dist/
