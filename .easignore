@@ -1,6 +1,8 @@
 # build artifacts & caches
 android/
 ios/
+supabase/
+.kiro/
 .expo/
 .expo-shared/
 dist/

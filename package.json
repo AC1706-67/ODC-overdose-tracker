@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "eas-build-pre-install": "find . -type f -exec chmod 644 {} + && find . -type d -exec chmod 755 {} +",
+    "eas-build-pre-install": "chmod -R 755 . 2>/dev/null || true",
     "dev": "EXPO_NO_TELEMETRY=1 expo start",
     "start": "EXPO_NO_TELEMETRY=1 expo start --reset-cache",
     "build:web": "expo export --platform web",
