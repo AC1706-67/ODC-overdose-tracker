@@ -1,4 +1,6 @@
 # build artifacts & caches
+android/
+ios/
 .expo/
 .expo-shared/
 dist/
