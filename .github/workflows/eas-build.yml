@@ -38,3 +38,6 @@ jobs:
 
       - name: Build
         run: eas build --platform android --profile ${{ github.event.inputs.profile }} --non-interactive
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
+          EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
