@@ -80,7 +80,7 @@ export default function Login() {
       />
 
       <TouchableOpacity
-        onPress={() => router.push('/signup')}
+        onPress={() => router.push('/user-type')}
         style={styles.linkContainer}
         disabled={loading}
       >

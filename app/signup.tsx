@@ -10,9 +10,12 @@ import {
   Pressable,
 } from 'react-native';
 import { supabase } from '@/lib/supabase';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 
 export default function SignUp() {
+  const { userType = 'organization' } = useLocalSearchParams<{ userType?: string }>();
+  const isIndividual = userType === 'individual';
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -21,7 +24,6 @@ export default function SignUp() {
   const router = useRouter();
 
   async function signUp() {
-    // Validation
     if (!email || !password || !confirmPassword) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
@@ -47,10 +49,10 @@ export default function SignUp() {
 
     setLoading(true);
     const now = new Date().toISOString();
-    
+
     try {
-      console.log('[Signup] Starting signup for:', email);
-      
+      console.log('[Signup] Starting signup for:', email, 'userType:', userType);
+
       // Step 1: Create auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
@@ -78,47 +80,34 @@ export default function SignUp() {
 
       console.log('[Signup] ✅ Auth user created:', authData.user.id);
 
-      // Step 2: Get or create default organization (Anonymous Haven AI)
-      const { data: defaultOrg, error: orgError } = await supabase
-        .from('organizations')
-        .select('id, name, slug')
-        .eq('slug', 'anonymous-haven-ai')
-        .single();
-
-      if (orgError || !defaultOrg) {
-        console.error('[Signup] Default org not found:', orgError);
-        Alert.alert(
-          'Setup Error',
-          'Default organization not found. Please contact support.\n\nError: ' + (orgError?.message || 'No org found')
-        );
-        return;
-      }
-
-      console.log('[Signup] ✅ Found default org:', defaultOrg.name);
-
-      // Step 3: Create profile
+      // Step 2: Create profile with user_type
       const { error: profileError } = await supabase
         .from('profiles')
         .insert({
           id: authData.user.id,
           email: email,
+          user_type: isIndividual ? 'individual' : 'organization',
           terms_accepted_at: now,
           privacy_accepted_at: now,
           accepted_version: '1.0',
         });
 
       if (profileError) {
-        // Check if profile already exists (might be created by trigger/webhook)
-        if (profileError.message.includes('duplicate key') || 
-            profileError.message.includes('unique constraint') ||
-            profileError.code === '23505') {
-          console.log('[Signup] ℹ️ Profile already exists (created automatically)');
-          // This is OK - profile exists, continue
+        if (
+          profileError.message.includes('duplicate key') ||
+          profileError.message.includes('unique constraint') ||
+          profileError.code === '23505'
+        ) {
+          console.log('[Signup] ℹ️ Profile already exists, updating user_type');
+          await supabase
+            .from('profiles')
+            .update({ user_type: isIndividual ? 'individual' : 'organization' })
+            .eq('id', authData.user.id);
         } else {
           console.error('[Signup] Profile creation error:', profileError);
           Alert.alert(
             'Profile Error',
-            'Failed to create profile.\n\nError: ' + profileError.message
+            'Failed to create profile.\n\nError: ' + profileError.message,
           );
           return;
         }
@@ -126,28 +115,51 @@ export default function SignUp() {
         console.log('[Signup] ✅ Profile created');
       }
 
-      // Step 4: Assign user to default organization
-      const { error: membershipError } = await supabase
-        .from('user_organizations')
-        .insert({
-          user_id: authData.user.id,
-          organization_id: defaultOrg.id,
-          role: 'Responder',
-          is_active: true,
-        });
+      // Step 3: Org assignment — only for organization users
+      if (!isIndividual) {
+        const { data: defaultOrg, error: orgError } = await supabase
+          .from('organizations')
+          .select('id, name, slug')
+          .eq('slug', 'anonymous-haven-ai')
+          .single();
 
-      if (membershipError) {
-        console.error('[Signup] Membership creation error:', membershipError);
-        Alert.alert(
-          'Organization Error',
-          'Failed to assign organization.\n\nError: ' + membershipError.message
-        );
-        return;
+        if (orgError || !defaultOrg) {
+          console.error('[Signup] Default org not found:', orgError);
+          Alert.alert(
+            'Setup Error',
+            'Default organization not found. Please contact support.\n\nError: ' +
+              (orgError?.message || 'No org found'),
+          );
+          return;
+        }
+
+        console.log('[Signup] ✅ Found default org:', defaultOrg.name);
+
+        const { error: membershipError } = await supabase
+          .from('user_organizations')
+          .insert({
+            user_id: authData.user.id,
+            organization_id: defaultOrg.id,
+            role: 'Responder',
+            is_active: true,
+          });
+
+        if (membershipError) {
+          console.error('[Signup] Membership creation error:', membershipError);
+          Alert.alert(
+            'Organization Error',
+            'Failed to assign organization.\n\nError: ' +
+              membershipError.message,
+          );
+          return;
+        }
+
+        console.log('[Signup] ✅ User assigned to org');
+      } else {
+        console.log('[Signup] ℹ️ Individual user — skipping org assignment');
       }
 
-      console.log('[Signup] ✅ User assigned to org');
-
-      // Step 5: Sign out so user can sign in properly
+      // Step 4: Sign out so user can sign in properly
       if (authData.session) {
         await supabase.auth.signOut();
       }
@@ -156,14 +168,15 @@ export default function SignUp() {
       Alert.alert('Success', 'Account created! You can now sign in.', [
         {
           text: 'OK',
-          onPress: () => router.back(),
+          onPress: () => router.replace('/login'),
         },
       ]);
     } catch (err: any) {
       console.error('[Signup] Unexpected error:', err);
       Alert.alert(
         'Error',
-        'An unexpected error occurred.\n\nError: ' + (err?.message || String(err))
+        'An unexpected error occurred.\n\nError: ' +
+          (err?.message || String(err)),
       );
     } finally {
       setLoading(false);
@@ -174,7 +187,9 @@ export default function SignUp() {
     <View style={styles.container}>
       <Text style={styles.title}>Create Account</Text>
       <Text style={styles.subtitle}>
-        Join Compassionate LOG to start recording acts of care
+        {isIndividual
+          ? 'Personal health tracker — no organization required'
+          : 'Organization account — full outreach and team features'}
       </Text>
 
       <TextInput
@@ -243,25 +258,6 @@ export default function SignUp() {
       >
         <Text style={styles.linkText}>
           Already have an account? <Text style={styles.linkBold}>Sign in</Text>
-        </Text>
-      </TouchableOpacity>
-
-      <View style={styles.divider}>
-        <View style={styles.dividerLine} />
-        <Text style={styles.dividerText}>OR</Text>
-        <View style={styles.dividerLine} />
-      </View>
-
-      <TouchableOpacity
-        onPress={() => router.push('/request-organization')}
-        style={styles.orgRequestButton}
-        disabled={loading}
-      >
-        <Text style={styles.orgRequestText}>
-          🏢 Request Organization Access
-        </Text>
-        <Text style={styles.orgRequestSubtext}>
-          For organizations wanting dedicated team access
         </Text>
       </TouchableOpacity>
     </View>
@@ -343,39 +339,5 @@ const styles = StyleSheet.create({
   link: {
     color: '#3b82f6',
     textDecorationLine: 'underline',
-  },
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 24,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#e5e7eb',
-  },
-  dividerText: {
-    marginHorizontal: 16,
-    fontSize: 14,
-    color: '#9ca3af',
-    fontWeight: '500',
-  },
-  orgRequestButton: {
-    backgroundColor: '#f3f4f6',
-    padding: 16,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderColor: '#e5e7eb',
-    alignItems: 'center',
-  },
-  orgRequestText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1f2937',
-    marginBottom: 4,
-  },
-  orgRequestSubtext: {
-    fontSize: 13,
-    color: '#6b7280',
   },
 });
