@@ -194,6 +194,7 @@ export default function SignUp() {
 
       <TextInput
         placeholder="Email"
+        placeholderTextColor="#6b7280"
         autoCapitalize="none"
         keyboardType="email-address"
         value={email}
@@ -204,6 +205,7 @@ export default function SignUp() {
 
       <TextInput
         placeholder="Password (min 6 characters)"
+        placeholderTextColor="#6b7280"
         secureTextEntry
         value={password}
         onChangeText={setPassword}
@@ -213,6 +215,7 @@ export default function SignUp() {
 
       <TextInput
         placeholder="Confirm Password"
+        placeholderTextColor="#6b7280"
         secureTextEntry
         value={confirmPassword}
         onChangeText={setConfirmPassword}
