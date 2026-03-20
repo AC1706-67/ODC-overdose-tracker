@@ -1,12 +1,31 @@
+import { useState, useEffect } from 'react';
 import { Tabs } from 'expo-router';
 import { Activity, BarChart3, Package, Settings } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useOrg } from '@/src/context/OrgContext';
 import { canUseOutreach } from '@/src/lib/featureAccess';
+import { useSession } from '@/hooks/useSession';
+import { supabase } from '@/lib/supabase';
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
   const { activeOrg, loading, status } = useOrg();
+  const session = useSession();
+  const [isIndividual, setIsIndividual] = useState(false);
+
+  // Fetch user_type from profile
+  useEffect(() => {
+    if (!session?.user?.id) return;
+    supabase
+      .from('profiles')
+      .select('user_type')
+      .eq('id', session.user.id)
+      .single()
+      .then(({ data }) => {
+        setIsIndividual(data?.user_type === 'individual');
+        console.log('[TabLayout] user_type:', data?.user_type);
+      });
+  }, [session?.user?.id]);
 
   // Simplified: if we have an activeOrg with an ID, user has an org
   const hasOrg = !loading && activeOrg && activeOrg.id;
@@ -18,10 +37,7 @@ export default function TabLayout() {
   console.log('[TabLayout] status:', status);
   console.log('[TabLayout] hasOrg:', hasOrg);
   console.log('[TabLayout] outreachEnabled:', outreachEnabled);
-  console.log(
-    '[TabLayout] activeOrg.outreach_enabled:',
-    activeOrg?.outreach_enabled,
-  );
+  console.log('[TabLayout] isIndividual:', isIndividual);
 
   if (loading) {
     return null; // Or a loading spinner
@@ -60,7 +76,7 @@ export default function TabLayout() {
         name="distribution"
         options={{
           title: 'Outreach',
-          href: outreachEnabled ? '/distribution' : null,
+          href: isIndividual ? null : outreachEnabled ? '/distribution' : null,
           tabBarIcon: ({ size, color }) => (
             <Package size={size} color={color} />
           ),
@@ -70,7 +86,7 @@ export default function TabLayout() {
         name="dashboard"
         options={{
           title: 'Dashboard',
-          href: hasOrg ? '/dashboard' : null,
+          href: isIndividual ? null : hasOrg ? '/dashboard' : null,
           tabBarIcon: ({ size, color }) => (
             <BarChart3 size={size} color={color} />
           ),
@@ -80,6 +96,7 @@ export default function TabLayout() {
         name="settings"
         options={{
           title: 'Settings',
+          href: isIndividual ? null : undefined,
           tabBarIcon: ({ size, color }) => (
             <Settings size={size} color={color} />
           ),

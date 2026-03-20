@@ -115,8 +115,8 @@ export default function SignUp() {
         console.log('[Signup] ✅ Profile created');
       }
 
-      // Step 3: Org assignment — only for organization users
-      if (!isIndividual) {
+      // Step 3: Org assignment — only for individual users (auto-assign to Anonymous Haven AI)
+      if (isIndividual) {
         const { data: defaultOrg, error: orgError } = await supabase
           .from('organizations')
           .select('id, name, slug')
@@ -140,7 +140,7 @@ export default function SignUp() {
           .insert({
             user_id: authData.user.id,
             organization_id: defaultOrg.id,
-            role: 'Responder',
+            role: 'Peer',
             is_active: true,
           });
 
@@ -154,9 +154,9 @@ export default function SignUp() {
           return;
         }
 
-        console.log('[Signup] ✅ User assigned to org');
+        console.log('[Signup] ✅ Individual user assigned to Anonymous Haven AI as Peer');
       } else {
-        console.log('[Signup] ℹ️ Individual user — skipping org assignment');
+        console.log('[Signup] ℹ️ Organization user — skipping org assignment, will go through onboarding');
       }
 
       // Step 4: Sign out so user can sign in properly
