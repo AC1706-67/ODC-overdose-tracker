@@ -14,6 +14,7 @@ export interface Organization {
   name: string;
   is_active: boolean;
   outreach_enabled?: boolean;
+  org_type?: 'full' | 'incident_only';
   features?: Record<string, any>;
 }
 
@@ -94,7 +95,7 @@ export function OrgProvider({ children }: { children: ReactNode }) {
             // Now get the full organization data
             const { data: org, error: orgError } = await supabase
               .from('organizations')
-              .select('id, slug, name, is_active, outreach_enabled')
+              .select('id, slug, name, is_active, outreach_enabled, org_type')
               .eq('id', membership.organization_id)
               .single();
 
@@ -180,7 +181,7 @@ export function OrgProvider({ children }: { children: ReactNode }) {
     try {
       const { data, error } = await supabase
         .from('organizations')
-        .select('id, slug, name, is_active, outreach_enabled')
+        .select('id, slug, name, is_active, outreach_enabled, org_type')
         .eq('id', orgId)
         .single();
 

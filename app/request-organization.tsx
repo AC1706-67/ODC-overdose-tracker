@@ -21,6 +21,7 @@ export default function RequestOrganization() {
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
   const [description, setDescription] = useState('');
+  const [accessTier, setAccessTier] = useState<'full' | 'incident_only'>('full');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -48,6 +49,7 @@ export default function RequestOrganization() {
           city: city || null,
           state: state || null,
           description: description || null,
+          org_type: accessTier,
           status: 'pending',
         });
 
@@ -185,6 +187,52 @@ export default function RequestOrganization() {
         editable={!loading}
       />
 
+      <Text style={styles.sectionTitle}>Access Level</Text>
+      <Text style={styles.label}>
+        How will your organization use Compassionate Log?{' '}
+        <Text style={styles.required}>*</Text>
+      </Text>
+
+      <TouchableOpacity
+        style={[
+          styles.tierCard,
+          accessTier === 'full' && styles.tierCardSelected,
+        ]}
+        onPress={() => setAccessTier('full')}
+        disabled={loading}
+      >
+        <View style={styles.tierRadio}>
+          {accessTier === 'full' && <View style={styles.tierRadioInner} />}
+        </View>
+        <View style={styles.tierText}>
+          <Text style={styles.tierTitle}>Full Access</Text>
+          <Text style={styles.tierDescription}>
+            Incidents, outreach logs, team management, locations, and dashboards
+          </Text>
+        </View>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[
+          styles.tierCard,
+          accessTier === 'incident_only' && styles.tierCardSelected,
+        ]}
+        onPress={() => setAccessTier('incident_only')}
+        disabled={loading}
+      >
+        <View style={styles.tierRadio}>
+          {accessTier === 'incident_only' && (
+            <View style={styles.tierRadioInner} />
+          )}
+        </View>
+        <View style={styles.tierText}>
+          <Text style={styles.tierTitle}>Incident Tracking Only</Text>
+          <Text style={styles.tierDescription}>
+            Health incident and overdose tracking only
+          </Text>
+        </View>
+      </TouchableOpacity>
+
       <View style={styles.buttonContainer}>
         <Button
           title={loading ? 'Submitting...' : 'Submit Request'}
@@ -288,5 +336,49 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#1e40af',
     lineHeight: 20,
+  },
+  tierCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f9fafb',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+    borderWidth: 2,
+    borderColor: '#e5e7eb',
+  },
+  tierCardSelected: {
+    borderColor: '#3b82f6',
+    backgroundColor: '#eff6ff',
+  },
+  tierRadio: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    borderColor: '#9ca3af',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
+  },
+  tierRadioInner: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#3b82f6',
+  },
+  tierText: {
+    flex: 1,
+  },
+  tierTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#111827',
+    marginBottom: 4,
+  },
+  tierDescription: {
+    fontSize: 13,
+    color: '#6b7280',
+    lineHeight: 18,
   },
 });

@@ -30,6 +30,10 @@ export default function TabLayout() {
   // Simplified: if we have an activeOrg with an ID, user has an org
   const hasOrg = !loading && activeOrg && activeOrg.id;
   const outreachEnabled = hasOrg && canUseOutreach(activeOrg);
+  const isIncidentOnly = activeOrg?.org_type === 'incident_only';
+
+  // Hide org-level tabs for individual users OR incident_only orgs
+  const hideOrgTabs = isIndividual || isIncidentOnly;
 
   // Debug logging
   console.log('[TabLayout] activeOrg:', JSON.stringify(activeOrg));
@@ -38,6 +42,7 @@ export default function TabLayout() {
   console.log('[TabLayout] hasOrg:', hasOrg);
   console.log('[TabLayout] outreachEnabled:', outreachEnabled);
   console.log('[TabLayout] isIndividual:', isIndividual);
+  console.log('[TabLayout] isIncidentOnly:', isIncidentOnly);
 
   if (loading) {
     return null; // Or a loading spinner
@@ -76,7 +81,7 @@ export default function TabLayout() {
         name="distribution"
         options={{
           title: 'Outreach',
-          href: isIndividual ? null : outreachEnabled ? '/distribution' : null,
+          href: hideOrgTabs ? null : outreachEnabled ? '/distribution' : null,
           tabBarIcon: ({ size, color }) => (
             <Package size={size} color={color} />
           ),
@@ -86,7 +91,7 @@ export default function TabLayout() {
         name="dashboard"
         options={{
           title: 'Dashboard',
-          href: isIndividual ? null : hasOrg ? '/dashboard' : null,
+          href: hideOrgTabs ? null : hasOrg ? '/dashboard' : null,
           tabBarIcon: ({ size, color }) => (
             <BarChart3 size={size} color={color} />
           ),
@@ -96,7 +101,7 @@ export default function TabLayout() {
         name="settings"
         options={{
           title: 'Settings',
-          href: isIndividual ? null : undefined,
+          href: hideOrgTabs ? null : undefined,
           tabBarIcon: ({ size, color }) => (
             <Settings size={size} color={color} />
           ),
