@@ -5,10 +5,10 @@ import { MapPin, Navigation, Users, Calendar } from 'lucide-react-native';
 interface LocationCoverage {
   location_id: string;
   location_label: string;
-  zip_code?: string;
+  postal_code?: string;
   city?: string;
   state?: string;
-  location_type: string;
+  kind: string;
   visits_count: number;
   active_days: number;
   total_people_reached: number;
@@ -72,7 +72,7 @@ export default function LocationCoverageMap({
           <View style={styles.locationDetails}>
             {item.city && item.state && (
               <Text style={styles.locationAddress} numberOfLines={1}>
-                {item.city}, {item.state} {item.zip_code}
+                {item.city}, {item.state} {item.postal_code}
               </Text>
             )}
 

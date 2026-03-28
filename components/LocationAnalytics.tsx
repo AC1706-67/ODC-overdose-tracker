@@ -26,10 +26,10 @@ const { width } = Dimensions.get('window');
 interface LocationCoverage {
   location_id: string;
   location_label: string;
-  zip_code?: string;
+  postal_code?: string;
   city?: string;
   state?: string;
-  location_type: string;
+  kind: string;
   visits_count: number;
   active_days: number;
   total_people_reached: number;
@@ -188,7 +188,7 @@ export default function LocationAnalytics() {
                   </Text>
                   {location.city && location.state && (
                     <Text style={styles.locationAddress}>
-                      {location.city}, {location.state} {location.zip_code}
+                      {location.city}, {location.state} {location.postal_code}
                     </Text>
                   )}
                 </View>

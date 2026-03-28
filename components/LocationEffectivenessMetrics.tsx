@@ -12,10 +12,10 @@ import {
 interface LocationCoverage {
   location_id: string;
   location_label: string;
-  zip_code?: string;
+  postal_code?: string;
   city?: string;
   state?: string;
-  location_type: string;
+  kind: string;
   visits_count: number;
   active_days: number;
   total_people_reached: number;

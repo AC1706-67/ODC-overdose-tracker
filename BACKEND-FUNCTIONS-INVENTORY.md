@@ -204,8 +204,8 @@ RETURNS TABLE (
 RETURNS TABLE (
   location_id uuid,
   location_name text,
-  location_type text,
-  zip_code text,
+  kind text,
+  postal_code text,
   total_activities bigint,
   total_kits_distributed bigint,
   total_people_reached bigint,

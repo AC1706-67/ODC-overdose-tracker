@@ -34,7 +34,7 @@ RETURNS TABLE (
   parsed_zip TEXT,
   parsed_city TEXT,
   parsed_state TEXT,
-  location_type TEXT
+  kind TEXT
 ) AS $
 DECLARE
   clean_location TEXT;
@@ -62,15 +62,15 @@ BEGIN
   IF clean_location ~* intersection_pattern THEN
     -- This looks like an intersection
     parsed_name := clean_location;
-    location_type := 'intersection';
+    kind := 'intersection';
   ELSIF clean_location ~* address_pattern THEN
     -- This looks like a street address
     parsed_name := clean_location;
-    location_type := 'address';
+    kind := 'address';
   ELSE
     -- General area or other location type
     parsed_name := clean_location;
-    location_type := 'area';
+    kind := 'area';
   END IF;
   
   -- Set extracted values
@@ -92,13 +92,13 @@ $ LANGUAGE plpgsql;
 -- =============================================
 
 -- Insert unique locations from existing outreach_logs
-INSERT INTO locations (name, zip_code, city, state, location_type, created_at)
+INSERT INTO locations (name, postal_code, city, state, kind, created_at)
 SELECT DISTINCT
   COALESCE(parsed.parsed_name, 'Unknown Location') as name,
-  parsed.parsed_zip as zip_code,
+  parsed.parsed_zip as postal_code,
   parsed.parsed_city as city,
   parsed.parsed_state as state,
-  COALESCE(parsed.location_type, 'area') as location_type,
+  COALESCE(parsed.kind, 'area') as kind,
   MIN(ol.created_at) as created_at
 FROM outreach_logs ol
 CROSS JOIN LATERAL parse_location_string(ol.location) as parsed
@@ -110,8 +110,8 @@ GROUP BY
   parsed.parsed_zip,
   parsed.parsed_city,
   parsed.parsed_state,
-  COALESCE(parsed.location_type, 'area')
-ON CONFLICT (name, COALESCE(zip_code, '')) 
+  COALESCE(parsed.kind, 'area')
+ON CONFLICT (name, COALESCE(postal_code, '')) 
 WHERE is_active = true 
 DO NOTHING;
 
@@ -128,7 +128,7 @@ WHERE ol.location IS NOT NULL
   AND trim(ol.location) != ''
   AND ol.location_id IS NULL
   AND l.name = COALESCE(parsed.parsed_name, 'Unknown Location')
-  AND COALESCE(l.zip_code, '') = COALESCE(parsed.parsed_zip, '')
+  AND COALESCE(l.postal_code, '') = COALESCE(parsed.parsed_zip, '')
   AND l.is_active = true;
 
 -- =============================================
@@ -136,12 +136,12 @@ WHERE ol.location IS NOT NULL
 -- =============================================
 
 -- Create a default "Unknown Location" record for outreach logs without location data
-INSERT INTO locations (name, location_type, created_at)
+INSERT INTO locations (name, kind, created_at)
 SELECT 'Unknown Location', 'area', MIN(created_at)
 FROM outreach_logs 
 WHERE (location IS NULL OR trim(location) = '') 
   AND location_id IS NULL
-ON CONFLICT (name, COALESCE(zip_code, '')) 
+ON CONFLICT (name, COALESCE(postal_code, '')) 
 WHERE is_active = true 
 DO NOTHING;
 
@@ -152,7 +152,7 @@ FROM locations l
 WHERE (ol.location IS NULL OR trim(ol.location) = '')
   AND ol.location_id IS NULL
   AND l.name = 'Unknown Location'
-  AND l.zip_code IS NULL
+  AND l.postal_code IS NULL
   AND l.is_active = true;
 
 -- =============================================

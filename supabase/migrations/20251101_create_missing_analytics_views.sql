@@ -37,10 +37,10 @@ CREATE OR REPLACE VIEW v_location_coverage_v1 AS
 SELECT 
   l.id as location_id,
   l.name as location_label,
-  l.zip_code,
+  l.postal_code,
   l.city,
   l.state,
-  l.location_type,
+  l.kind,
   COUNT(ol.id) as visits_count,
   COUNT(DISTINCT ol.outreach_date) as active_days,
   COALESCE(SUM(ol.people_reached), 0) as total_people_reached,
@@ -54,7 +54,7 @@ LEFT JOIN outreach_logs ol ON l.id = ol.location_id
   AND ol.outreach_date >= (CURRENT_DATE - INTERVAL '30 days')
 LEFT JOIN outreach_team_members otm ON ol.id = otm.outreach_log_id
 WHERE l.is_active = true
-GROUP BY l.id, l.name, l.zip_code, l.city, l.state, l.location_type, ol.organization_id;
+GROUP BY l.id, l.name, l.postal_code, l.city, l.state, l.kind, ol.organization_id;
 
 -- =============================================
 -- ACTIVITY TIMELINE VIEW
@@ -66,7 +66,7 @@ SELECT
   ol.organization_id,
   o.name as organization_name,
   l.name as location_name,
-  l.zip_code,
+  l.postal_code,
   ol.people_reached,
   ol.num_kits,
   ol.notes,
@@ -77,7 +77,7 @@ LEFT JOIN locations l ON ol.location_id = l.id
 LEFT JOIN outreach_team_members otm ON ol.id = otm.outreach_log_id
 LEFT JOIN team_members tm ON otm.team_member_id = tm.id
 WHERE ol.outreach_date >= (CURRENT_DATE - INTERVAL '30 days')
-GROUP BY ol.id, ol.outreach_date, ol.organization_id, o.name, l.name, l.zip_code, ol.people_reached, ol.num_kits, ol.notes
+GROUP BY ol.id, ol.outreach_date, ol.organization_id, o.name, l.name, l.postal_code, ol.people_reached, ol.num_kits, ol.notes
 ORDER BY ol.outreach_date DESC;
 
 -- =============================================

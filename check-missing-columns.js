@@ -33,19 +33,19 @@ async function checkMissingColumns() {
     console.log('✅ role_in_activity column exists');
   }
 
-  // Check if location_type was added to locations
+  // Check if kind was added to locations
   console.log('\n📋 LOCATIONS TABLE:');
   console.log('===================');
 
   const { error: locationTypeError } = await supabase
     .from('locations')
-    .select('location_type')
+    .select('kind')
     .limit(1);
 
   if (locationTypeError) {
-    console.log('❌ location_type column missing:', locationTypeError.message);
+    console.log('❌ kind column missing:', locationTypeError.message);
   } else {
-    console.log('✅ location_type column exists');
+    console.log('✅ kind column exists');
   }
 
   // Test a simple insert to see if it works

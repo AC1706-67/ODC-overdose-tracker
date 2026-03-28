@@ -16,10 +16,10 @@ interface Location {
   id: string;
   name: string;
   address?: string;
-  zip_code?: string;
+  postal_code?: string;
   city?: string;
   state?: string;
-  location_type: 'intersection' | 'address' | 'area';
+  kind: 'intersection' | 'address' | 'area';
   is_active: boolean;
 }
 
@@ -95,10 +95,10 @@ export default function LocationPicker({
         id: data.id,
         name: data.name,
         address: data.address,
-        zip_code: data.zip_code,
+        postal_code: data.postal_code,
         city: data.city,
         state: data.state,
-        location_type: data.location_type,
+        kind: data.kind,
         is_active: data.is_active,
       };
 
@@ -175,14 +175,14 @@ export default function LocationPicker({
                   <Text style={styles.locationCity}>
                     {selectedLocation.city}
                     {selectedLocation.state && `, ${selectedLocation.state}`}
-                    {selectedLocation.zip_code &&
-                      ` ${selectedLocation.zip_code}`}
+                    {selectedLocation.postal_code &&
+                      ` ${selectedLocation.postal_code}`}
                   </Text>
                 )}
                 <Text style={styles.locationType}>
                   {
                     locationTypes.find(
-                      (t) => t.value === selectedLocation.location_type,
+                      (t) => t.value === selectedLocation.kind,
                     )?.label
                   }
                 </Text>
@@ -364,7 +364,7 @@ export default function LocationPicker({
                         <Text style={styles.locationItemType}>
                           {
                             locationTypes.find(
-                              (t) => t.value === location.location_type,
+                              (t) => t.value === location.kind,
                             )?.label
                           }
                         </Text>
@@ -374,9 +374,9 @@ export default function LocationPicker({
                             {location.state && `, ${location.state}`}
                           </Text>
                         )}
-                        {location.zip_code && (
+                        {location.postal_code && (
                           <Text style={styles.locationItemZip}>
-                            • {location.zip_code}
+                            • {location.postal_code}
                           </Text>
                         )}
                       </View>

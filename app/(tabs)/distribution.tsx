@@ -63,10 +63,10 @@ interface Location {
   id: string;
   name: string;
   address?: string;
-  zip_code?: string;
+  postal_code?: string;
   city?: string;
   state?: string;
-  location_type: 'intersection' | 'address' | 'area';
+  kind: 'intersection' | 'address' | 'area';
   is_active: boolean;
 }
 

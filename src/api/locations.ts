@@ -23,8 +23,8 @@ export async function createLocation(
     address: string | null;
     city: string | null;
     state: string | null;
-    zip_code: string | null;
-    location_type: string;
+    postal_code: string | null;
+    kind: string;
     is_active: boolean;
     created_at: string;
   };

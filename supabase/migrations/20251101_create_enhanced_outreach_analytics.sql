@@ -37,17 +37,17 @@ CREATE TABLE IF NOT EXISTS locations (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name varchar(255) NOT NULL,
   address text,
-  zip_code varchar(10),
+  postal_code varchar(10),
   city varchar(100),
   state varchar(50),
   coordinates point, -- For future mapping features
-  location_type varchar(50) DEFAULT 'area' CHECK (location_type IN ('intersection', 'address', 'area')),
+  kind varchar(50) DEFAULT 'area' CHECK (kind IN ('intersection', 'address', 'area')),
   is_active boolean DEFAULT true,
   created_at timestamptz DEFAULT now(),
   
   -- Constraints
   CONSTRAINT locations_name_not_empty CHECK (length(trim(name)) > 0),
-  CONSTRAINT locations_zip_format CHECK (zip_code IS NULL OR zip_code ~ '^[0-9]{5}(-[0-9]{4})?$')
+  CONSTRAINT locations_zip_format CHECK (postal_code IS NULL OR postal_code ~ '^[0-9]{5}(-[0-9]{4})?$')
 );
 
 -- =============================================
@@ -139,9 +139,9 @@ CREATE INDEX IF NOT EXISTS team_members_org_active_idx ON team_members(organizat
 
 -- Locations indexes
 CREATE INDEX IF NOT EXISTS locations_name_idx ON locations(name);
-CREATE INDEX IF NOT EXISTS locations_zip_code_idx ON locations(zip_code);
+CREATE INDEX IF NOT EXISTS locations_postal_code_idx ON locations(postal_code);
 CREATE INDEX IF NOT EXISTS locations_city_state_idx ON locations(city, state);
-CREATE INDEX IF NOT EXISTS locations_type_idx ON locations(location_type);
+CREATE INDEX IF NOT EXISTS locations_kind_idx ON locations(kind);
 CREATE INDEX IF NOT EXISTS locations_active_idx ON locations(is_active);
 CREATE INDEX IF NOT EXISTS locations_coordinates_idx ON locations USING GIST(coordinates);
 
@@ -158,16 +158,16 @@ CREATE INDEX IF NOT EXISTS outreach_logs_females_reached_idx ON outreach_logs(fe
 
 -- Composite indexes for common query patterns
 CREATE INDEX IF NOT EXISTS team_members_org_name_active_idx ON team_members(organization_id, name, is_active);
-CREATE INDEX IF NOT EXISTS locations_zip_name_idx ON locations(zip_code, name);
+CREATE INDEX IF NOT EXISTS locations_zip_name_idx ON locations(postal_code, name);
 CREATE INDEX IF NOT EXISTS outreach_logs_org_date_location_idx ON outreach_logs(organization_id, outreach_date, location_id);
 
 -- =============================================
 -- CREATE UNIQUE CONSTRAINTS
 -- =============================================
 
--- Prevent duplicate locations with same name and zip_code
+-- Prevent duplicate locations with same name and postal_code
 CREATE UNIQUE INDEX IF NOT EXISTS locations_name_zip_unique_idx 
-ON locations(name, COALESCE(zip_code, '')) 
+ON locations(name, COALESCE(postal_code, '')) 
 WHERE is_active = true;
 
 -- =============================================
@@ -478,7 +478,7 @@ CREATE OR REPLACE FUNCTION get_location_analytics(
 RETURNS TABLE (
   location_id uuid,
   location_name text,
-  zip_code text,
+  postal_code text,
   city text,
   total_activities bigint,
   total_people_reached bigint,
@@ -492,7 +492,7 @@ BEGIN
   SELECT 
     l.id,
     l.name,
-    l.zip_code,
+    l.postal_code,
     l.city,
     COUNT(ol.id) as total_activities,
     COALESCE(SUM(ol.people_reached), 0) as total_people_reached,
@@ -506,7 +506,7 @@ BEGIN
     AND (org_uuid IS NULL OR ol.organization_id = org_uuid)
   LEFT JOIN outreach_team_members otm ON ol.id = otm.outreach_log_id
   WHERE l.is_active = true
-  GROUP BY l.id, l.name, l.zip_code, l.city
+  GROUP BY l.id, l.name, l.postal_code, l.city
   HAVING COUNT(ol.id) > 0 OR org_uuid IS NULL
   ORDER BY total_activities DESC, l.name;
 END;
@@ -546,7 +546,7 @@ CREATE OR REPLACE VIEW location_analytics_v1 AS
 SELECT 
   l.id,
   l.name,
-  l.zip_code,
+  l.postal_code,
   l.city,
   COUNT(ol.id) as total_activities,
   COALESCE(SUM(ol.people_reached), 0) as total_people_reached,
@@ -557,7 +557,7 @@ SELECT
 FROM locations l
 LEFT JOIN outreach_logs ol ON l.id = ol.location_id
 LEFT JOIN outreach_team_members otm ON ol.id = otm.outreach_log_id
-GROUP BY l.id, l.name, l.zip_code, l.city;
+GROUP BY l.id, l.name, l.postal_code, l.city;
 
 -- Activity Timeline View
 CREATE OR REPLACE VIEW activity_timeline_v1 AS
@@ -567,7 +567,7 @@ SELECT
   ol.organization_id,
   o.name as organization_name,
   l.name as location_name,
-  l.zip_code,
+  l.postal_code,
   ol.people_reached,
   ol.num_kits,
   ARRAY_AGG(tm.name ORDER BY tm.name) FILTER (WHERE tm.name IS NOT NULL) as team_members,
@@ -577,7 +577,7 @@ LEFT JOIN organizations o ON ol.organization_id = o.id
 LEFT JOIN locations l ON ol.location_id = l.id
 LEFT JOIN outreach_team_members otm ON ol.id = otm.outreach_log_id
 LEFT JOIN team_members tm ON otm.team_member_id = tm.id
-GROUP BY ol.id, ol.outreach_date, ol.organization_id, o.name, l.name, l.zip_code, ol.people_reached, ol.num_kits, ol.notes
+GROUP BY ol.id, ol.outreach_date, ol.organization_id, o.name, l.name, l.postal_code, ol.people_reached, ol.num_kits, ol.notes
 ORDER BY ol.outreach_date DESC;
 
 -- =============================================

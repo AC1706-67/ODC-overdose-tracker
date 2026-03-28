@@ -35,7 +35,7 @@ BEGIN
   INSERT INTO public.locations (
     name,
     organization_id,
-    location_type,
+    kind,
     is_active
   )
   VALUES (
