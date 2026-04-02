@@ -1,176 +1,101 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   SafeAreaView,
-  FlatList,
+  TextInput,
   ActivityIndicator,
   Alert,
 } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-
+import { supabase } from '@/src/lib/supabase';
 import { useOrg } from '@/src/context/OrgContext';
-import {
-  getJoinableCertifiedOrganizations,
-  joinOrganization,
-  getMyOrganizations,
-} from '@/src/api/orgMembership';
-
-type CertifiedOrg = {
-  id: string;
-  name: string;
-  slug: string;
-  type: string;
-  city?: string;
-  state?: string;
-  description?: string;
-  is_demo_organization?: boolean;
-};
 
 export default function SelectOrgScreen() {
   const { setActiveOrgId } = useOrg();
-  const [organizations, setOrganizations] = useState<CertifiedOrg[]>([]);
-  const [myOrgIds, setMyOrgIds] = useState<Set<string>>(new Set());
-  const [loading, setLoading] = useState(true);
-  const [joining, setJoining] = useState<string | null>(null);
+  const [code, setCode] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  const handleSubmitCode = async () => {
+    if (!code.trim()) {
+      Alert.alert('Enter a code', 'Please enter your invite code.');
+      return;
+    }
 
-  const loadData = async () => {
+    setLoading(true);
     try {
-      // Load both joinable orgs and user's current memberships
-      const [orgs, myOrgs] = await Promise.all([
-        getJoinableCertifiedOrganizations(),
-        getMyOrganizations(),
-      ]);
+      // 1. Look up the invite code
+      const { data: invite, error: inviteError } = await supabase
+        .from('organization_invite_codes')
+        .select('*')
+        .eq('code', code.trim().toUpperCase())
+        .eq('is_active', true)
+        .single();
 
-      setOrganizations(orgs);
-      setMyOrgIds(new Set(myOrgs.map((m) => m.organization_id)));
+      if (inviteError || !invite) {
+        Alert.alert('Invalid Code', 'That invite code is not valid or has expired.');
+        return;
+      }
+
+      // 2. Check max uses
+      if (invite.max_uses && invite.current_uses >= invite.max_uses) {
+        Alert.alert('Code Expired', 'This invite code has reached its maximum uses.');
+        return;
+      }
+
+      // 3. Check expiration
+      if (invite.expires_at && new Date(invite.expires_at) < new Date()) {
+        Alert.alert('Code Expired', 'This invite code has expired.');
+        return;
+      }
+
+      // 4. Get current user
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      // 5. Insert into user_organizations
+      const { error: memberError } = await supabase
+        .from('user_organizations')
+        .insert({
+          user_id: user.id,
+          organization_id: invite.organization_id,
+          role: invite.role,
+        });
+
+      if (memberError && memberError.code !== '23505') {
+        throw memberError;
+      }
+
+      // 6. Increment current_uses
+      await supabase
+        .from('organization_invite_codes')
+        .update({ current_uses: invite.current_uses + 1 })
+        .eq('id', invite.id);
+
+      // 7. Record redemption
+      await supabase.from('organization_invite_redemptions').insert({
+        invite_code_id: invite.id,
+        user_id: user.id,
+        organization_id: invite.organization_id,
+        role: invite.role,
+      });
+
+      // 8. Set active org and navigate
+      await setActiveOrgId(invite.organization_id);
+      Alert.alert('Welcome!', 'You have successfully joined the organization.', [
+        { text: "Let's go!", onPress: () => router.replace('/(tabs)') },
+      ]);
     } catch (error: any) {
-      console.error('Error loading organizations:', error);
-      Alert.alert(
-        'Error',
-        error.message ||
-          'Something went wrong loading organizations. Please try again.',
-      );
+      console.error('[InviteCode] Error:', error);
+      Alert.alert('Error', error.message || 'Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleJoinOrg = async (orgId: string, orgName: string) => {
-    setJoining(orgId);
-    try {
-      const isMember = myOrgIds.has(orgId);
-
-      if (isMember) {
-        // User is already a member, just set as active org
-        console.log(
-          '[SelectOrg] User is already a member, setting as active org',
-        );
-        await setActiveOrgId(orgId);
-
-        Alert.alert('Success!', `Switched to ${orgName}`, [
-          { text: 'OK', onPress: () => router.replace('/(tabs)') },
-        ]);
-      } else {
-        // User is not a member, join the organization first
-        console.log('[SelectOrg] User is not a member, joining organization');
-        await joinOrganization(orgId, 'Responder');
-
-        // Set as active org
-        await setActiveOrgId(orgId);
-
-        Alert.alert('Success!', `You have joined ${orgName}`, [
-          { text: 'OK', onPress: () => router.replace('/(tabs)') },
-        ]);
-      }
-    } catch (error: any) {
-      console.error('Error joining organization:', error);
-
-      // Check if user needs to accept terms
-      if (error.message === 'TERMS_NOT_ACCEPTED') {
-        Alert.alert(
-          'Terms Required',
-          'You must accept our Terms of Service and Privacy Policy before joining an organization.',
-          [
-            { text: 'Cancel', style: 'cancel' },
-            {
-              text: 'Accept Terms',
-              onPress: () => router.push('/consent'),
-            },
-          ],
-        );
-      } else {
-        Alert.alert('Error', error.message || 'Failed to join organization');
-      }
-    } finally {
-      setJoining(null);
-    }
-  };
-
-  const renderOrganization = ({ item }: { item: CertifiedOrg }) => {
-    const isMember = myOrgIds.has(item.id);
-    const isDemo = item.is_demo_organization === true;
-
-    return (
-      <View style={styles.orgCard}>
-        <View style={styles.orgInfo}>
-          <View style={styles.orgHeader}>
-            <Text style={styles.orgName}>{item.name}</Text>
-            {isDemo && (
-              <View style={styles.demoBadge}>
-                <Ionicons name="flask" size={12} color="#7c3aed" />
-                <Text style={styles.demoText}>Demo</Text>
-              </View>
-            )}
-            {isMember && (
-              <View style={styles.memberBadge}>
-                <Ionicons name="checkmark-circle" size={14} color="#059669" />
-                <Text style={styles.memberText}>Member</Text>
-              </View>
-            )}
-          </View>
-          {item.city && item.state && (
-            <Text style={styles.orgLocation}>
-              {item.city}, {item.state}
-            </Text>
-          )}
-          {item.description && (
-            <Text style={styles.orgDescription} numberOfLines={2}>
-              {item.description}
-            </Text>
-          )}
-          {isDemo && (
-            <Text style={styles.demoExplanation}>
-              Use this organization to test the app before going live.
-            </Text>
-          )}
-          <Text style={styles.orgType}>{item.type}</Text>
-        </View>
-        <TouchableOpacity
-          style={[
-            isMember ? styles.selectButton : styles.joinButton,
-            joining === item.id && styles.joinButtonDisabled,
-          ]}
-          onPress={() => handleJoinOrg(item.id, item.name)}
-          disabled={joining !== null}
-        >
-          {joining === item.id ? (
-            <ActivityIndicator color="#ffffff" size="small" />
-          ) : (
-            <Text style={styles.joinButtonText}>
-              {isMember ? 'Select' : 'Join'}
-            </Text>
-          )}
-        </TouchableOpacity>
-      </View>
-    );
   };
 
   return (
@@ -179,41 +104,45 @@ export default function SelectOrgScreen() {
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color="#111827" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Select Organization</Text>
+        <Text style={styles.headerTitle}>Join Organization</Text>
         <View style={{ width: 24 }} />
       </View>
 
-      {loading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#2563eb" />
-        </View>
-      ) : organizations.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Ionicons name="business-outline" size={64} color="#d1d5db" />
-          <Text style={styles.emptyText}>
-            No certified organizations are available yet.
-          </Text>
-          <Text style={styles.emptySubtext}>
-            Check back later or request certification for your organization.
-          </Text>
-        </View>
-      ) : (
-        <FlatList
-          data={organizations}
-          renderItem={renderOrganization}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.list}
+      <View style={styles.content}>
+        <Ionicons name="key-outline" size={64} color="#2563eb" style={styles.icon} />
+        <Text style={styles.title}>Enter Your Invite Code</Text>
+        <Text style={styles.subtitle}>
+          Ask your organization administrator for your invite code to get started.
+        </Text>
+
+        <TextInput
+          style={styles.input}
+          placeholder="e.g. RALLY2026"
+          placeholderTextColor="#9ca3af"
+          value={code}
+          onChangeText={setCode}
+          autoCapitalize="characters"
+          autoCorrect={false}
         />
-      )}
+
+        <TouchableOpacity
+          style={[styles.button, loading && styles.buttonDisabled]}
+          onPress={handleSubmitCode}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#ffffff" />
+          ) : (
+            <Text style={styles.buttonText}>Join Organization</Text>
+          )}
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f9fafb',
-  },
+  container: { flex: 1, backgroundColor: '#f9fafb' },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -223,139 +152,44 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#e5e7eb',
   },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
+  headerTitle: { fontSize: 18, fontWeight: '600', color: '#111827' },
+  content: { flex: 1, padding: 24, alignItems: 'center', justifyContent: 'center' },
+  icon: { marginBottom: 24 },
+  title: {
+    fontSize: 22,
+    fontWeight: '700',
     color: '#111827',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-  },
-  emptyText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#374151',
-    marginTop: 16,
+    marginBottom: 8,
     textAlign: 'center',
   },
-  emptySubtext: {
-    fontSize: 14,
+  subtitle: {
+    fontSize: 15,
     color: '#6b7280',
-    marginTop: 8,
     textAlign: 'center',
-    paddingHorizontal: 32,
+    marginBottom: 32,
+    lineHeight: 22,
   },
-  list: {
-    padding: 16,
-  },
-  orgCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  input: {
+    width: '100%',
     backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 10,
     padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  orgInfo: {
-    flex: 1,
-    marginRight: 12,
-  },
-  orgHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  orgName: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 20,
+    fontWeight: '700',
     color: '#111827',
-    marginRight: 8,
+    textAlign: 'center',
+    letterSpacing: 4,
+    marginBottom: 16,
   },
-  memberBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#d1fae5',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 10,
-  },
-  memberText: {
-    fontSize: 11,
-    color: '#059669',
-    marginLeft: 3,
-    fontWeight: '500',
-  },
-  demoBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ede9fe',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 10,
-    marginLeft: 6,
-  },
-  demoText: {
-    fontSize: 11,
-    color: '#7c3aed',
-    marginLeft: 3,
-    fontWeight: '500',
-  },
-  demoExplanation: {
-    fontSize: 12,
-    color: '#7c3aed',
-    fontStyle: 'italic',
-    marginBottom: 4,
-  },
-  orgLocation: {
-    fontSize: 14,
-    color: '#6b7280',
-    marginBottom: 4,
-  },
-  orgDescription: {
-    fontSize: 14,
-    color: '#6b7280',
-    marginBottom: 4,
-  },
-  orgType: {
-    fontSize: 12,
-    color: '#9ca3af',
-    fontStyle: 'italic',
-  },
-  joinButton: {
-    backgroundColor: '#059669',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
-    minWidth: 80,
-    alignItems: 'center',
-  },
-  selectButton: {
+  button: {
+    width: '100%',
     backgroundColor: '#2563eb',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
-    minWidth: 80,
+    padding: 16,
+    borderRadius: 10,
     alignItems: 'center',
   },
-  joinButtonDisabled: {
-    opacity: 0.6,
-  },
-  joinButtonText: {
-    color: '#ffffff',
-    fontSize: 14,
-    fontWeight: '600',
-  },
+  buttonDisabled: { opacity: 0.6 },
+  buttonText: { color: '#ffffff', fontSize: 16, fontWeight: '600' },
 });
