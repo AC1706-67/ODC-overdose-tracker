@@ -38,7 +38,7 @@ export default function DashboardCharts({ cards }: DashboardChartsProps) {
   const supplyTypesData = [
     {
       name: 'Narcan',
-      population: Math.max(1, Math.round(cards.kits_distributed * 0.3)),
+      population: Math.max(1, Math.round(cards.kits_distributed * 0.35)),
       color: '#dc2626',
       legendFontColor: '#374151',
       legendFontSize: 12,
@@ -52,21 +52,14 @@ export default function DashboardCharts({ cards }: DashboardChartsProps) {
     },
     {
       name: 'Feminine',
-      population: Math.max(1, Math.round(cards.kits_distributed * 0.2)),
+      population: Math.max(1, Math.round(cards.kits_distributed * 0.25)),
       color: '#ec4899',
       legendFontColor: '#374151',
       legendFontSize: 12,
     },
     {
-      name: 'Safe Sex',
-      population: Math.max(1, Math.round(cards.kits_distributed * 0.15)),
-      color: '#7c3aed',
-      legendFontColor: '#374151',
-      legendFontSize: 12,
-    },
-    {
       name: 'Wound Care',
-      population: Math.max(1, Math.round(cards.kits_distributed * 0.1)),
+      population: Math.max(1, Math.round(cards.kits_distributed * 0.15)),
       color: '#059669',
       legendFontColor: '#374151',
       legendFontSize: 12,

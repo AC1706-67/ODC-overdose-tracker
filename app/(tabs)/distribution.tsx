@@ -25,7 +25,6 @@ const SUPPLY_TYPES = [
   'Narcan',
   'Feminine Hygiene',
   'Hygiene',
-  'Safe Sex',
   'Wound Care',
 ];
 const COMMON_ZIP_CODES = [
