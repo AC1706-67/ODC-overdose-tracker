@@ -24,67 +24,11 @@ export async function submitCertificationRequest(
       organizationType,
       city,
       state,
-      website,
       contactName,
       contactEmail,
       description,
     } = values;
 
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      throw new Error('You must be logged in to submit a request.');
-    }
-
-    // 1) Look up org by name
-    const { data: existingOrgs, error: orgLookupError } = await supabase
-      .from('organizations')
-      .select('id')
-      .eq('name', organizationName.trim())
-      .limit(1);
-
-    if (orgLookupError) {
-      console.error('Org lookup error', orgLookupError);
-      throw orgLookupError;
-    }
-
-    // Check if org exists or create it
-    if (existingOrgs && existingOrgs.length > 0) {
-      // Org already exists, we'll use it for the certification request
-    } else {
-      // 2) Create org
-      const slug = organizationName
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-|-$/g, '');
-
-      const { error: orgInsertError } = await supabase
-        .from('organizations')
-        .insert({
-          name: organizationName.trim(),
-          slug,
-          type: organizationType,
-          city: city || null,
-          state: state || null,
-          website: website || null,
-          contact_name: contactName,
-          contact_email: contactEmail,
-          is_certified: false,
-          is_public: false,
-          status: 'pending',
-          created_by: user.id,
-        });
-
-      if (orgInsertError) {
-        console.error('Org insert error', orgInsertError);
-        throw orgInsertError;
-      }
-    }
-
-    // 3) Insert certification request
     const { error: certInsertError } = await supabase
       .from('certification_requests')
       .insert({
@@ -106,7 +50,6 @@ export async function submitCertificationRequest(
     return { success: true };
   } catch (error: any) {
     console.error('submitCertificationRequest error', error);
-    // TEMP: surface the real message while debugging
     throw new Error(
       error?.message || 'Unknown error submitting certification request',
     );

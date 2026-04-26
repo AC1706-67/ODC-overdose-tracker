@@ -5,15 +5,52 @@ import {
   StyleSheet,
   TouchableOpacity,
   SafeAreaView,
+  Alert,
 } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useOrg } from '@/src/context/OrgContext';
+import { supabase } from '@/lib/supabase';
 
 export default function OnboardingScreen() {
-  const { skipOnboarding } = useOrg();
+  const { skipOnboarding, setActiveOrgId } = useOrg();
 
   const handleSkip = async () => {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        // Find Anonymous Haven AI org
+        const { data: defaultOrg } = await supabase
+          .from('organizations')
+          .select('id')
+          .eq('slug', 'anonymous-haven-ai')
+          .single();
+
+        if (defaultOrg) {
+          // Add membership (ignore duplicate)
+          const { error: membershipError } = await supabase
+            .from('user_organizations')
+            .insert({
+              user_id: user.id,
+              organization_id: defaultOrg.id,
+              role: 'Peer',
+              is_active: true,
+            });
+
+          if (membershipError && membershipError.code !== '23505') {
+            console.error('[Onboarding] Membership error:', membershipError);
+          }
+
+          await setActiveOrgId(defaultOrg.id);
+        }
+      }
+    } catch (err) {
+      console.error('[Onboarding] Skip error:', err);
+    }
+
     await skipOnboarding();
     router.replace('/(tabs)');
   };
@@ -35,24 +72,6 @@ export default function OnboardingScreen() {
             <Text style={styles.optionTitle}>I have an organization code</Text>
             <Text style={styles.optionDescription}>
               Enter your organization's invite code to join
-            </Text>
-          </View>
-          <Ionicons name="chevron-forward" size={24} color="#9ca3af" />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.optionCard}
-          onPress={() => router.push('/onboarding/select-org')}
-        >
-          <View style={styles.iconContainer}>
-            <Ionicons name="business" size={32} color="#059669" />
-          </View>
-          <View style={styles.optionText}>
-            <Text style={styles.optionTitle}>
-              Join a certified organization
-            </Text>
-            <Text style={styles.optionDescription}>
-              Browse and join existing organizations
             </Text>
           </View>
           <Ionicons name="chevron-forward" size={24} color="#9ca3af" />
