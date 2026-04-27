@@ -5,56 +5,11 @@ import {
   StyleSheet,
   TouchableOpacity,
   SafeAreaView,
-  Alert,
 } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useOrg } from '@/src/context/OrgContext';
-import { supabase } from '@/lib/supabase';
 
 export default function OnboardingScreen() {
-  const { skipOnboarding, setActiveOrgId } = useOrg();
-
-  const handleSkip = async () => {
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (user) {
-        // Find Anonymous Haven AI org
-        const { data: defaultOrg } = await supabase
-          .from('organizations')
-          .select('id')
-          .eq('slug', 'anonymous-haven-ai')
-          .single();
-
-        if (defaultOrg) {
-          // Add membership (ignore duplicate)
-          const { error: membershipError } = await supabase
-            .from('user_organizations')
-            .insert({
-              user_id: user.id,
-              organization_id: defaultOrg.id,
-              role: 'Peer',
-              is_active: true,
-            });
-
-          if (membershipError && membershipError.code !== '23505') {
-            console.error('[Onboarding] Membership error:', membershipError);
-          }
-
-          await setActiveOrgId(defaultOrg.id);
-        }
-      }
-    } catch (err) {
-      console.error('[Onboarding] Skip error:', err);
-    }
-
-    await skipOnboarding();
-    router.replace('/(tabs)');
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
@@ -93,10 +48,6 @@ export default function OnboardingScreen() {
             </Text>
           </View>
           <Ionicons name="chevron-forward" size={24} color="#9ca3af" />
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
-          <Text style={styles.skipText}>Skip for now</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -159,15 +110,6 @@ const styles = StyleSheet.create({
   },
   optionDescription: {
     fontSize: 14,
-    color: '#6b7280',
-  },
-  skipButton: {
-    marginTop: 24,
-    padding: 16,
-    alignItems: 'center',
-  },
-  skipText: {
-    fontSize: 16,
     color: '#6b7280',
   },
 });

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Tabs } from 'expo-router';
 import { Activity, BarChart3, Package, Settings } from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useOrg } from '@/src/context/OrgContext';
 import { canUseOutreach } from '@/src/lib/featureAccess';
@@ -94,6 +95,16 @@ export default function TabLayout() {
           href: hideOrgTabs ? null : hasOrg ? '/dashboard' : null,
           tabBarIcon: ({ size, color }) => (
             <BarChart3 size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="odometer"
+        options={{
+          title: 'Odometer',
+          href: hasOrg ? '/(tabs)/odometer' : null,
+          tabBarIcon: ({ size, color }) => (
+            <Ionicons name="car-outline" size={size} color={color} />
           ),
         }}
       />
