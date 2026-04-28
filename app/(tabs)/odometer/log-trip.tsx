@@ -95,7 +95,6 @@ export default function LogTripScreen() {
         trip_date: tripDate,
         start_odometer: start,
         end_odometer: end,
-        miles_driven: calculateMiles(start, end),
         trip_type: tripType,
         participant_alias: participantAlias || null,
         purpose: purpose || null,

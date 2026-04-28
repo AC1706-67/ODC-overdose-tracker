@@ -31,5 +31,5 @@ export interface Trip {
   updated_at: string;
 }
 
-export type TripInsert = Omit<Trip, 'id' | 'created_at' | 'updated_at'>;
+export type TripInsert = Omit<Trip, 'id' | 'created_at' | 'updated_at' | 'miles_driven'>;
 export type VehicleInsert = Omit<Vehicle, 'id' | 'created_at' | 'updated_at'>;
