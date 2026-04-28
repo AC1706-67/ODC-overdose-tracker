@@ -82,7 +82,7 @@ export default function TabLayout() {
         name="distribution"
         options={{
           title: 'Outreach',
-          href: hideOrgTabs ? null : outreachEnabled ? '/distribution' : null,
+          href: null,
           tabBarIcon: ({ size, color }) => (
             <Package size={size} color={color} />
           ),
