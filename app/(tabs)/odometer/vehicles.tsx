@@ -41,11 +41,16 @@ export default function VehiclesScreen() {
   const loadVehicles = useCallback(async () => {
     if (!activeOrg?.id) return;
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('vehicles')
         .select('*')
         .eq('organization_id', activeOrg.id)
+        .neq('status', 'deleted')
         .order('name');
+      if (error) {
+        console.error('Vehicle fetch error:', error);
+        return;
+      }
       setVehicles(data || []);
     } catch (err) {
       console.error('[Vehicles] Load error:', err);
@@ -117,6 +122,32 @@ export default function VehiclesScreen() {
     }
   }
 
+  function handleDeleteVehicle(vehicle: Vehicle) {
+    Alert.alert(
+      'Delete Vehicle',
+      `Are you sure you want to delete "${vehicle.name}"? This cannot be undone.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const { error } = await supabase
+                .from('vehicles')
+                .update({ status: 'deleted' })
+                .eq('id', vehicle.id);
+              if (error) throw error;
+              await loadVehicles();
+            } catch (err: any) {
+              Alert.alert('Error', err.message || 'Failed to delete vehicle.');
+            }
+          },
+        },
+      ],
+    );
+  }
+
   const renderVehicle = ({ item }: { item: Vehicle }) => (
     <View style={styles.vehicleCard}>
       <View style={{ flex: 1 }}>
@@ -134,6 +165,12 @@ export default function VehiclesScreen() {
         <Text style={[styles.statusText, item.status === 'inactive' && styles.inactiveText]}>
           {item.status}
         </Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.deleteButton}
+        onPress={() => handleDeleteVehicle(item)}
+      >
+        <Ionicons name="trash-outline" size={20} color="#dc2626" />
       </TouchableOpacity>
     </View>
   );
@@ -282,6 +319,7 @@ const styles = StyleSheet.create({
   inactiveBadge: { backgroundColor: '#fee2e2' },
   statusText: { fontSize: 12, fontWeight: '600', color: '#065f46', textTransform: 'capitalize' },
   inactiveText: { color: '#991b1b' },
+  deleteButton: { marginLeft: 10, padding: 6 },
   emptyContainer: { alignItems: 'center', paddingVertical: 60 },
   emptyText: { fontSize: 15, color: '#9ca3af', marginTop: 12 },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },

@@ -1,24 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { BarChart3 } from 'lucide-react-native';
-import OutreachDashboardScreen from '@/screens/dashboard/OutreachDashboardScreen';
 import HealthDashboardScreen from '@/screens/dashboard/HealthDashboardScreen';
 import { useOrg } from '@/src/context/OrgContext';
-import { canUseOutreach } from '@/src/lib/featureAccess';
 
 export default function DashboardScreen() {
-  const { activeOrg, loading } = useOrg();
-  const outreachEnabled = !loading && canUseOutreach(activeOrg);
-  const [activeTab, setActiveTab] = useState(
-    outreachEnabled ? 'outreach' : 'health',
-  );
-
-  // Update active tab if outreach access changes
-  useEffect(() => {
-    if (!loading && !outreachEnabled && activeTab === 'outreach') {
-      setActiveTab('health');
-    }
-  }, [loading, outreachEnabled, activeTab]);
+  const { loading } = useOrg();
+  const [activeTab, setActiveTab] = useState('health');
 
   if (loading) {
     return (
@@ -43,21 +31,6 @@ export default function DashboardScreen() {
 
       {/* Custom Tab Bar */}
       <View style={styles.tabBar}>
-        {outreachEnabled && (
-          <TouchableOpacity
-            style={[styles.tab, activeTab === 'outreach' && styles.activeTab]}
-            onPress={() => setActiveTab('outreach')}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                activeTab === 'outreach' && styles.activeTabText,
-              ]}
-            >
-              Outreach
-            </Text>
-          </TouchableOpacity>
-        )}
         <TouchableOpacity
           style={[styles.tab, activeTab === 'health' && styles.activeTab]}
           onPress={() => setActiveTab('health')}
@@ -75,11 +48,7 @@ export default function DashboardScreen() {
 
       {/* Tab Content */}
       <View style={styles.content}>
-        {activeTab === 'outreach' && outreachEnabled ? (
-          <OutreachDashboardScreen />
-        ) : (
-          <HealthDashboardScreen />
-        )}
+        <HealthDashboardScreen />
       </View>
     </View>
   );

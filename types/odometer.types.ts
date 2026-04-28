@@ -3,7 +3,7 @@ export interface Vehicle {
   organization_id: string;
   name: string;
   license_plate: string | null;
-  status: 'active' | 'inactive';
+  status: 'active' | 'inactive' | 'deleted';
   starting_odometer: number | null;
   starting_odometer_date: string | null;
   make_model: string | null;

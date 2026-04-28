@@ -51,7 +51,11 @@ export default function LogTripScreen() {
       .eq('organization_id', activeOrg.id)
       .eq('status', 'active')
       .order('name')
-      .then(({ data }) => {
+      .then(({ data, error }) => {
+        if (error) {
+          console.error('Vehicle fetch error:', error);
+          return;
+        }
         if (data) setVehicles(data);
         if (data && data.length > 0) setSelectedVehicleId(data[0].id);
       });
