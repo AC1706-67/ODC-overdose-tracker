@@ -5,9 +5,18 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  Platform,
 } from 'react-native';
-import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
+
+// Only import expo-camera on native platforms
+let CameraView: any = null;
+let useCameraPermissions: any = null;
+if (Platform.OS !== 'web') {
+  const cam = require('expo-camera');
+  CameraView = cam.CameraView;
+  useCameraPermissions = cam.useCameraPermissions;
+}
 
 type CameraCaptureProps = {
   onCapture: (uri: string) => void;
@@ -15,9 +24,30 @@ type CameraCaptureProps = {
 };
 
 export default function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
-  const [facing, setFacing] = useState<CameraType>('back');
+  // On web, show a "not available" message
+  if (Platform.OS === 'web') {
+    return (
+      <View style={styles.container}>
+        <View style={styles.permissionContainer}>
+          <Ionicons name="camera-off-outline" size={64} color="#999" />
+          <Text style={styles.permissionText}>
+            Camera is not available on web
+          </Text>
+          <TouchableOpacity style={styles.cancelButton} onPress={onCancel}>
+            <Text style={styles.cancelButtonText}>Go Back</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
+  return <NativeCameraCapture onCapture={onCapture} onCancel={onCancel} />;
+}
+
+function NativeCameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
+  const [facing, setFacing] = useState<'back' | 'front'>('back');
   const [permission, requestPermission] = useCameraPermissions();
-  const cameraRef = useRef<CameraView>(null);
+  const cameraRef = useRef<any>(null);
 
   if (!permission) {
     return <View style={styles.container} />;

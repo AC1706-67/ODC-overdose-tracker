@@ -30,7 +30,7 @@ export default function LogTripScreen() {
   const session = useSession();
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [selectedVehicleId, setSelectedVehicleId] = useState('');
-  const [tripDate, setTripDate] = useState(formatDate(new Date()));
+  const [tripDate, setTripDate] = useState(new Date().toISOString().split('T')[0]);
   const [tripType, setTripType] = useState<TripType>('transport');
   const [startOdometer, setStartOdometer] = useState('');
   const [endOdometer, setEndOdometer] = useState('');
@@ -252,12 +252,18 @@ export default function LogTripScreen() {
               placeholder="e.g. 45230"
               placeholderTextColor="#9ca3af"
             />
-            <TouchableOpacity
-              style={styles.cameraButton}
-              onPress={() => setShowCamera('start')}
-            >
-              <Ionicons name="camera" size={22} color="#7c3aed" />
-            </TouchableOpacity>
+            {Platform.OS !== 'web' ? (
+              <TouchableOpacity
+                style={styles.cameraButton}
+                onPress={() => setShowCamera('start')}
+              >
+                <Ionicons name="camera" size={22} color="#7c3aed" />
+              </TouchableOpacity>
+            ) : (
+              <View style={[styles.cameraButton, { opacity: 0.4 }]}>
+                <Ionicons name="camera-off-outline" size={22} color="#7c3aed" />
+              </View>
+            )}
           </View>
           {startPhotoUri && (
             <Image source={{ uri: startPhotoUri }} style={styles.photoPreview} />
@@ -274,12 +280,18 @@ export default function LogTripScreen() {
               placeholder="e.g. 45280"
               placeholderTextColor="#9ca3af"
             />
-            <TouchableOpacity
-              style={styles.cameraButton}
-              onPress={() => setShowCamera('end')}
-            >
-              <Ionicons name="camera" size={22} color="#7c3aed" />
-            </TouchableOpacity>
+            {Platform.OS !== 'web' ? (
+              <TouchableOpacity
+                style={styles.cameraButton}
+                onPress={() => setShowCamera('end')}
+              >
+                <Ionicons name="camera" size={22} color="#7c3aed" />
+              </TouchableOpacity>
+            ) : (
+              <View style={[styles.cameraButton, { opacity: 0.4 }]}>
+                <Ionicons name="camera-off-outline" size={22} color="#7c3aed" />
+              </View>
+            )}
           </View>
           {endPhotoUri && (
             <Image source={{ uri: endPhotoUri }} style={styles.photoPreview} />
