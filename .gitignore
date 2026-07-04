@@ -38,3 +38,5 @@ yarn-error.*
 # APK files (too large for GitHub)
 *.apk
 *.aab.env.local
+
+.vercel
