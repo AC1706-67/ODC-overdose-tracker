@@ -33,7 +33,11 @@
       "output": "single",
       "favicon": "./assets/images/favicon.png"
     },
-    "platforms": ["ios", "android", "web"],
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
     "plugins": [
       "expo-router",
       "expo-build-properties",
@@ -43,7 +47,8 @@
         {
           "cameraPermission": "Used to capture odometer photos for trip logging."
         }
-      ]
+      ],
+      "expo-font"
     ],
     "extra": {
       "router": {
