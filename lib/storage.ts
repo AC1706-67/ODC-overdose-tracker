@@ -1,5 +1,8 @@
+import { Platform } from 'react-native';
 import { supabase } from './supabase';
 import * as ImageManipulator from 'expo-image-manipulator';
+import * as FileSystem from 'expo-file-system';
+import { decode } from 'base64-arraybuffer';
 
 export async function compressImage(uri: string): Promise<string> {
   const manipResult = await ImageManipulator.manipulateAsync(
@@ -17,13 +20,28 @@ export async function uploadTripPhoto(
   type: 'start' | 'end'
 ): Promise<string> {
   const compressedUri = await compressImage(photoUri);
-  const response = await fetch(compressedUri);
-  const blob = await response.blob();
   const filePath = `${userId}/${tripId}/${type}.jpg`;
-  const { error } = await supabase.storage
-    .from('trip-photos')
-    .upload(filePath, blob, { contentType: 'image/jpeg', upsert: true });
-  if (error) throw error;
+
+  if (Platform.OS === 'web') {
+    // Web: use fetch/blob approach
+    const response = await fetch(compressedUri);
+    const blob = await response.blob();
+    const { error } = await supabase.storage
+      .from('trip-photos')
+      .upload(filePath, blob, { contentType: 'image/jpeg', upsert: true });
+    if (error) throw error;
+  } else {
+    // Native (Android/iOS): use base64 → ArrayBuffer approach
+    const base64 = await FileSystem.readAsStringAsync(compressedUri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    const arrayBuffer = decode(base64);
+    const { error } = await supabase.storage
+      .from('trip-photos')
+      .upload(filePath, arrayBuffer, { contentType: 'image/jpeg', upsert: true });
+    if (error) throw error;
+  }
+
   return filePath;
 }
 
